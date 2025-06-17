@@ -15,15 +15,12 @@
     "@reduxjs/toolkit": "^2.8.2",
     "expo": "53.0.10",
     "expo-status-bar": "~2.2.3",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
+    "react": "19.0.0",
     "react-native": "0.79.3",
     "react-native-country-picker-modal": "^2.0.0",
     "react-native-gesture-handler": "^2.26.0",
     "react-native-reanimated": "^3.18.0",
-    "react-redux": "^9.2.0",
-    "react-native-web": "~0.20.0",
-    "@expo/metro-runtime": "~5.0.4"
+    "react-redux": "^9.2.0"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
