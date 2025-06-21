@@ -2,7 +2,7 @@
 
 export type AuthStackParamList = {
     Login: undefined;
-    Otp: undefined;
+    Otp: { phoneNumber: string };
     Home: undefined;
 };
 

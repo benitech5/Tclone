@@ -1,48 +1,58 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet, Button } from 'react-native';
+import { View, Text, TextInput, StyleSheet, Button, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AuthStackParamList } from '../navigation/Types';
 import { useAppDispatch } from '../store/store';
 import { login } from '../store/authSlice';
+import { verifyOtp } from '../api/AuthService';
 
 type OtpScreenNavigationProp = NativeStackNavigationProp<AuthStackParamList, 'Otp'>;
+type OtpScreenRouteProp = RouteProp<AuthStackParamList, 'Otp'>;
 
 const OtpScreen = () => {
     const [otp, setOtp] = useState('');
     const [error, setError] = useState('');
     const navigation = useNavigation<OtpScreenNavigationProp>();
-    const dispatch = useAppDispatch(); // ✅ should be inside the component
+    const route = useRoute<OtpScreenRouteProp>();
+    const { phoneNumber } = route.params;
+    const dispatch = useAppDispatch();
 
     const handleVerify = async () => {
-        if (otp === '1234') {
-            const user = { name: 'Benjamin', email: 'starblade1111@gmail.com' };
+        if (!otp) {
+            setError('Please enter the OTP.');
+            return;
+        }
+        try {
+            const { token, user } = await verifyOtp(phoneNumber, otp);
 
-            await AsyncStorage.setItem('token', 'fake-jwt-token');
+            await AsyncStorage.setItem('token', token);
             await AsyncStorage.setItem('user', JSON.stringify(user));
 
-            dispatch(login(user)); // ✅ update Redux
+            dispatch(login(user));
 
             navigation.reset({
                 index: 0,
                 routes: [{ name: 'Home' as never }],
             });
-        } else {
-            setError('Invalid OTP. Try 1234.');
+        } catch (err) {
+            setError('Invalid OTP. Please try again.');
+            console.error(err);
         }
     };
 
     return (
         <View style={styles.container}>
             <Text style={styles.title}>Enter OTP</Text>
+            <Text style={styles.subtitle}>A 6-digit code was sent to {phoneNumber}</Text>
             <TextInput
                 style={styles.input}
                 value={otp}
                 onChangeText={setOtp}
                 keyboardType="number-pad"
-                maxLength={4}
-                placeholder="1234"
+                maxLength={6}
+                placeholder="123456"
             />
             {error ? <Text style={styles.error}>{error}</Text> : null}
             <Button title="Verify OTP" onPress={handleVerify} />
@@ -55,7 +65,8 @@ export default OtpScreen;
 
 const styles = StyleSheet.create({
     container: { flex: 1, justifyContent: 'center', padding: 20 },
-    title: { fontSize: 22, marginBottom: 20, textAlign: 'center' },
+    title: { fontSize: 22, marginBottom: 10, textAlign: 'center' },
+    subtitle: { fontSize: 16, color: '#666', marginBottom: 20, textAlign: 'center' },
     input: {
         borderWidth: 1,
         borderColor: '#ccc',
