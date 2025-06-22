@@ -13,6 +13,7 @@
     "@react-navigation/native": "^6.1.17",
     "@react-navigation/native-stack": "^6.9.26",
     "@reduxjs/toolkit": "^2.2.5",
+    "@stomp/stompjs": "^7.1.1",
     "axios": "^1.6.0",
     "expo": "~51.0.14",
     "expo-status-bar": "~1.12.1",
@@ -23,6 +24,7 @@
     "react-native-reanimated": "~3.10.1",
     "react-native-safe-area-context": "4.8.2",
     "react-native-screens": "~3.29.0",
+    "react-native-url-polyfill": "^2.0.0",
     "react-redux": "^9.1.2"
   },
   "devDependencies": {

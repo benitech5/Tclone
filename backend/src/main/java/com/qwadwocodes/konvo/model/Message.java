@@ -28,12 +28,23 @@ public class Message {
     @JoinColumn(name = "group_id")
     private ChatGroup group;
 
+    @ManyToOne
+    @JoinColumn(name = "channel_id")
+    private Channel channel;
+
+    @Column(name = "conversation_id")
+    private String conversationId;
+
     @Column(nullable = false)
     private String content;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "message_type", nullable = false)
     private MessageType messageType;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "message_status", nullable = false)
+    private MessageStatus status;
 
     @Column(name = "file_url")
     private String fileUrl;
@@ -53,6 +64,30 @@ public class Message {
     @Column(name = "is_edited")
     private boolean isEdited;
 
+    @Column(name = "is_secret_chat")
+    private boolean isSecretChat;
+
+    @Column(name = "self_destruct_timer")
+    private Integer selfDestructTimer; // in seconds
+
+    @Column(name = "expires_at")
+    private LocalDateTime expiresAt;
+
+    @Column(name = "read_at")
+    private LocalDateTime readAt;
+
+    @Column(name = "delivered_at")
+    private LocalDateTime deliveredAt;
+
+    @Column(name = "reply_to_message_id")
+    private Long replyToMessageId;
+
+    @Column(name = "forwarded_from_message_id")
+    private Long forwardedFromMessageId;
+
+    @Column(name = "view_count")
+    private Integer viewCount;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
@@ -66,6 +101,10 @@ public class Message {
     protected void onCreate() {
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
+        status = MessageStatus.SENT;
+        if (viewCount == null) {
+            viewCount = 0;
+        }
     }
 
     @PreUpdate
@@ -80,6 +119,14 @@ public class Message {
         AUDIO,
         DOCUMENT,
         STICKER,
-        LOCATION
+        LOCATION,
+        CONTACT,
+        POLL
+    }
+
+    public enum MessageStatus {
+        SENT,
+        DELIVERED,
+        READ
     }
 } 
