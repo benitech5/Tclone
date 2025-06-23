@@ -97,6 +97,10 @@ public class Message {
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 
+    // Full-text search vector
+    @Column(name = "content_tsv", columnDefinition = "tsvector")
+    private String contentTsv;
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();

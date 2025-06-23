@@ -28,7 +28,7 @@ public class AuthService {
 
         User user = userRepository.findByPhoneNumber(request.getPhoneNumber())
                 .orElseGet(() -> User.builder()
-                        .firstName(request.getName())
+                        .firstName("User")
                         .phoneNumber(request.getPhoneNumber())
                         .isOnline(false)
                         .build());

@@ -63,4 +63,24 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
     // Find messages that need to be expired (self-destruct)
     @Query("SELECT m FROM Message m WHERE m.expiresAt IS NOT NULL AND m.expiresAt <= :now")
     List<Message> findExpiredMessages(@Param("now") LocalDateTime now);
+
+    // Full-text search in all messages (global search)
+    @Query(value = "SELECT * FROM messages m WHERE m.content_tsv @@ plainto_tsquery(:query) AND m.deleted_at IS NULL ORDER BY ts_rank(m.content_tsv, plainto_tsquery(:query)) DESC",
+           nativeQuery = true)
+    Page<Message> searchAllMessages(@Param("query") String query, Pageable pageable);
+
+    // Full-text search in conversation messages
+    @Query(value = "SELECT * FROM messages m WHERE m.conversation_id = :conversationId AND m.content_tsv @@ plainto_tsquery(:query) AND m.deleted_at IS NULL ORDER BY ts_rank(m.content_tsv, plainto_tsquery(:query)) DESC",
+           nativeQuery = true)
+    Page<Message> searchMessagesInConversation(@Param("conversationId") String conversationId, @Param("query") String query, Pageable pageable);
+
+    // Full-text search in group messages
+    @Query(value = "SELECT * FROM messages m WHERE m.group_id = :groupId AND m.content_tsv @@ plainto_tsquery(:query) AND m.deleted_at IS NULL ORDER BY ts_rank(m.content_tsv, plainto_tsquery(:query)) DESC",
+           nativeQuery = true)
+    Page<Message> searchMessagesInGroup(@Param("groupId") Long groupId, @Param("query") String query, Pageable pageable);
+
+    // Full-text search in channel messages
+    @Query(value = "SELECT * FROM messages m WHERE m.channel_id = :channelId AND m.content_tsv @@ plainto_tsquery(:query) AND m.deleted_at IS NULL ORDER BY ts_rank(m.content_tsv, plainto_tsquery(:query)) DESC",
+           nativeQuery = true)
+    Page<Message> searchMessagesInChannel(@Param("channelId") Long channelId, @Param("query") String query, Pageable pageable);
 } 
