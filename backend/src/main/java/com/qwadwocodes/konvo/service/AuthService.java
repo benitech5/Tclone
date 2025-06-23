@@ -58,7 +58,7 @@ public class AuthService {
         userRepository.save(user);
 
         String token = jwtUtil.generateToken(user.getPhoneNumber());
-        UserDto userDto = new UserDto(user.getId(), user.getFirstName(), user.getPhoneNumber(), user.getProfilePictureUrl());
+        UserDto userDto = new UserDto(user);
 
         return new AuthResponse(token, userDto);
     }
