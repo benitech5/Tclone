@@ -9,6 +9,8 @@ import com.qwadwocodes.konvo.repository.MessageRepository;
 import com.qwadwocodes.konvo.repository.UserRepository;
 import com.qwadwocodes.konvo.service.ChatService;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -28,6 +30,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ChatController {
 
+    private static final Logger logger = LoggerFactory.getLogger(ChatController.class);
     private final ChatService chatService;
     private final MessageRepository messageRepository;
     private final UserRepository userRepository;
@@ -43,7 +46,9 @@ public class ChatController {
     @PostMapping("/messages")
     public ResponseEntity<MessageDto> sendMessage(@RequestBody CreateMessageRequest request) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        logger.info("sendMessage endpoint hit. Auth: {}", auth);
         String phoneNumber = auth.getName();
+        logger.info("Authenticated phone number: {}", phoneNumber);
         User sender = userRepository.findByPhoneNumber(phoneNumber)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 

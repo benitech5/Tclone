@@ -6,6 +6,7 @@ import com.qwadwocodes.konvo.repository.ChannelRepository;
 import com.qwadwocodes.konvo.repository.ChatGroupRepository;
 import com.qwadwocodes.konvo.repository.ConversationRepository;
 import com.qwadwocodes.konvo.repository.MessageRepository;
+import com.qwadwocodes.konvo.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -20,6 +21,7 @@ public class ChatService {
     private final ConversationRepository conversationRepository;
     private final ChatGroupRepository chatGroupRepository;
     private final ChannelRepository channelRepository;
+    private final UserRepository userRepository;
 
     public Message sendMessage(User sender, CreateMessageRequest request) {
         Message message = new Message();
@@ -42,9 +44,10 @@ public class ChatService {
 
         // Handle different message types
         if (request.getReceiverId() != null) {
-            // One-on-one message
-            message.setReceiver(new User());
-            message.getReceiver().setId(request.getReceiverId());
+            // One-on-one message - properly load the receiver user
+            User receiver = userRepository.findById(request.getReceiverId())
+                    .orElseThrow(() -> new RuntimeException("Receiver user not found with ID: " + request.getReceiverId()));
+            message.setReceiver(receiver);
             message.setConversationId(generateConversationId(sender.getId(), request.getReceiverId()));
         } else if (request.getGroupId() != null) {
             // Group message
