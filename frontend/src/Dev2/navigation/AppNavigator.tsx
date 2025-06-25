@@ -9,6 +9,9 @@ import ChatListScreen from '../screens/chatListScreen';
 import ChatScreen from '../screens/chatScreen';
 import StoriesListScreen from '../screens/StoriesListScreen';
 import MainChatListScreen from '../screens/MainChatListScreen';
+import ProfileScreen from '../screens/ProfileScreen';
+import CallsScreen from '../screens/CallsScreen';
+import NewChatScreen from '../screens/NewChatScreen';
 
 const AppStack = createNativeStackNavigator<AppStackParamList>();
 
@@ -22,6 +25,9 @@ export default function AppNavigator() {
             <AppStack.Screen name="Chat" component={ChatScreen} />
             <AppStack.Screen name="StoriesList" component={StoriesListScreen} />
             <AppStack.Screen name="MainChatList" component={MainChatListScreen} />
+            <AppStack.Screen name="Profile" component={ProfileScreen} />
+            <AppStack.Screen name="Calls" component={CallsScreen} />
+            <AppStack.Screen name="NewChat" component={NewChatScreen} />
         </AppStack.Navigator>
     );
 }

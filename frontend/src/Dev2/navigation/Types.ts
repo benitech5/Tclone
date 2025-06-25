@@ -17,5 +17,7 @@ export type AppStackParamList = {
     Chat: { chatId: string; chatName: string };
     StoriesList: undefined;
     MainChatList: undefined;
+    Calls: undefined;
+    NewChat: undefined;
     // Add other main app screens here if needed
 };
