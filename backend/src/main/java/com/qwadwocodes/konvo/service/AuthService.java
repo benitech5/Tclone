@@ -42,10 +42,14 @@ public class AuthService {
     }
 
     public AuthResponse verifyOtp(VerifyOtpRequest request) {
+        log.info("Verifying OTP for {}: {}", request.getPhoneNumber(), request.getOtp());
         User user = userRepository.findByPhoneNumber(request.getPhoneNumber())
                 .orElseThrow(() -> new RuntimeException("User not found with phone number: " + request.getPhoneNumber()));
 
+        log.info("User found: {}, DB OTP: {}, DB Expiry: {}", user.getPhoneNumber(), user.getOtp(), user.getOtpExpiry());
+
         if (user.getOtp() == null || !user.getOtp().equals(request.getOtp())) {
+            log.error("Invalid OTP: provided={}, expected={}", request.getOtp(), user.getOtp());
             throw new RuntimeException("Invalid OTP");
         }
 
