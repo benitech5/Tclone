@@ -2,16 +2,17 @@
 // This will try different IP addresses automatically
 
 const POSSIBLE_IPS = [
-    '192.168.12.32',    // Your current IP
-    '192.168.103.1',    // Your other IP
-    '192.168.198.1',    // Your other IP
+    '4', '4', '4', '4',
     '10.0.2.2',         // Android emulator default
     'localhost',        // Local development
     '127.0.0.1'         // Loopback
 ];
 
+// This will be replaced by the setup-network.js script
+const API_BASE_URL = 'http://192.168.137.1:8080';
+
 export const API_CONFIG = {
-    BASE_URL: 'http://192.168.222.32:8080',
+    BASE_URL: API_BASE_URL,
     // API endpoints
     AUTH: {
         REQUEST_OTP: '/api/auth/request-otp',
@@ -36,8 +37,8 @@ export const API_CONFIG = {
 
 // Function to detect the working API URL
 function detectApiUrl(): string {
-    // For now, use the first IP - you can enhance this with actual detection
-    return `http://${POSSIBLE_IPS[0]}:8080`;
+    // Use the working IP as primary
+    return API_BASE_URL;
 }
 
 // Helper function to get full API URL
