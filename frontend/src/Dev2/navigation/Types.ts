@@ -1,23 +1,41 @@
 // src/navigation/types.ts
 
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+
 export type AuthStackParamList = {
-    Login: undefined;
-    Otp: { phoneNumber: string };
+    Onboarding: undefined;
+    PhoneNumber: undefined;
+    Email: undefined;
     ConfirmationCode: { email: string };
     TwoStepVerification: undefined;
-    Home: undefined;
+    Login: undefined;
+    Otp: { phoneNumber: string };
 };
 
-export type AppStackParamList = {
+export type SettingsStackParamList = {
+    ProfileSettings: undefined;
+    AccountSettings: undefined;
+    ChatSettings: undefined;
+    NotificationSettings: undefined;
+    Help: undefined;
+    PrivacyPolicy: undefined;
+    PrivacySettings: undefined;
+    SecuritySettings: undefined;
+};
+
+export type RootStackParamList = {
     Home: undefined;
     Profile: undefined;
-    DrawerMenu: undefined;
     Contacts: undefined;
-    ChatList: undefined;
     Chat: { chatId: string; chatName: string };
-    StoriesList: undefined;
-    MainChatList: undefined;
-    Calls: undefined;
     NewChat: undefined;
-    // Add other main app screens here if needed
+    Calls: undefined;
+    StoryViewer: { userId: string };
+    // Integrating other stacks
+    Auth: { screen: keyof AuthStackParamList };
+    Settings: { screen: keyof SettingsStackParamList };
+    Logout: undefined; // For handling logout action
 };
+
+// Define the navigation prop type for the RootStack
+export type RootStackNavigationProp = NativeStackNavigationProp<RootStackParamList>;

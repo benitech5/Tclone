@@ -1,21 +1,45 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, FlatList, TextInput, TouchableOpacity, Image, SafeAreaView, KeyboardAvoidingView, Platform, ImageBackground, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { getMessages, sendMessage } from '../api/ChatService';
-import { useRoute } from '@react-navigation/native';
+import { useRoute, useFocusEffect, RouteProp } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { RootStackParamList } from '../navigation/Types';
 
-const chatBg = require('../../../assets/chat-bg.png'); // Try new path for background asset
+// Define a type for a single message
+interface Message {
+  id: string;
+  text: string;
+  isOwn: boolean; // You might get this from the backend or determine it by sender ID
+}
+
+const CHAT_WALLPAPER_URI_KEY = 'chat_wallpaper_uri';
+const defaultChatBg = require('../../../assets/chat-bg.png');
 const avatar = 'https://randomuser.me/api/portraits/men/3.jpg';
 
 export default function ChatScreen() {
-  const [messages, setMessages] = useState([]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [sending, setSending] = useState(false);
-  const flatListRef = useRef(null);
-  const route = useRoute();
-  const { chatId, chatName } = route.params || {};
+  const [wallpaperUri, setWallpaperUri] = useState<string | null>(null);
+  const flatListRef = useRef<FlatList<Message>>(null);
+  
+  // Use RouteProp to get strong types for route params
+  type ChatScreenRouteProp = RouteProp<RootStackParamList, 'Chat'>;
+  const route = useRoute<ChatScreenRouteProp>();
+  const { chatId, chatName } = route.params;
+
+  useFocusEffect(
+    useCallback(() => {
+      const loadWallpaper = async () => {
+        const uri = await AsyncStorage.getItem(CHAT_WALLPAPER_URI_KEY);
+        setWallpaperUri(uri);
+      };
+      loadWallpaper();
+    }, [])
+  );
 
   useEffect(() => {
     const fetchMessages = async () => {
@@ -46,6 +70,8 @@ export default function ChatScreen() {
     }
   };
 
+  const backgroundSource = wallpaperUri ? { uri: wallpaperUri } : defaultChatBg;
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
@@ -67,7 +93,7 @@ export default function ChatScreen() {
           <Ionicons name="ellipsis-vertical" size={22} color="#fff" />
         </TouchableOpacity>
       </View>
-      <ImageBackground source={chatBg} style={styles.bg}>
+      <ImageBackground source={backgroundSource} style={styles.bg}>
         {loading ? (
           <ActivityIndicator size="large" color="#d0021b" style={{ marginTop: 40 }} />
         ) : error ? (
@@ -76,7 +102,7 @@ export default function ChatScreen() {
           <FlatList
             ref={flatListRef}
             data={messages}
-            keyExtractor={item => item.id}
+            keyExtractor={(item) => item.id.toString()}
             renderItem={({ item }) => (
               <View style={[styles.messageRow, item.isOwn ? styles.ownRow : styles.otherRow]}>
                 <View style={[styles.bubble, item.isOwn ? styles.ownBubble : styles.otherBubble]}>
