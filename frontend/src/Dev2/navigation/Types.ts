@@ -24,17 +24,27 @@ export type SettingsStackParamList = {
 };
 
 export type RootStackParamList = {
+    Onboarding: undefined;
+    Login: undefined;
+    Otp: { phone: string };
     Home: undefined;
-    Profile: undefined;
+    ChatList: undefined;
+    Chat: { chatId: string };
     Contacts: undefined;
-    Chat: { chatId: string; chatName: string };
-    NewChat: undefined;
-    Calls: undefined;
-    StoryViewer: { userId: string };
-    // Integrating other stacks
-    Auth: { screen: keyof AuthStackParamList };
-    Settings: { screen: keyof SettingsStackParamList };
-    Logout: undefined; // For handling logout action
+    Profile: undefined;
+    EditProfile: undefined;
+    NewContact: undefined;
+    GroupInfo: { groupId: string };
+    ChannelInfo: { channelId: string };
+    UserProfile: { userId: string };
+    NewStory: undefined;
+    MessageActionsPopup: { messageId: string };
+    NotificationSettings: undefined;
+    PrivacySettings: undefined;
+    SecuritySettings: undefined;
+    DataAndStorageSettings: undefined;
+    AppearanceSettings: undefined;
+    LanguageSettings: undefined;
 };
 
 // Define the navigation prop type for the RootStack

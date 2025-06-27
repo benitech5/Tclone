@@ -24,7 +24,6 @@ public class SearchService {
     private final UserRepository userRepository;
     private final ChatGroupRepository chatGroupRepository;
     private final ChannelRepository channelRepository;
-    private final ConversationRepository conversationRepository;
 
     @Transactional(readOnly = true)
     public Page<MessageDto> searchAllMessages(String query, Pageable pageable) {

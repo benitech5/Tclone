@@ -1,60 +1,35 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
-import SwitchRow from '../component/SwitchRow';
-import SettingsRow from '../component/SettingsRow';
+import { View, Text, StyleSheet, Switch, ScrollView, TouchableOpacity } from 'react-native';
 
 const SecuritySettingsScreen = () => {
-  const [isPasscodeLockEnabled, setPasscodeLockEnabled] = useState(false);
-  const [isTwoStepEnabled, setTwoStepEnabled] = useState(false);
+  const [passcodeLock, setPasscodeLock] = useState(false);
+  const [twoStep, setTwoStep] = useState(false);
 
   return (
     <ScrollView style={styles.container}>
-      <View style={styles.section}>
-        <SwitchRow
-          icon="finger-print-outline"
-          label="Passcode & Face ID"
-          value={isPasscodeLockEnabled}
-          onValueChange={setPasscodeLockEnabled}
-        />
+      <Text style={styles.title}>Security</Text>
+      <View style={styles.settingRow}>
+        <Text style={styles.label}>Passcode & Face ID</Text>
+        <Switch value={passcodeLock} onValueChange={setPasscodeLock} />
       </View>
-      <Text style={styles.description}>
-        When enabled, you'll need to use Face ID or your passcode to unlock Konvo. You can still reply to messages from notifications and answer calls if Konvo is locked.
-      </Text>
-
-      <View style={styles.section}>
-         <SettingsRow
-          icon="keypad-outline"
-          label="Two-Step Verification"
-          onPress={() => {
-            // Navigate to Two-Step setup flow
-          }}
-        />
+      <View style={styles.settingRow}>
+        <Text style={styles.label}>Two-Step Verification</Text>
+        <Switch value={twoStep} onValueChange={setTwoStep} />
       </View>
-       <Text style={styles.description}>
-        For added security, enable two-step verification, which will require a PIN when registering your phone number with Konvo again.
-      </Text>
+      <TouchableOpacity style={styles.infoBtn}>
+        <Text style={styles.infoText}>Learn more about security</Text>
+      </TouchableOpacity>
     </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f2f2f7',
-    paddingTop: 30,
-  },
-  section: {
-    backgroundColor: '#fff',
-    borderTopWidth: 1,
-    borderBottomWidth: 1,
-    borderColor: '#e0e0e0',
-  },
-  description: {
-    paddingHorizontal: 20,
-    paddingVertical: 15,
-    fontSize: 14,
-    color: '#666',
-  },
+  container: { flex: 1, backgroundColor: '#fff', padding: 24 },
+  title: { fontSize: 22, fontWeight: 'bold', marginBottom: 24 },
+  settingRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 16, borderBottomWidth: 1, borderBottomColor: '#eee' },
+  label: { fontSize: 16 },
+  infoBtn: { marginTop: 24, padding: 16, backgroundColor: '#eee', borderRadius: 8, alignItems: 'center' },
+  infoText: { color: '#e53935', fontWeight: 'bold' },
 });
 
 export default SecuritySettingsScreen; 

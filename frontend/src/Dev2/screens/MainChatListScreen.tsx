@@ -2,6 +2,12 @@ import React from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, Image, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
+const mockChats = [
+  { id: '1', name: 'Family Group', lastMessage: 'Dinner at 7?' },
+  { id: '2', name: 'Work', lastMessage: 'Project deadline is Friday.' },
+  { id: '3', name: 'Alice', lastMessage: 'See you soon!' },
+];
+
 const stories = [
   { id: '1', name: 'My Story', avatar: 'https://randomuser.me/api/portraits/men/1.jpg' },
   { id: '2', name: 'Bobee Jnr', avatar: 'https://randomuser.me/api/portraits/men/2.jpg' },
@@ -25,61 +31,32 @@ const tabs = [
   { label: 'Unread', count: 4 },
 ];
 
-export default function MainChatListScreen() {
+const MainChatListScreen = () => {
   const [activeTab, setActiveTab] = React.useState(0);
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>KONVO</Text>
-        <TouchableOpacity>
-          <Ionicons name="search" size={24} color="#fff" />
-        </TouchableOpacity>
-      </View>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.storiesRow}>
-        {stories.map(story => (
-          <View key={story.id} style={styles.storyAvatarContainer}>
-            <Image source={{ uri: story.avatar }} style={styles.storyAvatar} />
-            <Text style={styles.storyName}>{story.name}</Text>
-          </View>
-        ))}
-      </ScrollView>
-      <View style={styles.tabsRow}>
-        {tabs.map((tab, idx) => (
-          <TouchableOpacity key={tab.label} style={styles.tab} onPress={() => setActiveTab(idx)}>
-            <Text style={[styles.tabLabel, activeTab === idx && styles.activeTabLabel]}>{tab.label}</Text>
-            {tab.count > 0 && (
-              <View style={styles.tabBadge}><Text style={styles.tabBadgeText}>{tab.count}</Text></View>
-            )}
-          </TouchableOpacity>
-        ))}
-      </View>
+      <Text style={styles.title}>All Chats</Text>
       <FlatList
-        data={chats}
+        data={mockChats}
         keyExtractor={item => item.id}
         renderItem={({ item }) => (
           <TouchableOpacity style={styles.chatItem}>
-            <Image source={{ uri: item.avatar }} style={styles.avatar} />
-            <View style={styles.chatInfo}>
-              <Text style={styles.chatName}>{item.name}</Text>
-              <Text style={styles.lastMessage} numberOfLines={1}>{item.lastMessage}</Text>
-            </View>
-            <View style={styles.rightSection}>
-              <Text style={styles.time}>{item.time}</Text>
-              {item.unread > 0 && (
-                <View style={styles.unreadBadge}><Text style={styles.unreadText}>{item.unread}</Text></View>
-              )}
-            </View>
+            <Text style={styles.chatName}>{item.name}</Text>
+            <Text style={styles.lastMessage}>{item.lastMessage}</Text>
           </TouchableOpacity>
         )}
-        style={styles.list}
       />
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff' },
+  container: { flex: 1, backgroundColor: '#fff', padding: 24 },
+  title: { fontSize: 28, fontWeight: 'bold', marginBottom: 24 },
+  chatItem: { padding: 16, borderBottomWidth: 1, borderBottomColor: '#eee' },
+  chatName: { fontSize: 18, fontWeight: 'bold' },
+  lastMessage: { fontSize: 14, color: '#888' },
   header: {
     backgroundColor: '#d0021b',
     flexDirection: 'row',
@@ -101,13 +78,11 @@ const styles = StyleSheet.create({
   tabBadge: { backgroundColor: '#d0021b', borderRadius: 10, paddingHorizontal: 6, marginLeft: 6 },
   tabBadgeText: { color: '#fff', fontSize: 12, fontWeight: 'bold' },
   list: { flex: 1 },
-  chatItem: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 20, paddingVertical: 16, borderBottomWidth: 1, borderBottomColor: '#f2f2f7' },
   avatar: { width: 50, height: 50, borderRadius: 25, marginRight: 16 },
   chatInfo: { flex: 1 },
-  chatName: { fontSize: 18, fontWeight: 'bold', color: '#222' },
-  lastMessage: { fontSize: 15, color: '#888', marginTop: 2 },
-  rightSection: { alignItems: 'flex-end' },
   time: { fontSize: 13, color: '#aaa' },
   unreadBadge: { backgroundColor: '#d0021b', borderRadius: 10, paddingHorizontal: 8, paddingVertical: 2, marginTop: 4 },
   unreadText: { color: '#fff', fontWeight: 'bold', fontSize: 13 },
-}); 
+});
+
+export default MainChatListScreen; 

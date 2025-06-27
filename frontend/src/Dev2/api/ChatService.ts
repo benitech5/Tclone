@@ -1,22 +1,24 @@
 import axios from 'axios';
 import { getApiUrl, API_CONFIG } from '../config/apiConfig';
 
-export const getConversations = async () => {
-  const response = await axios.get(getApiUrl(API_CONFIG.CHAT.CONVERSATIONS));
-  return response.data;
+const ChatService = {
+  getChats: async () => {
+    const response = await axios.get(getApiUrl(API_CONFIG.CHAT.CONVERSATIONS));
+    return response.data; // Should be an array of chats
+  },
+  getMessages: async (chatId) => {
+    const response = await axios.get(getApiUrl(API_CONFIG.CHAT.MESSAGES), {
+      params: { chatId },
+    });
+    return response.data; // Should be an array of messages
+  },
+  sendMessage: async (chatId, message) => {
+    const response = await axios.post(getApiUrl(API_CONFIG.CHAT.MESSAGES), {
+      chatId,
+      message,
+    });
+    return response.data; // Should be the sent message object
+  },
 };
 
-export const getMessages = async (conversationId: string) => {
-  const response = await axios.get(getApiUrl(API_CONFIG.CHAT.MESSAGES), {
-    params: { conversationId },
-  });
-  return response.data;
-};
-
-export const sendMessage = async (conversationId: string, content: string) => {
-  const response = await axios.post(getApiUrl(API_CONFIG.CHAT.MESSAGES), {
-    conversationId,
-    content,
-  });
-  return response.data;
-}; 
+export default ChatService; 

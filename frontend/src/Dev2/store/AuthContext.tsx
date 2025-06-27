@@ -1,11 +1,13 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
+import AuthService from '../api/AuthService';
 
 interface AuthContextType {
   user: any;
   token: string | null;
-  login: (user: any, token: string) => Promise<void>;
+  requestOtp: (phone: string) => Promise<void>;
+  verifyOtp: (phone: string, otp: string) => Promise<void>;
   logout: () => Promise<void>;
   loading: boolean;
 }
@@ -31,12 +33,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     loadAuth();
   }, []);
 
-  const login = async (user: any, token: string) => {
-    setUser(user);
-    setToken(token);
-    axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-    await AsyncStorage.setItem('token', token);
-    await AsyncStorage.setItem('user', JSON.stringify(user));
+  const requestOtp = async (phone: string) => {
+    await AuthService.requestOtp(phone);
+  };
+
+  const verifyOtp = async (phone: string, otp: string) => {
+    const response = await AuthService.verifyOtp(phone, otp);
+    setToken(response.token);
+    setUser(response.user);
   };
 
   const logout = async () => {
@@ -48,7 +52,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, login, logout, loading }}>
+    <AuthContext.Provider value={{ user, token, requestOtp, verifyOtp, logout, loading }}>
       {children}
     </AuthContext.Provider>
   );

@@ -29,7 +29,7 @@ public class StorySegment {
     @Column(nullable = false)
     private String url; // Path to the media file
 
-    private Long duration = 5000L; // Default duration in ms
+    private Long duration; // Default duration in ms
 
     private LocalDateTime createdAt;
     

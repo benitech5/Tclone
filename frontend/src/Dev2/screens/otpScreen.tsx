@@ -1,9 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, KeyboardAvoidingView, Platform } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AuthStackParamList } from '../navigation/Types';
-import { verifyOtp } from '../api/AuthService';
 import { useAuth } from '../store/AuthContext';
 import { useAppDispatch } from '../store/store';
 import { login as reduxLogin } from '../store/authSlice';
@@ -11,42 +10,24 @@ import { login as reduxLogin } from '../store/authSlice';
 type OtpScreenNavigationProp = NativeStackNavigationProp<AuthStackParamList, 'Otp'>;
 type OtpScreenRouteProp = RouteProp<AuthStackParamList, 'Otp'>;
 
-export default function OtpScreen() {
+const OtpScreen = () => {
     const [otp, setOtp] = useState('');
-    const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
+    const { verifyOtp } = useAuth();
     const navigation = useNavigation<OtpScreenNavigationProp>();
     const route = useRoute<OtpScreenRouteProp>();
-    const { login } = useAuth();
-    const phoneNumber = route.params?.phoneNumber;
+    const { phone } = route.params || {};
     const dispatch = useAppDispatch();
 
     const handleVerify = async () => {
-        console.log('handleVerify called');
-        if (!otp) {
-            setError('Please enter the OTP.');
-            console.log('OTP input is empty, exiting handleVerify');
-            return;
-        }
-        console.log('Setting loading to true');
         setLoading(true);
+        setError('');
         try {
-            console.log('Verifying OTP with:', { phoneNumber, otp });
-            const response = await verifyOtp(phoneNumber, otp);
-            console.log('OTP verification response:', response);
-            // Assume response contains { user, token }
-            if (response && response.token && response.user) {
-                await login(response.user, response.token);
-                dispatch(reduxLogin({
-                  name: response.user.firstName || '',
-                  email: response.user.phoneNumber || '',
-                }));
-            } else {
-                setError('Invalid OTP or server error.');
-            }
-        } catch (err) {
-            setError('OTP verification failed.');
-            console.log('Error during OTP verification:', err);
+            await verifyOtp(phone, otp);
+            navigation.navigate('Home');
+        } catch (e) {
+            setError('Invalid OTP.');
         } finally {
             setLoading(false);
         }
@@ -56,7 +37,7 @@ export default function OtpScreen() {
         <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
             <View style={styles.container}>
                 <Text style={styles.title}>Enter OTP</Text>
-                <Text style={styles.subtitle}>We sent a code to {phoneNumber}</Text>
+                <Text style={styles.subtitle}>We sent a code to {phone}</Text>
                 <TextInput
                     style={styles.input}
                     placeholder="Enter OTP"
@@ -75,7 +56,7 @@ export default function OtpScreen() {
             </View>
         </KeyboardAvoidingView>
     );
-}
+};
 
 const styles = StyleSheet.create({
     container: {
@@ -134,3 +115,5 @@ const styles = StyleSheet.create({
         fontSize: 14,
     },
 });
+
+export default OtpScreen;

@@ -1,120 +1,44 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, SafeAreaView } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { AuthStackParamList } from '../navigation/Types';
-import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
-import { verifyEmailCode } from '../api/AuthService';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
 
-export default function ConfirmationCodeScreen() {
+const ConfirmationCodeScreen = ({ navigation }) => {
   const [code, setCode] = useState('');
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const navigation = useNavigation<NativeStackNavigationProp<AuthStackParamList, 'ConfirmationCode'>>();
-  const route = useRoute<RouteProp<AuthStackParamList, 'ConfirmationCode'>>();
-  const email = route.params?.email;
 
-  const handleVerify = async () => {
-    if (!code) return;
-    setLoading(true);
-    setError('');
-    try {
-      await verifyEmailCode(email, code);
-      navigation.navigate('TwoStepVerification');
-    } catch (err) {
-      setError('Invalid code or server error.');
-    } finally {
-      setLoading(false);
+  const handleConfirm = () => {
+    if (code.length === 6) {
+      navigation.navigate('Home');
+    } else {
+      setError('Please enter a valid 6-digit code.');
     }
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Ionicons name="arrow-back" size={24} color="#fff" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Confirmation Code</Text>
-        <View style={{ width: 24 }} />
-      </View>
-      <View style={styles.body}>
-        <Text style={styles.label}>Code</Text>
-        <TextInput
-          style={styles.input}
-          placeholder=""
-          keyboardType="number-pad"
-          value={code}
-          onChangeText={setCode}
-          placeholderTextColor="#aaa"
-        />
-        <Text style={styles.infoText}>
-          We have sent a code to {email}
-        </Text>
-        {error ? <Text style={styles.error}>{error}</Text> : null}
-      </View>
-      <TouchableOpacity style={styles.fab} onPress={handleVerify} disabled={!code || loading}>
-        {loading ? <Text style={{ color: '#fff' }}>...</Text> : <Ionicons name="arrow-forward" size={28} color="#fff" />}
+    <View style={styles.container}>
+      <Text style={styles.title}>Enter Confirmation Code</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="6-digit code"
+        keyboardType="number-pad"
+        value={code}
+        onChangeText={setCode}
+        maxLength={6}
+      />
+      {error ? <Text style={styles.error}>{error}</Text> : null}
+      <TouchableOpacity style={styles.button} onPress={handleConfirm}>
+        <Text style={styles.buttonText}>Confirm</Text>
       </TouchableOpacity>
-    </SafeAreaView>
+    </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff' },
-  header: {
-    backgroundColor: '#d0021b',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingTop: 16,
-    paddingBottom: 18,
-  },
-  headerTitle: {
-    color: '#fff',
-    fontSize: 22,
-    fontWeight: 'bold',
-  },
-  body: {
-    padding: 24,
-  },
-  label: {
-    color: '#888',
-    fontSize: 14,
-    marginBottom: 2,
-  },
-  input: {
-    borderBottomWidth: 1,
-    borderBottomColor: '#d0021b',
-    fontSize: 18,
-    color: '#222',
-    paddingVertical: 4,
-    marginBottom: 8,
-  },
-  infoText: {
-    color: '#888',
-    fontSize: 13,
-    marginTop: 12,
-  },
-  fab: {
-    position: 'absolute',
-    right: 24,
-    bottom: 32,
-    backgroundColor: '#d0021b',
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    justifyContent: 'center',
-    alignItems: 'center',
-    elevation: 4,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 2 },
-  },
-  error: {
-    color: 'red',
-    fontSize: 14,
-    marginTop: 8,
-  },
-}); 
+  container: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#fff', padding: 24 },
+  title: { fontSize: 28, fontWeight: 'bold', marginBottom: 32 },
+  input: { width: '100%', borderWidth: 1, borderColor: '#ccc', borderRadius: 8, padding: 12, marginBottom: 16 },
+  button: { backgroundColor: '#007AFF', padding: 16, borderRadius: 8, width: '100%', alignItems: 'center' },
+  buttonText: { color: '#fff', fontWeight: 'bold', fontSize: 16 },
+  error: { color: 'red', marginBottom: 8 },
+});
+
+export default ConfirmationCodeScreen; 

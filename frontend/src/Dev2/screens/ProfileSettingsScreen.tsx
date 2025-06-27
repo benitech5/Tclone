@@ -1,109 +1,103 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { Ionicons } from '@expo/vector-icons';
-import SettingsRow from '../component/SettingsRow';
-import { RootStackNavigationProp } from '../navigation/Types';
 
-// Define a type for a section of settings
-type SettingsSection = {
-  title: string;
-  items: {
-    icon: keyof typeof Ionicons.glyphMap;
-    label: string;
-    screen: keyof RootStackNavigationProp['navigate']; // Type-safe navigation
-    color?: string;
-  }[];
+const user = {
+  avatar: 'https://randomuser.me/api/portraits/men/32.jpg',
+  name: 'Numeria Neveda',
+  phone: '+233 00 000 0000',
+  username: '@numerveda5000',
 };
 
-const settingsSections: SettingsSection[] = [
-  {
-    title: 'General',
-    items: [
-      { label: 'Account', icon: 'person-outline', screen: 'AccountSettings' },
-      { label: 'Chats', icon: 'chatbubble-outline', screen: 'ChatSettings' },
-      { label: 'Notifications', icon: 'notifications-outline', screen: 'NotificationSettings' },
-    ],
-  },
-  {
-    title: 'Support',
-    items: [
-      { label: 'Help', icon: 'help-circle-outline', screen: 'Help' },
-      { label: 'Privacy Policy', icon: 'document-text-outline', screen: 'PrivacyPolicy' }, // Assuming a PrivacyPolicy screen exists
-    ],
-  },
-  {
-    title: 'Danger Zone',
-    items: [
-      { label: 'Logout', icon: 'log-out-outline', screen: 'Logout', color: '#ff3b30' },
-    ],
-  },
+const otherAccounts = [
+  { id: 1, name: 'Eros', avatar: 'https://randomuser.me/api/portraits/men/33.jpg' },
+  { id: 2, name: 'Dionysus', avatar: 'https://randomuser.me/api/portraits/men/34.jpg' },
 ];
 
-export default function ProfileSettingsScreen() {
-  const navigation = useNavigation<RootStackNavigationProp>();
+const settings = [
+  { icon: '📞', label: 'Recent Calls', screen: null },
+  { icon: '💻', label: 'Devices', screen: null },
+  { icon: '📁', label: 'Chat Folder', screen: null },
+  { icon: '🔔', label: 'Notifications and Sounds', screen: 'NotificationSettings' },
+  { icon: '🔒', label: 'Privacy and Security', screen: 'PrivacySettings' },
+  { icon: '💾', label: 'Data and Storage', screen: 'DataAndStorageSettings' },
+  { icon: '🎨', label: 'Appearance', screen: 'AppearanceSettings' },
+  { icon: '🌐', label: 'Language', screen: 'LanguageSettings' },
+];
 
-  const handlePress = (screen: keyof RootStackNavigationProp['navigate'] | 'Logout') => {
-    if (screen === 'Logout') {
-      // Handle logout logic, e.g., call auth context
-      console.log('Logging out...');
-    } else {
-      // The type safety is handled by the data structure
-      // @ts-ignore
-      navigation.navigate(screen);
-    }
-  };
-
+const ProfileSettingsScreen = () => {
+  const navigation = useNavigation();
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Settings</Text>
-      </View>
-      {settingsSections.map(section => (
-        <View key={section.title} style={styles.section}>
-          <Text style={styles.sectionTitle}>{section.title}</Text>
-          {section.items.map(item => (
-            <SettingsRow
-              key={item.label}
-              icon={item.icon}
-              label={item.label}
-              color={item.color}
-              onPress={() => handlePress(item.screen)}
-            />
-          ))}
+        <Image source={{ uri: user.avatar }} style={styles.avatar} />
+        <View style={styles.headerInfo}>
+          <Text style={styles.name}>{user.name}</Text>
+          <Text style={styles.phone}>{user.phone}</Text>
+          <Text style={styles.username}>{user.username}</Text>
         </View>
-      ))}
+        <TouchableOpacity style={styles.editBtn} onPress={() => navigation.navigate('EditProfile')}>
+          <Text style={styles.editText}>Edit</Text>
+        </TouchableOpacity>
+      </View>
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Other Accounts</Text>
+        <View style={styles.accountsRow}>
+          {otherAccounts.map(acc => (
+            <View key={acc.id} style={styles.accountItem}>
+              <Image source={{ uri: acc.avatar }} style={styles.accountAvatar} />
+              <Text style={styles.accountName}>{acc.name}</Text>
+            </View>
+          ))}
+          <TouchableOpacity style={styles.addAccountBtn}>
+            <Text style={styles.addAccountText}>+ Add Account</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+      <TouchableOpacity style={styles.storiesBtn}>
+        <Text style={styles.storiesText}>My Stories</Text>
+      </TouchableOpacity>
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Settings</Text>
+        {settings.map((item, idx) => (
+          <TouchableOpacity
+            key={idx}
+            style={styles.settingRow}
+            onPress={() => item.screen && navigation.navigate(item.screen)}
+            disabled={!item.screen}
+          >
+            <Text style={styles.settingIcon}>{item.icon}</Text>
+            <Text style={styles.settingLabel}>{item.label}</Text>
+          </TouchableOpacity>
+        ))}
+      </View>
     </ScrollView>
   );
-}
+};
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f2f2f7', // Use a light grey background for settings screens
-  },
-  header: {
-    paddingTop: 60,
-    paddingBottom: 20,
-    paddingHorizontal: 20,
-    backgroundColor: '#fff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#dcdcdc',
-  },
-  headerTitle: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#222',
-  },
-  section: {
-    marginTop: 30,
-  },
-  sectionTitle: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#8e8e93',
-    paddingHorizontal: 20,
-    marginBottom: 8,
-    textTransform: 'uppercase',
-  },
-}); 
+  container: { flex: 1, backgroundColor: '#fff' },
+  header: { flexDirection: 'row', alignItems: 'center', padding: 24, backgroundColor: '#b2f7ef' },
+  avatar: { width: 64, height: 64, borderRadius: 32, marginRight: 16 },
+  headerInfo: { flex: 1 },
+  name: { fontSize: 20, fontWeight: 'bold' },
+  phone: { fontSize: 14, color: '#555' },
+  username: { fontSize: 14, color: '#888' },
+  editBtn: { padding: 8 },
+  editText: { color: '#e53935', fontWeight: 'bold' },
+  section: { padding: 24, borderBottomWidth: 1, borderBottomColor: '#eee' },
+  sectionTitle: { fontSize: 16, fontWeight: 'bold', marginBottom: 12 },
+  accountsRow: { flexDirection: 'row', alignItems: 'center' },
+  accountItem: { alignItems: 'center', marginRight: 16 },
+  accountAvatar: { width: 40, height: 40, borderRadius: 20, marginBottom: 4 },
+  accountName: { fontSize: 12 },
+  addAccountBtn: { justifyContent: 'center', alignItems: 'center', padding: 8 },
+  addAccountText: { color: '#e53935', fontWeight: 'bold' },
+  storiesBtn: { padding: 24, borderBottomWidth: 1, borderBottomColor: '#eee' },
+  storiesText: { color: '#e53935', fontWeight: 'bold', fontSize: 16 },
+  settingRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 12 },
+  settingIcon: { fontSize: 18, width: 32 },
+  settingLabel: { fontSize: 16 },
+});
+
+export default ProfileSettingsScreen; 

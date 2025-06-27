@@ -1,127 +1,41 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, Dimensions } from 'react-native';
+import React from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { AuthStackParamList } from '../navigation/Types';
-
-const { width } = Dimensions.get('window');
 
 const slides = [
-  {
-    image: require('../../assets/konvo-logo.png'), // Replace with your logo asset
-    title: 'KONVO Messaging App',
-    description: 'A convenient and effective messaging platform.\nIt is free and reliable.',
-  },
-  {
-    image: require('../../assets/fast.png'), // Replace with your icon asset
-    title: 'FAST',
-    description: 'Konvo delivers messages at lightning speed, ensuring your chats and media reach their destination instantly without any lag.',
-  },
-  {
-    image: require('../../assets/secure.png'), // Replace with your icon asset
-    title: 'SECURE',
-    description: 'Konvo ensures that your chats are safe from malicious intruders and parties.',
-  },
-  {
-    image: require('../../assets/free.png'), // Replace with your icon asset
-    title: 'FREE',
-    description: 'Konvo is completely free to download and use with unlimited storage for chats and media.',
-  },
-  {
-    image: require('../../assets/efficiency.png'), // Replace with your icon asset
-    title: 'EFFICIENCY',
-    description: 'TeleClone is a high-performance messaging app that delivers your messages instantly and optimizes data usage.\nEnjoy a seamless, uninterrupted experience—communicate quickly and reliably every time.',
-  },
-  {
-    image: require('../../assets/robust.png'), // Replace with your icon asset
-    title: 'Robust',
-    description: 'Stay connected effortlessly with a strong and reliable messaging app—built to last.',
-  },
+  { key: 'slide1', title: 'Welcome to Konvo', description: 'Connect, chat, and share stories with friends.', image: require('../../../assets/icon.png') },
+  { key: 'slide2', title: 'Private & Secure', description: 'Your conversations are always protected.', image: require('../../../assets/chat-bg.png') },
+  { key: 'slide3', title: 'Get Started', description: 'Sign up and join the conversation!', image: require('../../../assets/splash-icon.png') },
 ];
 
-export default function OnboardingScreen() {
-  const [current, setCurrent] = useState(0);
-  const navigation = useNavigation<NativeStackNavigationProp<AuthStackParamList, 'Login'>>();
+const OnboardingScreen = () => {
+  const navigation = useNavigation();
+  const [index, setIndex] = React.useState(0);
 
-  const handleNext = () => {
-    if (current < slides.length - 1) {
-      setCurrent(current + 1);
-    } else {
-      navigation.navigate('Login'); // Use correct route name
-    }
+  const nextSlide = () => {
+    if (index < slides.length - 1) setIndex(index + 1);
+    else navigation.navigate('Login');
   };
 
   return (
     <View style={styles.container}>
-      <Image source={slides[current].image} style={styles.image} resizeMode="contain" />
-      <Text style={styles.title}>{slides[current].title}</Text>
-      <Text style={styles.description}>{slides[current].description}</Text>
-      <View style={styles.dotsContainer}>
-        {slides.map((_, idx) => (
-          <View
-            key={idx}
-            style={[styles.dot, current === idx && styles.activeDot]}
-          />
-        ))}
-      </View>
-      <TouchableOpacity style={styles.button} onPress={handleNext}>
-        <Text style={styles.buttonText}>Start Messaging</Text>
+      <Image source={slides[index].image} style={styles.image} />
+      <Text style={styles.title}>{slides[index].title}</Text>
+      <Text style={styles.description}>{slides[index].description}</Text>
+      <TouchableOpacity style={styles.button} onPress={nextSlide}>
+        <Text style={styles.buttonText}>{index === slides.length - 1 ? 'Get Started' : 'Next'}</Text>
       </TouchableOpacity>
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 24,
-  },
-  image: {
-    width: width * 0.5,
-    height: width * 0.5,
-    marginBottom: 32,
-  },
-  title: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 12,
-    color: '#d0021b',
-  },
-  description: {
-    fontSize: 15,
-    textAlign: 'center',
-    color: '#222',
-    marginBottom: 32,
-  },
-  dotsContainer: {
-    flexDirection: 'row',
-    marginBottom: 32,
-  },
-  dot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: '#ccc',
-    marginHorizontal: 4,
-  },
-  activeDot: {
-    backgroundColor: '#d0021b',
-  },
-  button: {
-    backgroundColor: '#d0021b',
-    borderRadius: 8,
-    paddingVertical: 14,
-    paddingHorizontal: 32,
-    alignItems: 'center',
-    marginTop: 16,
-  },
-  buttonText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    fontSize: 16,
-  },
-}); 
+  container: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#fff', padding: 24 },
+  image: { width: 120, height: 120, marginBottom: 32 },
+  title: { fontSize: 28, fontWeight: 'bold', marginBottom: 16 },
+  description: { fontSize: 18, color: '#555', textAlign: 'center', marginBottom: 32 },
+  button: { backgroundColor: '#007AFF', padding: 16, borderRadius: 8, width: '100%', alignItems: 'center' },
+  buttonText: { color: '#fff', fontWeight: 'bold', fontSize: 16 },
+});
+
+export default OnboardingScreen; 
