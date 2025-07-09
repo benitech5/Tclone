@@ -23,6 +23,21 @@ export default function ChatDetailsScreen() {
     const route = useRoute();
     // @ts-ignore
     const chatId = route.params?.chatId;
+    const [messages, setMessages] = useState(mockMessages);
+
+    const handleSend = () => {
+        if (message.trim() === '') return;
+        setMessages([
+            ...messages,
+            {
+                id: Date.now().toString(),
+                text: message,
+                time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                isMe: true,
+            },
+        ]);
+        setMessage('');
+    };
 
     const renderMessage = ({ item }: { item: any }) => (
         <View style={[styles.messageBubble, item.isMe ? styles.myMessage : styles.theirMessage]}>
@@ -51,7 +66,7 @@ export default function ChatDetailsScreen() {
                     value={message}
                     onChangeText={setMessage}
                 />
-                <TouchableOpacity style={styles.sendButton}>
+                <TouchableOpacity style={styles.sendButton} onPress={handleSend}>
                     <Ionicons name="send" size={24} color="#0088cc" />
                 </TouchableOpacity>
             </View>

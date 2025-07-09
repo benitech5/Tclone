@@ -12,6 +12,10 @@ import CallsScreen from '../screens/Contacts/CallsScreen';
 import ProfileScreen from '../screens/Profile/ProfileScreen';
 import AccountScreen from '../screens/Profile/AccountScreen';
 import PrivacyScreen from '../screens/Profile/PrivacyScreen';
+import ForwardMessageScreen from '../screens/Chat/ForwardMessageScreen';
+import SavedMessagesScreen from '../screens/Chat/SavedMessagesScreen';
+import PinnedMessagesScreen from '../screens/Chat/PinnedMessagesScreen';
+import MediaSharedScreen from '../screens/Chat/MediaSharedScreen';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 const Stack = createNativeStackNavigator<MainStackParamList>();
@@ -43,6 +47,10 @@ export const MainNavigator = () => (
     <Stack.Screen name="ChatDetails" component={ChatDetailsScreen} />
     <Stack.Screen name="Contacts" component={ContactsScreen} />
     <Stack.Screen name="Calls" component={CallsScreen} />
+    <Stack.Screen name="ForwardMessage" component={ForwardMessageScreen} />
+    <Stack.Screen name="SavedMessages" component={SavedMessagesScreen} />
+    <Stack.Screen name="PinnedMessages" component={PinnedMessagesScreen} />
+    <Stack.Screen name="MediaShared" component={MediaSharedScreen} />
   </Stack.Navigator>
 );
 

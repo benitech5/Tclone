@@ -24,5 +24,9 @@ export type MainStackParamList = {
   Profile: undefined;
   Account: undefined;
   ChatDetails: { chatId: string };
+  ForwardMessage: undefined;
+  SavedMessages: undefined;
+  PinnedMessages: undefined;
+  MediaShared: undefined;
   // Add other screens as needed
 };

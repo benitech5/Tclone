@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, Pressable, StyleSheet, KeyboardAvoidingView, Platform, TextInput } from 'react-native';
-import CountryPicker from 'react-native-country-picker-modal';
+import { CountryPicker } from 'react-native-country-codes-picker';
 
 const PhoneLoginScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
     const [step, setStep] = useState(1);
@@ -32,8 +32,8 @@ const PhoneLoginScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
 
     // Step 2: Phone input
     const handleSelectCountry = (country: any) => {
-        setCountryCode(country.cca2);
-        setCallingCode(country.callingCode[0]);
+        setCountryCode(country.code);
+        setCallingCode(country.dial_code.replace('+', ''));
         setCountryName(country.name);
     };
     const handlePhoneChange = (text: string) => {
@@ -92,14 +92,13 @@ const PhoneLoginScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                             <Text style={{ flex: 1 }}>{countryName}</Text>
                         </Pressable>
                         <CountryPicker
-                            withFilter
-                            withFlag
-                            withCallingCode
-                            withCountryNameButton
-                            visible={showCountryPicker}
-                            countryCode={countryCode}
-                            onSelect={handleSelectCountry}
-                            onClose={() => setShowCountryPicker(false)}
+                            show={showCountryPicker}
+                            lang="en"
+                            pickerButtonOnPress={(item) => {
+                                handleSelectCountry(item);
+                                setShowCountryPicker(false);
+                            }}
+                            style={{ modal: { height: 400 } }}
                         />
                         <Text style={styles.label}>{countryName}</Text>
                         <View style={styles.inputContainer}>
@@ -157,6 +156,12 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         paddingHorizontal: 15,
         marginBottom: 30,
+    },
+    input: {
+        flex: 1,
+        fontSize: 16,
+        paddingVertical: 10,
+        color: '#333',
     },
     countryCode: {
         fontSize: 16,

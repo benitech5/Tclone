@@ -14,7 +14,6 @@ export const AppNavigator = () => (
     initialRouteName="Onboarding"
     screenOptions={{ headerShown: false }}
   >
-    <Stack.Screen name="Splash" component={SplashScreen} />
     <Stack.Screen name="Onboarding" component={OnboardingScreen} />
     <Stack.Screen name="Auth" component={AuthNavigator} />
     <Stack.Screen name="Main" component={TabNavigator} />

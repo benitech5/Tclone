@@ -1,6 +1,6 @@
 // src/screens/ChatsScreen.tsx
 import React from 'react';
-import { View, Text, FlatList, TouchableOpacity, StyleSheet, Button } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, StyleSheet, Button, Image, ScrollView } from 'react-native';
 import { CompositeNavigationProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { MainStackParamList, RootStackParamList } from '../../types/navigation';
@@ -39,6 +39,25 @@ const mockChats = [
     lastMessage: '+AI in science mastery...',
     time: '00:00',
     unread: 3
+  },
+];
+
+const mockStories = [
+  {
+    id: 'my-story',
+    name: 'My Story',
+  },
+  {
+    id: '1',
+    name: 'Bobee Jnr',
+  },
+  {
+    id: '2',
+    name: 'Mirabelle',
+  },
+  {
+    id: '3',
+    name: 'Nikano Miku',
   },
 ];
 
@@ -94,12 +113,30 @@ const ChatsScreen: React.FC<ChatsScreenProps> = ({ navigation }) => {
     </TouchableOpacity>
   );
 
+  const renderStory = (story: typeof mockStories[0]) => (
+    <View key={story.id} style={styles.storyItem}>
+      <View style={styles.storyAvatarNoImg}>
+        <Text style={styles.storyAvatarLetter}>
+          {story.name.charAt(0).toUpperCase()}
+        </Text>
+      </View>
+      <Text style={styles.storyName} numberOfLines={1}>{story.name}</Text>
+    </View>
+  );
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>Welcome, {user?.name || 'User'}! 🎉</Text>
         <Button title="Logout" onPress={handleLogout} />
       </View>
+      {/* Stories Section */}
+      <View style={styles.storiesContainer}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.storiesList}>
+          {mockStories.map(renderStory)}
+        </ScrollView>
+      </View>
+      {/* Chat List */}
       <FlatList
         data={mockChats}
         renderItem={renderItem}
@@ -208,6 +245,41 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: 'bold',
     marginBottom: 8,
+  },
+  storiesContainer: {
+    paddingVertical: 10,
+    backgroundColor: '#fff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  storiesList: {
+    paddingHorizontal: 10,
+    alignItems: 'center',
+  },
+  storyItem: {
+    alignItems: 'center',
+    marginRight: 18,
+    width: 60,
+  },
+  storyAvatarNoImg: {
+    width: 54,
+    height: 54,
+    borderRadius: 27,
+    backgroundColor: '#e91e63', // pink background for story
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  storyAvatarLetter: {
+    color: '#fff',
+    fontSize: 24,
+    fontWeight: 'bold',
+  },
+  storyName: {
+    fontSize: 12,
+    color: '#222',
+    textAlign: 'center',
+    width: 60,
   },
 });
 

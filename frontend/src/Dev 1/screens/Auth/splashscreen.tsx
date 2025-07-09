@@ -1,11 +1,46 @@
-import React from 'react';
-import { View, StyleSheet, Text } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { View, StyleSheet, Image, Animated } from 'react-native';
 
-const SplashScreen = () => {
+const SplashScreen = ({ navigation }: any) => {
+    const [showLogo, setShowLogo] = useState(false);
+    const fadeAnim = useRef(new Animated.Value(0)).current;
+
+    useEffect(() => {
+        // Show black screen for 1 second
+        const blackTimeout = setTimeout(() => {
+            setShowLogo(true);
+            // Fade in logo
+            Animated.timing(fadeAnim, {
+                toValue: 1,
+                duration: 500,
+                useNativeDriver: true,
+            }).start();
+        }, 1000);
+
+        // Navigate to Onboarding after 4 seconds
+        const navTimeout = setTimeout(() => {
+            navigation.replace('Onboarding');
+        }, 4000);
+
+        return () => {
+            clearTimeout(blackTimeout);
+            clearTimeout(navTimeout);
+        };
+    }, [fadeAnim, navigation]);
+
     return (
         <View style={styles.container}>
-            <Text style={styles.title}>Konvo</Text>
-            <Text style={styles.subtitle}>Connecting people securely</Text>
+            {!showLogo ? (
+                <View style={styles.blackScreen} />
+            ) : (
+                <Animated.View style={{ opacity: fadeAnim }}>
+                    <Image
+                        source={require('../../../assets/avatars/konvologo.png')}
+                        style={styles.logo}
+                        resizeMode="contain"
+                    />
+                </Animated.View>
+            )}
         </View>
     );
 };
@@ -13,19 +48,18 @@ const SplashScreen = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#0088cc', // Telegram-like blue
+        backgroundColor: 'black',
         justifyContent: 'center',
         alignItems: 'center',
     },
-    title: {
-        fontSize: 32,
-        fontWeight: 'bold',
-        color: 'white',
+    blackScreen: {
+        ...StyleSheet.absoluteFillObject,
+        backgroundColor: 'black',
     },
-    subtitle: {
-        fontSize: 16,
-        color: 'white',
-        marginTop: 10,
+    logo: {
+        width: 180,
+        height: 180,
+        alignSelf: 'center',
     },
 });
 
