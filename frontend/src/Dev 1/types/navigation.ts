@@ -16,6 +16,7 @@ export type AuthStackParamList = {
 };
 
 export type MainStackParamList = {
+  Home: undefined;
   Chats: undefined;
   Settings: undefined;
   ChatSettings: undefined;
@@ -28,5 +29,6 @@ export type MainStackParamList = {
   SavedMessages: undefined;
   PinnedMessages: undefined;
   MediaShared: undefined;
+  Confirmation: { message: string; onConfirm: () => void; onCancel?: () => void };
   // Add other screens as needed
 };

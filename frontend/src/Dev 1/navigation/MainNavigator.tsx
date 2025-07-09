@@ -16,19 +16,22 @@ import ForwardMessageScreen from '../screens/Chat/ForwardMessageScreen';
 import SavedMessagesScreen from '../screens/Chat/SavedMessagesScreen';
 import PinnedMessagesScreen from '../screens/Chat/PinnedMessagesScreen';
 import MediaSharedScreen from '../screens/Chat/MediaSharedScreen';
+import ConfirmationScreen from '../screens/Other/ConfirmationScreen';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import TabNavigator from './TabNavigator';
 
 const Stack = createNativeStackNavigator<MainStackParamList>();
 
 export const MainNavigator = () => (
   <Stack.Navigator
-    initialRouteName="Chats"
+    initialRouteName="Home"
     screenOptions={{
       headerShown: false,
       animation: 'slide_from_right',
     }}
   >
-    <Stack.Screen name="Chats" component={ChatsScreen} />
+    <Stack.Screen name="Home" component={TabNavigator} />
+    <Stack.Screen name="ChatDetails" component={ChatDetailsScreen} options={{ headerShown: true, title: '' }} />
     <Stack.Screen name="Settings" component={SettingsScreen} />
     <Stack.Screen
       name="ChatSettings"
@@ -44,13 +47,13 @@ export const MainNavigator = () => (
     <Stack.Screen name="Notifications" component={NotificationsScreen} />
     <Stack.Screen name="Profile" component={ProfileScreen} />
     <Stack.Screen name="Account" component={AccountScreen} />
-    <Stack.Screen name="ChatDetails" component={ChatDetailsScreen} />
     <Stack.Screen name="Contacts" component={ContactsScreen} />
     <Stack.Screen name="Calls" component={CallsScreen} />
     <Stack.Screen name="ForwardMessage" component={ForwardMessageScreen} />
     <Stack.Screen name="SavedMessages" component={SavedMessagesScreen} />
     <Stack.Screen name="PinnedMessages" component={PinnedMessagesScreen} />
     <Stack.Screen name="MediaShared" component={MediaSharedScreen} />
+    <Stack.Screen name="Confirmation" component={ConfirmationScreen} options={{ headerShown: true, title: 'Confirm' }} />
   </Stack.Navigator>
 );
 

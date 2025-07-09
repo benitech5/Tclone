@@ -48,7 +48,7 @@ const OtpScreen = () => {
         setError('');
         navigation.reset({
             index: 0,
-            routes: [{ name: 'Main' as never, params: { screen: 'Chats' } }],
+            routes: [{ name: 'Main', params: { screen: 'Chats' } }],
         });
     };
 

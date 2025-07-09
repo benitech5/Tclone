@@ -5,7 +5,7 @@ import { RootStackParamList } from '../types/navigation';
 import SplashScreen from '../screens/Auth/splashscreen';
 import OnboardingScreen from '../screens/Auth/OnboardingScreen';
 import { AuthNavigator } from './AuthNavigator';
-import TabNavigator from './TabNavigator';
+import { MainNavigator } from './MainNavigator';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -16,6 +16,6 @@ export const AppNavigator = () => (
   >
     <Stack.Screen name="Onboarding" component={OnboardingScreen} />
     <Stack.Screen name="Auth" component={AuthNavigator} />
-    <Stack.Screen name="Main" component={TabNavigator} />
+    <Stack.Screen name="Main" component={MainNavigator} />
   </Stack.Navigator>
 );

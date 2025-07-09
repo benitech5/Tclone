@@ -32,9 +32,11 @@ const PhoneLoginScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
 
     // Step 2: Phone input
     const handleSelectCountry = (country: any) => {
-        setCountryCode(country.code);
-        setCallingCode(country.dial_code.replace('+', ''));
-        setCountryName(country.name);
+        console.log('Selected country:', country);
+        setCountryCode(country.code || countryCode);
+        setCallingCode((country.dial_code && country.dial_code.replace('+', '')) || callingCode);
+        setCountryName(country.name || countryName);
+        setShowCountryPicker(false);
     };
     const handlePhoneChange = (text: string) => {
         // Remove non-numeric characters
@@ -89,14 +91,13 @@ const PhoneLoginScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                             style={styles.inputContainer}
                             onPress={() => setShowCountryPicker(true)}
                         >
-                            <Text style={{ flex: 1 }}>{countryName}</Text>
+                            <Text style={{ flex: 1 }}>{countryName || 'Select Country'}</Text>
                         </Pressable>
                         <CountryPicker
                             show={showCountryPicker}
                             lang="en"
                             pickerButtonOnPress={(item) => {
                                 handleSelectCountry(item);
-                                setShowCountryPicker(false);
                             }}
                             style={{ modal: { height: 400 } }}
                         />

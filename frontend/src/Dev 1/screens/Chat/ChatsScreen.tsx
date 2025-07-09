@@ -127,8 +127,8 @@ const ChatsScreen: React.FC<ChatsScreenProps> = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>Welcome, {user?.name || 'User'}! 🎉</Text>
-        <Button title="Logout" onPress={handleLogout} />
+        {/* Remove this static welcome message:
+        <Text style={styles.title}>Welcome, {user?.name || 'User'}! 🎉</Text> */}
       </View>
       {/* Stories Section */}
       <View style={styles.storiesContainer}>
@@ -240,11 +240,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderBottomWidth: 1,
     borderColor: '#eee',
-  },
-  title: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    marginBottom: 8,
   },
   storiesContainer: {
     paddingVertical: 10,
