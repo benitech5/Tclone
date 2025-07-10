@@ -1,9 +1,9 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 
-const ContactProfileScreen: React.FC = () => (
+const NewChannelScreen: React.FC = () => (
   <View style={styles.container}>
-    <Text style={styles.header}>Contact Profile</Text>
+    <Text style={styles.header}>New Channel</Text>
     <Text style={styles.placeholder}>Feature coming soon...</Text>
   </View>
 );
@@ -14,4 +14,4 @@ const styles = StyleSheet.create({
   placeholder: { fontSize: 16, color: '#888' },
 });
 
-export default ContactProfileScreen; 
+export default NewChannelScreen; 

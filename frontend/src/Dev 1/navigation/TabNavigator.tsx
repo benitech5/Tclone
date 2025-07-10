@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Alert, TouchableOpacity, Pressable } from 'react-native';
 import { createDrawerNavigator, DrawerContentScrollView, DrawerItemList, DrawerItem } from '@react-navigation/drawer';
 import { Ionicons, MaterialIcons, Feather } from '@expo/vector-icons';
-import ChatsScreen from '../screens/Chat/ChatsScreen';
+import HomeScreen from '../screens/Chat/HomeScreen';
 import CallsScreen from '../screens/Contacts/CallsScreen';
 import ContactsScreen from '../screens/Contacts/ContactsScreen';
 import SettingsScreen from '../screens/Settings/SettingsScreen';
@@ -43,15 +43,7 @@ function CustomDrawerContent(props: any) {
       if (rootNav.getParent) rootNav = rootNav.getParent();
       rootNav.navigate('Confirmation', {
         message: 'Do you want to logout of your account?',
-        onConfirm: () => {
-          dispatch(logout());
-          if (rootNav && rootNav.reset) {
-            rootNav.reset({
-              index: 0,
-              routes: [{ name: 'Onboarding' }],
-            });
-          }
-        },
+        action: 'logout',
       });
     }, 300);
   };
@@ -62,15 +54,7 @@ function CustomDrawerContent(props: any) {
       if (rootNav.getParent) rootNav = rootNav.getParent();
       rootNav.navigate('Confirmation', {
         message: 'Do you want to add a new account? You will be taken to onboarding and your previous account will not be saved.',
-        onConfirm: () => {
-          dispatch(logout());
-          if (rootNav && rootNav.reset) {
-            rootNav.reset({
-              index: 0,
-              routes: [{ name: 'Onboarding' }],
-            });
-          }
-        },
+        action: 'addAccount',
       });
     }, 300);
   };
@@ -109,7 +93,7 @@ const DrawerNavigator = () => (
     initialRouteName="Chats"
     drawerContent={props => <CustomDrawerContent {...props} />}
   >
-    <Drawer.Screen name="Chats" component={PatchedChatsScreen} options={{ drawerIcon: ({ color, size }) => <Ionicons name="chatbubble-outline" size={size} color={color} /> }} />
+    <Drawer.Screen name="Chats" component={PatchedHomeScreen} options={{ drawerIcon: ({ color, size }) => <Ionicons name="chatbubble-outline" size={size} color={color} /> }} />
     <Drawer.Screen name="My Profile" component={MyProfileScreen} options={{ drawerIcon: ({ color, size }) => <Ionicons name="person-outline" size={size} color={color} /> }} />
     <Drawer.Screen name="New Group" component={NewGroupScreen} options={{ drawerIcon: ({ color, size }) => <Ionicons name="people-outline" size={size} color={color} /> }} />
     <Drawer.Screen name="Contacts" component={ContactsScreen} options={{ drawerIcon: ({ color, size }) => <Ionicons name="people" size={size} color={color} /> }} />
@@ -121,8 +105,8 @@ const DrawerNavigator = () => (
   </Drawer.Navigator>
 );
 
-// Patch ChatsScreen to show welcome message for only 2 seconds
-const PatchedChatsScreen = (props: any) => {
+// Patch HomeScreen to show welcome message for only 2 seconds
+const PatchedHomeScreen = (props: any) => {
   const user = useAppSelector((state) => state.auth.user);
   const [showWelcome, setShowWelcome] = useState(true);
   useEffect(() => {
@@ -138,7 +122,7 @@ const PatchedChatsScreen = (props: any) => {
           </Text>
         </View>
       )}
-      <ChatsScreen {...props} />
+      <HomeScreen {...props} />
     </View>
   );
 };

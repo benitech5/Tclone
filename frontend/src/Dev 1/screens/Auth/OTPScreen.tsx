@@ -46,9 +46,10 @@ const OtpScreen = () => {
             return;
         }
         setError('');
-        navigation.reset({
+        // @ts-ignore
+        navigation.getParent()?.reset({
             index: 0,
-            routes: [{ name: 'Main', params: { screen: 'Chats' } }],
+            routes: [{ name: 'Main', params: { screen: 'Home' } }],
         });
     };
 

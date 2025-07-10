@@ -1,6 +1,8 @@
 import React from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
+import { useAppDispatch } from '../../store/store';
+import { logout } from '../../store/authSlice';
 
 interface ConfirmationParams {
   message: string;
@@ -11,17 +13,25 @@ interface ConfirmationParams {
 const ConfirmationScreen: React.FC = () => {
   const navigation = useNavigation();
   const route = useRoute();
-  const { message, onConfirm, onCancel } = (route.params || {}) as ConfirmationParams;
+  const dispatch = useAppDispatch();
+  const params = (route.params || {}) as { message?: string; action?: string };
+  const message = params.message || 'Are you sure?';
+  const action = params.action;
 
   const handleYes = () => {
-    if (onConfirm) {
-      onConfirm();
+    console.log('Yes pressed', action);
+    if (action === 'logout' || action === 'addAccount') {
+      dispatch(logout());
+      (navigation as any).reset({
+        index: 0,
+        routes: [{ name: 'Onboarding' }],
+      });
     }
+    // Add more actions as needed
   };
 
   const handleNo = () => {
-    if (onCancel) onCancel();
-    else navigation.goBack();
+    navigation.goBack();
   };
 
   return (

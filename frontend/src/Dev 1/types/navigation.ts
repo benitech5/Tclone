@@ -30,5 +30,27 @@ export type MainStackParamList = {
   PinnedMessages: undefined;
   MediaShared: undefined;
   Confirmation: { message: string; onConfirm: () => void; onCancel?: () => void };
-  // Add other screens as needed
+  Contacts: undefined;
+  Calls: undefined;
+  DataAndStorage: undefined;
+  Devices: undefined;
+  Language: undefined;
+  Theme: undefined;
+  ChatFolders: undefined;
+  InviteFriends: undefined;
+  AddContact: undefined;
+  ContactProfile: undefined;
+  RecentCalls: undefined;
+  CallInfo: undefined;
+  GlobalSearch: undefined;
+  InChatSearch: undefined;
+  EditProfile: undefined;
+  BlockedUsers: undefined;
+  ChatFolderView: undefined;
+  NewGroup: undefined;
+  GroupInfo: undefined;
+  InviteToGroup: undefined;
+  NewChannel: undefined;
+  ChannelInfo: undefined;
+  JoinRequests: undefined;
 };

@@ -2,7 +2,7 @@
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { MainStackParamList, AuthStackParamList } from '../types/navigation';
-import ChatsScreen from '../screens/Chat/ChatsScreen';
+import HomeScreen from '../screens/Chat/HomeScreen';
 import ChatSettingsScreen from '../screens/Chat/ChatSettingsScreen';
 import ChatDetailsScreen from '../screens/Chat/ChatDetailsScreen';
 import SettingsScreen from '../screens/Settings/SettingsScreen';
@@ -19,6 +19,27 @@ import MediaSharedScreen from '../screens/Chat/MediaSharedScreen';
 import ConfirmationScreen from '../screens/Other/ConfirmationScreen';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import TabNavigator from './TabNavigator';
+import DataAndStorageScreen from '../screens/Settings/DataAndStorageScreen';
+import DevicesScreen from '../screens/Settings/DevicesScreen';
+import LanguageScreen from '../screens/Settings/LanguageScreen';
+import ThemeScreen from '../screens/Settings/ThemeScreen';
+import ChatFoldersScreen from '../screens/Settings/ChatFoldersScreen';
+import InviteFriendsScreen from '../screens/Contacts/InviteFriendsScreen';
+import AddContactScreen from '../screens/Contacts/AddContactScreen';
+import ContactProfileScreen from '../screens/Contacts/ContactProfileScreen';
+import RecentCallsScreen from '../screens/Contacts/RecentCallsScreen';
+import CallInfoScreen from '../screens/Contacts/CallInfoScreen';
+import GlobalSearchScreen from '../screens/Search/GlobalSearchScreen';
+import InChatSearchScreen from '../screens/Search/InChatSearchScreen';
+import EditProfileScreen from '../screens/Profile/EditProfileScreen';
+import BlockedUsersScreen from '../screens/Profile/BlockedUsersScreen';
+import ChatFolderViewScreen from '../screens/Other/ChatFolderViewScreen';
+import NewGroupScreen from '../screens/Other/NewGroupScreen';
+import GroupInfoScreen from '../screens/Other/GroupInfoScreen';
+import InviteToGroupScreen from '../screens/Other/InviteToGroupScreen';
+import NewChannelScreen from '../screens/Other/NewChannelScreen';
+import ChannelInfoScreen from '../screens/Other/ChannelInfoScreen';
+import JoinRequestsScreen from '../screens/Other/JoinRequestsScreen';
 
 const Stack = createNativeStackNavigator<MainStackParamList>();
 
@@ -54,6 +75,27 @@ export const MainNavigator = () => (
     <Stack.Screen name="PinnedMessages" component={PinnedMessagesScreen} />
     <Stack.Screen name="MediaShared" component={MediaSharedScreen} />
     <Stack.Screen name="Confirmation" component={ConfirmationScreen} options={{ headerShown: true, title: 'Confirm' }} />
+    <Stack.Screen name="DataAndStorage" component={DataAndStorageScreen} />
+    <Stack.Screen name="Devices" component={DevicesScreen} />
+    <Stack.Screen name="Language" component={LanguageScreen} />
+    <Stack.Screen name="Theme" component={ThemeScreen} />
+    <Stack.Screen name="ChatFolders" component={ChatFoldersScreen} />
+    <Stack.Screen name="InviteFriends" component={InviteFriendsScreen} />
+    <Stack.Screen name="AddContact" component={AddContactScreen} />
+    <Stack.Screen name="ContactProfile" component={ContactProfileScreen} />
+    <Stack.Screen name="RecentCalls" component={RecentCallsScreen} />
+    <Stack.Screen name="CallInfo" component={CallInfoScreen} />
+    <Stack.Screen name="GlobalSearch" component={GlobalSearchScreen} />
+    <Stack.Screen name="InChatSearch" component={InChatSearchScreen} />
+    <Stack.Screen name="EditProfile" component={EditProfileScreen} />
+    <Stack.Screen name="BlockedUsers" component={BlockedUsersScreen} />
+    <Stack.Screen name="ChatFolderView" component={ChatFolderViewScreen} />
+    <Stack.Screen name="NewGroup" component={NewGroupScreen} />
+    <Stack.Screen name="GroupInfo" component={GroupInfoScreen} />
+    <Stack.Screen name="InviteToGroup" component={InviteToGroupScreen} />
+    <Stack.Screen name="NewChannel" component={NewChannelScreen} />
+    <Stack.Screen name="ChannelInfo" component={ChannelInfoScreen} />
+    <Stack.Screen name="JoinRequests" component={JoinRequestsScreen} />
   </Stack.Navigator>
 );
 

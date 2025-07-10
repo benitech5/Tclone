@@ -12,6 +12,7 @@ const PhoneLoginScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
     const [phoneNumber, setPhoneNumber] = useState('');
     const [isValid, setIsValid] = useState(false);
     const [showCountryPicker, setShowCountryPicker] = useState(false);
+    const [countryFlag, setCountryFlag] = useState('');
 
     // Step 1: Name input
     const handleNameChange = (text: string) => {
@@ -35,7 +36,12 @@ const PhoneLoginScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
         console.log('Selected country:', country);
         setCountryCode(country.code || countryCode);
         setCallingCode((country.dial_code && country.dial_code.replace('+', '')) || callingCode);
-        setCountryName(country.name || countryName);
+        setCountryName(
+            typeof country.name === 'string'
+                ? country.name
+                : (country.name && country.name.en) || countryName
+        );
+        setCountryFlag(country.flag || '');
         setShowCountryPicker(false);
     };
     const handlePhoneChange = (text: string) => {
@@ -86,24 +92,19 @@ const PhoneLoginScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                 )}
                 {step === 2 && (
                     <>
-                        <Text style={styles.title}>Select your country</Text>
-                        <Pressable
-                            style={styles.inputContainer}
-                            onPress={() => setShowCountryPicker(true)}
-                        >
-                            <Text style={{ flex: 1 }}>{countryName || 'Select Country'}</Text>
-                        </Pressable>
-                        <CountryPicker
-                            show={showCountryPicker}
-                            lang="en"
-                            pickerButtonOnPress={(item) => {
-                                handleSelectCountry(item);
-                            }}
-                            style={{ modal: { height: 400 } }}
-                        />
-                        <Text style={styles.label}>{countryName}</Text>
+                        {/* Main header */}
+                        <Text style={styles.title}>Phone number</Text>
+                        {/* Subtext */}
+                        <Text style={styles.subtitle}>Select your country and Enter your phone number</Text>
+                        {/* Flag and country name */}
+                        <Text style={styles.label}>
+                            {countryFlag && <Text>{countryFlag} </Text>}
+                            {countryName}
+                        </Text>
                         <View style={styles.inputContainer}>
-                            <Text style={styles.countryCode}>+{callingCode}</Text>
+                            <Pressable onPress={() => setShowCountryPicker(true)}>
+                                <Text style={styles.countryCode}>+{callingCode}</Text>
+                            </Pressable>
                             <TextInput
                                 style={styles.input}
                                 placeholder="Phone number"
@@ -113,6 +114,14 @@ const PhoneLoginScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                                 maxLength={15}
                             />
                         </View>
+                        <CountryPicker
+                            show={showCountryPicker}
+                            lang="en"
+                            pickerButtonOnPress={(item) => {
+                                handleSelectCountry(item);
+                            }}
+                            style={{ modal: { height: 400 } }}
+                        />
                         <Pressable
                             style={[styles.button, !isValid && styles.disabledButton]}
                             onPress={handleSubmit}

@@ -1,4 +1,4 @@
-// src/screens/ChatsScreen.tsx
+// src/screens/HomeScreen.tsx
 import React from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, Button, Image, ScrollView } from 'react-native';
 import { CompositeNavigationProp } from '@react-navigation/native';
@@ -8,13 +8,13 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAppSelector, useAppDispatch } from '../../store/store';
 import { logout } from '../../store/authSlice';
 
-type ChatsScreenNavigationProp = CompositeNavigationProp<
+type HomeScreenNavigationProp = CompositeNavigationProp<
   NativeStackNavigationProp<MainStackParamList, 'Chats'>,
   NativeStackNavigationProp<RootStackParamList>
 >;
 
-interface ChatsScreenProps {
-  navigation: ChatsScreenNavigationProp;
+interface HomeScreenProps {
+  navigation: HomeScreenNavigationProp;
 }
 
 const mockChats = [
@@ -61,7 +61,7 @@ const mockStories = [
   },
 ];
 
-const ChatsScreen: React.FC<ChatsScreenProps> = ({ navigation }) => {
+const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const user = useAppSelector((state) => state.auth.user);
   const dispatch = useAppDispatch();
 
@@ -278,4 +278,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ChatsScreen;
+export default HomeScreen;

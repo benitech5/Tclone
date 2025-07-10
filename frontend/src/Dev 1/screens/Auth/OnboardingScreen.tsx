@@ -60,29 +60,32 @@ const OnboardingScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                 ))}
             </View>
 
-            {/* Always show Next and Skip buttons for debugging */}
-            <View style={styles.buttonRow}>
-                <Pressable
-                    style={[styles.button, styles.skipButton]}
-                    onPress={() => {
-                        setCurrentIndex(onboardingData.length - 1);
-                        slidesRef.current?.scrollToIndex({ index: onboardingData.length - 1 });
-                    }}
-                >
-                    <Text style={styles.buttonText}>Skip</Text>
-                </Pressable>
-                <Pressable
-                    style={styles.button}
-                    onPress={() => {
-                        const nextIndex = currentIndex + 1;
-                        setCurrentIndex(nextIndex);
-                        slidesRef.current?.scrollToIndex({ index: nextIndex });
-                    }}
-                >
-                    <Text style={styles.buttonText}>Next</Text>
-                </Pressable>
-            </View>
+            {/* Show Skip and Next only if not on last slide */}
+            {currentIndex !== onboardingData.length - 1 && (
+                <View style={styles.buttonRow}>
+                    <Pressable
+                        style={[styles.button, styles.skipButton]}
+                        onPress={() => {
+                            setCurrentIndex(onboardingData.length - 1);
+                            slidesRef.current?.scrollToIndex({ index: onboardingData.length - 1 });
+                        }}
+                    >
+                        <Text style={styles.buttonText}>Skip</Text>
+                    </Pressable>
+                    <Pressable
+                        style={styles.button}
+                        onPress={() => {
+                            const nextIndex = currentIndex + 1;
+                            setCurrentIndex(nextIndex);
+                            slidesRef.current?.scrollToIndex({ index: nextIndex });
+                        }}
+                    >
+                        <Text style={styles.buttonText}>Next</Text>
+                    </Pressable>
+                </View>
+            )}
 
+            {/* Show Get Started only on last slide */}
             {currentIndex === onboardingData.length - 1 && (
                 <View style={styles.footer}>
                     <Pressable style={styles.button} onPress={handleGetStarted}>
@@ -157,9 +160,6 @@ const styles = StyleSheet.create({
         marginHorizontal: 40,
         marginBottom: 20,
         zIndex: 2,
-        borderWidth: 2,
-        borderColor: 'red',
-        backgroundColor: 'rgba(255,0,0,0.1)',
     },
     skipButton: {
         backgroundColor: '#aaa',
