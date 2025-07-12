@@ -14,28 +14,54 @@ import ContactProfileScreen from '../screens/Contacts/ContactProfileScreen';
 import SavedMessagesScreen from '../screens/Chat/SavedMessagesScreen';
 import { useAppDispatch, useAppSelector } from '../store/store';
 import { logout } from '../store/authSlice';
+import { useTheme } from '../ThemeContext';
 
 // Placeholder for Orbixa Features
-const OrbixaFeaturesScreen = () => (
-  <View style={styles.centered}><Text>Orbixa Features (Placeholder)</Text></View>
-);
+const OrbixaFeaturesScreen = () => {
+  const { theme } = useTheme();
+  return (
+    <View style={[styles.centered, { backgroundColor: theme.background }]}>
+      <Text style={[styles.placeholderText, { color: theme.text }]}>Orbixa Features (Placeholder)</Text>
+    </View>
+  );
+};
+
 // Placeholder for Add Account
-const AddAccountScreen = () => (
-  <View style={styles.centered}><Text>Add Account (Placeholder)</Text></View>
-);
+const AddAccountScreen = () => {
+  const { theme } = useTheme();
+  return (
+    <View style={[styles.centered, { backgroundColor: theme.background }]}>
+      <Text style={[styles.placeholderText, { color: theme.text }]}>Add Account (Placeholder)</Text>
+    </View>
+  );
+};
+
 // Placeholder for My Profile
-const MyProfileScreen = () => (
-  <View style={styles.centered}><Text>My Profile (Placeholder)</Text></View>
-);
+const MyProfileScreen = () => {
+  const { theme } = useTheme();
+  return (
+    <View style={[styles.centered, { backgroundColor: theme.background }]}>
+      <Text style={[styles.placeholderText, { color: theme.text }]}>My Profile (Placeholder)</Text>
+    </View>
+  );
+};
+
 // Placeholder for New Group
-const NewGroupScreen = () => (
-  <View style={styles.centered}><Text>New Group (Placeholder)</Text></View>
-);
+const NewGroupScreen = () => {
+  const { theme } = useTheme();
+  return (
+    <View style={[styles.centered, { backgroundColor: theme.background }]}>
+      <Text style={[styles.placeholderText, { color: theme.text }]}>New Group (Placeholder)</Text>
+    </View>
+  );
+};
 
 const Drawer = createDrawerNavigator();
 
 function CustomDrawerContent(props: any) {
   const dispatch = useAppDispatch();
+  const { theme } = useTheme();
+  
   const handleLogout = () => {
     props.navigation.closeDrawer();
     setTimeout(() => {
@@ -47,6 +73,7 @@ function CustomDrawerContent(props: any) {
       });
     }, 300);
   };
+  
   const handleAddAccount = () => {
     props.navigation.closeDrawer();
     setTimeout(() => {
@@ -58,56 +85,160 @@ function CustomDrawerContent(props: any) {
       });
     }, 300);
   };
+  
   return (
-    <DrawerContentScrollView {...props}>
-      <View style={styles.profileContainer}>
+    <DrawerContentScrollView {...props} style={{ backgroundColor: theme.background }}>
+      <View style={[styles.profileContainer, { backgroundColor: theme.accent }]}>
         <View style={styles.avatarCircle} />
         <Text style={styles.profileName}>Justin Philips</Text>
         <Text style={styles.profileNumber}>+233 657481924</Text>
       </View>
       <Pressable
         style={({ pressed }) => [
-          { flexDirection: 'row', alignItems: 'center', padding: 16, opacity: pressed ? 0.5 : 1 }
+          { 
+            flexDirection: 'row', 
+            alignItems: 'center', 
+            padding: 16, 
+            opacity: pressed ? 0.5 : 1,
+            backgroundColor: theme.card,
+            marginHorizontal: 8,
+            marginVertical: 4,
+            borderRadius: 8,
+          }
         ]}
         onPress={handleAddAccount}
       >
-        <Ionicons name="person-add" size={24} color="#333" style={{ marginRight: 20 }} />
-        <Text style={{ fontSize: 16 }}>Add Account</Text>
+        <Ionicons name="person-add" size={24} color={theme.text} style={{ marginRight: 20 }} />
+        <Text style={[styles.drawerItemText, { color: theme.text }]}>Add Account</Text>
       </Pressable>
       <DrawerItemList {...props} />
       <Pressable
         style={({ pressed }) => [
-          { flexDirection: 'row', alignItems: 'center', padding: 16, opacity: pressed ? 0.5 : 1 }
+          { 
+            flexDirection: 'row', 
+            alignItems: 'center', 
+            padding: 16, 
+            opacity: pressed ? 0.5 : 1,
+            backgroundColor: theme.card,
+            marginHorizontal: 8,
+            marginVertical: 4,
+            borderRadius: 8,
+          }
         ]}
         onPress={handleLogout}
       >
-        <MaterialIcons name="logout" size={24} color="#333" style={{ marginRight: 20 }} />
-        <Text style={{ fontSize: 16 }}>Logout</Text>
+        <MaterialIcons name="logout" size={24} color={theme.text} style={{ marginRight: 20 }} />
+        <Text style={[styles.drawerItemText, { color: theme.text }]}>Logout</Text>
       </Pressable>
     </DrawerContentScrollView>
   );
 }
 
-const DrawerNavigator = () => (
-  <Drawer.Navigator
-    initialRouteName="Chats"
-    drawerContent={props => <CustomDrawerContent {...props} />}
-  >
-    <Drawer.Screen name="Chats" component={PatchedHomeScreen} options={{ drawerIcon: ({ color, size }) => <Ionicons name="chatbubble-outline" size={size} color={color} /> }} />
-    <Drawer.Screen name="My Profile" component={MyProfileScreen} options={{ drawerIcon: ({ color, size }) => <Ionicons name="person-outline" size={size} color={color} /> }} />
-    <Drawer.Screen name="New Group" component={NewGroupScreen} options={{ drawerIcon: ({ color, size }) => <Ionicons name="people-outline" size={size} color={color} /> }} />
-    <Drawer.Screen name="Contacts" component={ContactsScreen} options={{ drawerIcon: ({ color, size }) => <Ionicons name="people" size={size} color={color} /> }} />
-    <Drawer.Screen name="Calls" component={CallsScreen} options={{ drawerIcon: ({ color, size }) => <Ionicons name="call-outline" size={size} color={color} /> }} />
-    <Drawer.Screen name="Saved Messages" component={SavedMessagesScreen} options={{ drawerIcon: ({ color, size }) => <Feather name="bookmark" size={size} color={color} /> }} />
-    <Drawer.Screen name="Settings" component={SettingsScreen} options={{ drawerIcon: ({ color, size }) => <Ionicons name="settings-outline" size={size} color={color} /> }} />
-    <Drawer.Screen name="Invite Friends" component={InviteFriendsScreen} options={{ drawerIcon: ({ color, size }) => <Ionicons name="person-add-outline" size={size} color={color} /> }} />
-    <Drawer.Screen name="Orbixa Features" component={OrbixaFeaturesScreen} options={{ drawerIcon: ({ color, size }) => <MaterialIcons name="star-outline" size={size} color={color} /> }} />
-  </Drawer.Navigator>
-);
+const DrawerNavigator = () => {
+  const { theme } = useTheme();
+  
+  return (
+    <Drawer.Navigator
+      initialRouteName="Chats"
+      drawerContent={props => <CustomDrawerContent {...props} />}
+      screenOptions={{
+        headerStyle: { backgroundColor: theme.background },
+        headerTintColor: theme.text,
+        drawerStyle: { backgroundColor: theme.background },
+        drawerLabelStyle: { color: theme.text },
+        drawerActiveTintColor: theme.accent,
+        drawerInactiveTintColor: theme.subtext,
+      }}
+    >
+      <Drawer.Screen 
+        name="Chats" 
+        component={PatchedHomeScreen} 
+        options={{ 
+          drawerIcon: ({ color, size }) => <Ionicons name="chatbubble-outline" size={size} color={color} />,
+          headerStyle: { backgroundColor: theme.background },
+          headerTintColor: theme.text,
+        }} 
+      />
+      <Drawer.Screen 
+        name="My Profile" 
+        component={MyProfileScreen} 
+        options={{ 
+          drawerIcon: ({ color, size }) => <Ionicons name="person-outline" size={size} color={color} />,
+          headerStyle: { backgroundColor: theme.background },
+          headerTintColor: theme.text,
+        }} 
+      />
+      <Drawer.Screen 
+        name="New Group" 
+        component={NewGroupScreen} 
+        options={{ 
+          drawerIcon: ({ color, size }) => <Ionicons name="people-outline" size={size} color={color} />,
+          headerStyle: { backgroundColor: theme.background },
+          headerTintColor: theme.text,
+        }} 
+      />
+      <Drawer.Screen 
+        name="Contacts" 
+        component={ContactsScreen} 
+        options={{ 
+          drawerIcon: ({ color, size }) => <Ionicons name="people" size={size} color={color} />,
+          headerStyle: { backgroundColor: theme.background },
+          headerTintColor: theme.text,
+        }} 
+      />
+      <Drawer.Screen 
+        name="Calls" 
+        component={CallsScreen} 
+        options={{ 
+          drawerIcon: ({ color, size }) => <Ionicons name="call-outline" size={size} color={color} />,
+          headerStyle: { backgroundColor: theme.background },
+          headerTintColor: theme.text,
+        }} 
+      />
+      <Drawer.Screen 
+        name="Saved Messages" 
+        component={SavedMessagesScreen} 
+        options={{ 
+          drawerIcon: ({ color, size }) => <Feather name="bookmark" size={size} color={color} />,
+          headerStyle: { backgroundColor: theme.background },
+          headerTintColor: theme.text,
+        }} 
+      />
+      <Drawer.Screen 
+        name="Settings" 
+        component={SettingsScreen} 
+        options={{ 
+          drawerIcon: ({ color, size }) => <Ionicons name="settings-outline" size={size} color={color} />,
+          headerStyle: { backgroundColor: theme.background },
+          headerTintColor: theme.text,
+        }} 
+      />
+      <Drawer.Screen 
+        name="Invite Friends" 
+        component={InviteFriendsScreen} 
+        options={{ 
+          drawerIcon: ({ color, size }) => <Ionicons name="person-add-outline" size={size} color={color} />,
+          headerStyle: { backgroundColor: theme.background },
+          headerTintColor: theme.text,
+        }} 
+      />
+      <Drawer.Screen 
+        name="Orbixa Features" 
+        component={OrbixaFeaturesScreen} 
+        options={{ 
+          drawerIcon: ({ color, size }) => <MaterialIcons name="star-outline" size={size} color={color} />,
+          headerStyle: { backgroundColor: theme.background },
+          headerTintColor: theme.text,
+        }} 
+      />
+    </Drawer.Navigator>
+  );
+};
 
 // Patch HomeScreen to show welcome message for only 2 seconds
 const PatchedHomeScreen = (props: any) => {
   const user = useAppSelector((state) => state.auth.user);
+  const { theme } = useTheme();
   const [showWelcome, setShowWelcome] = useState(true);
   useEffect(() => {
     const timer = setTimeout(() => setShowWelcome(false), 2000);
@@ -116,8 +247,8 @@ const PatchedHomeScreen = (props: any) => {
   return (
     <View style={{ flex: 1 }}>
       {showWelcome && (
-        <View style={{ backgroundColor: '#e0f7fa', padding: 10 }}>
-          <Text style={{ textAlign: 'center', color: '#007AFF', fontWeight: 'bold' }}>
+        <View style={{ backgroundColor: theme.mode === 'dark' ? '#2a2d3a' : '#e0f7fa', padding: 10 }}>
+          <Text style={{ textAlign: 'center', color: theme.accent, fontWeight: 'bold' }}>
             Welcome, {user?.name || 'User'}! 🎉
           </Text>
         </View>
@@ -131,7 +262,6 @@ const styles = StyleSheet.create({
   profileContainer: {
     alignItems: 'center',
     paddingVertical: 30,
-    backgroundColor: '#d32f2f',
     marginBottom: 10,
   },
   avatarCircle: {
@@ -155,7 +285,12 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#fff',
+  },
+  placeholderText: {
+    fontSize: 18,
+  },
+  drawerItemText: {
+    fontSize: 16,
   },
 });
 

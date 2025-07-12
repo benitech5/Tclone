@@ -3,15 +3,15 @@ import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { MainStackParamList, AuthStackParamList } from '../types/navigation';
 import HomeScreen from '../screens/Chat/HomeScreen';
-import ChatSettingsScreen from '../screens/Chat/ChatSettingsScreen';
+import ChatSettingsScreen from '../screens/Settings/ChatSettingsScreen';
 import ChatDetailsScreen from '../screens/Chat/ChatDetailsScreen';
 import SettingsScreen from '../screens/Settings/SettingsScreen';
-import NotificationsScreen from '../screens/Settings/NotificationsScreen';
+import NotificationsAndSoundsScreen from '../screens/Settings/NotificationsAndSoundsScreen';
 import ContactsScreen from '../screens/Contacts/ContactsScreen';
 import CallsScreen from '../screens/Contacts/CallsScreen';
 import ProfileScreen from '../screens/Profile/ProfileScreen';
 import AccountScreen from '../screens/Profile/AccountScreen';
-import PrivacyScreen from '../screens/Profile/PrivacyScreen';
+import PrivacyAndSecurityScreen from '../screens/Settings/PrivacyAndSecurityScreen';
 import ForwardMessageScreen from '../screens/Chat/ForwardMessageScreen';
 import SavedMessagesScreen from '../screens/Chat/SavedMessagesScreen';
 import PinnedMessagesScreen from '../screens/Chat/PinnedMessagesScreen';
@@ -40,6 +40,7 @@ import InviteToGroupScreen from '../screens/Other/InviteToGroupScreen';
 import NewChannelScreen from '../screens/Other/NewChannelScreen';
 import ChannelInfoScreen from '../screens/Other/ChannelInfoScreen';
 import JoinRequestsScreen from '../screens/Other/JoinRequestsScreen';
+import PowerSavingScreen from '../screens/Settings/PowerSavingScreen';
 
 const Stack = createNativeStackNavigator<MainStackParamList>();
 
@@ -58,14 +59,11 @@ export const MainNavigator = () => (
       name="ChatSettings"
       component={ChatSettingsScreen}
       options={{
-        headerShown: true,
-        title: 'Chat Settings',
-        headerStyle: { backgroundColor: '#0088cc' },
-        headerTintColor: '#fff',
+        headerShown: false,
       }}
     />
-    <Stack.Screen name="Privacy" component={PrivacyScreen} />
-    <Stack.Screen name="Notifications" component={NotificationsScreen} />
+    <Stack.Screen name="Privacy" component={PrivacyAndSecurityScreen} />
+    <Stack.Screen name="Notifications" component={NotificationsAndSoundsScreen} />
     <Stack.Screen name="Profile" component={ProfileScreen} />
     <Stack.Screen name="Account" component={AccountScreen} />
     <Stack.Screen name="Contacts" component={ContactsScreen} />
@@ -96,6 +94,7 @@ export const MainNavigator = () => (
     <Stack.Screen name="NewChannel" component={NewChannelScreen} />
     <Stack.Screen name="ChannelInfo" component={ChannelInfoScreen} />
     <Stack.Screen name="JoinRequests" component={JoinRequestsScreen} />
+    <Stack.Screen name="PowerSaving" component={PowerSavingScreen} />
   </Stack.Navigator>
 );
 
