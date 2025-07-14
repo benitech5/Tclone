@@ -4,7 +4,6 @@ import { View, StyleSheet, Image, Animated } from 'react-native';
 const SplashScreen = ({ navigation }: any) => {
     const [showLogo, setShowLogo] = useState(false);
     const fadeAnim = useRef(new Animated.Value(0)).current;
-
     useEffect(() => {
         // Show black screen for 1 second
         const blackTimeout = setTimeout(() => {
@@ -12,7 +11,7 @@ const SplashScreen = ({ navigation }: any) => {
             // Fade in logo
             Animated.timing(fadeAnim, {
                 toValue: 1,
-                duration: 500,
+                duration: 1000,
                 useNativeDriver: true,
             }).start();
         }, 1000);

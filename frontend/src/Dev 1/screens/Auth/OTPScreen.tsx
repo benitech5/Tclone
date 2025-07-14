@@ -76,14 +76,26 @@ const OtpScreen = () => {
                 ))}
             </View>
             {error ? <Text style={styles.error}>{error}</Text> : null}
-            <Button title="Verify OTP" onPress={handleVerify} />
-            <Button title="Back to Login" onPress={() => navigation.goBack()} color="#999" />
+            <View style={styles.verifyButtonWrapper}>
+                <Button
+                    title="Verify OTP"
+                    onPress={handleVerify}
+                    color="#dc1432ff"
+                />
+            </View>
+            <View style={styles.backButtonWrapper}>
+                <Button
+                    title="Back to Login"
+                    onPress={() => navigation.goBack()}
+                    color="#5A646F"
+                />
+            </View>
         </View>
     );
 };
 
 const styles = StyleSheet.create({
-    container: { flex: 1, justifyContent: 'center', padding: 20 },
+    container: { flex: 1, justifyContent: 'center', padding: 20 ,},
     title: { fontSize: 22, marginBottom: 10, textAlign: 'center' },
     subtitle: { fontSize: 16, color: '#666', marginBottom: 20, textAlign: 'center' },
     otpContainer: {
@@ -102,6 +114,16 @@ const styles = StyleSheet.create({
         marginHorizontal: 5,
     },
     error: { color: 'red', marginBottom: 10, textAlign: 'center' },
+    verifyButtonWrapper: {
+        borderRadius: 35,
+        overflow: 'hidden',
+        marginBottom: 5,
+    },
+    backButtonWrapper: {
+        borderRadius: 35,
+        overflow: 'hidden',
+        marginTop: 5,
+    },
 });
 
 export default OtpScreen;

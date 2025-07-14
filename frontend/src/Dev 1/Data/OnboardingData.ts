@@ -1,6 +1,6 @@
 export const onboardingData = [
     {
-        title: 'Konvo',
+        title: 'Orbixa',
         description: 'Connecting people securely',
     },
     {
@@ -11,5 +11,6 @@ export const onboardingData = [
         title: 'Your Privacy, Your Power',
         description: 'End-to-end encryption ensures only you control your data.',
     },
+    
 ];
   

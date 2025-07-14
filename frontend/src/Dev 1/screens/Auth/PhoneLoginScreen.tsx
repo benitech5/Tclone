@@ -178,13 +178,13 @@ const styles = StyleSheet.create({
         marginRight: 10,
     },
     button: {
-        backgroundColor: '#007AFF',
+        backgroundColor: '#DC1432',
         paddingVertical: 15,
-        borderRadius: 8,
+        borderRadius: 25,
         alignItems: 'center',
     },
     disabledButton: {
-        backgroundColor: '#A0C8FF',
+        backgroundColor: '#dc143288',
     },
     buttonText: {
         color: 'white',

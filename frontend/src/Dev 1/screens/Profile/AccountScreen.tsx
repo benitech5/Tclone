@@ -28,7 +28,7 @@ const AccountScreen = ({ navigation }: { navigation: AccountScreenNavigationProp
           <TextInput
             style={styles.input}
             placeholder="Enter your name"
-            defaultValue="Justin Philips"
+            defaultValue="Justin Philis"
           />
         </View>
 

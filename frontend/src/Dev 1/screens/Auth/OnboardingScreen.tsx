@@ -1,4 +1,6 @@
 import React, { useState, useRef } from 'react';
+import { LinearGradient } from 'expo-linear-gradient';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import {
     View,
     Text,
@@ -27,10 +29,20 @@ const OnboardingScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
     };
 
     const renderSlide = ({ item }: { item: typeof onboardingData[0] }) => (
-        <View style={[styles.slide, { width }]}>
+        <View style={[styles.slide, { width }]}> 
+            <View style={styles.iconContainer}>
+                <LinearGradient
+                    colors={["#C94FCF", "#1E4DB7"]}
+                    style={styles.gradientCircle}
+                >
+                    <MaterialCommunityIcons name="timer-sand" size={80} color="#fff" />
+                </LinearGradient>
+            </View>
             <View style={styles.textContainer}>
-                <Text style={styles.title}>{item.title}</Text>
-                <Text style={styles.description}>{item.description}</Text>
+                <Text style={styles.title}>{item.title.toUpperCase()}</Text>
+                <Text style={styles.description}>
+                    <Text style={{ fontWeight: 'bold' }}>Orbixa</Text> delivers messages at lightning speed, ensuring your chats and media reach their destination instantly without any lag.
+                </Text>
             </View>
         </View>
     );
@@ -54,42 +66,17 @@ const OnboardingScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                         key={index}
                         style={[
                             styles.indicator,
-                            currentIndex === index && styles.activeIndicator,
+                            currentIndex === index ? styles.activeIndicator : null,
                         ]}
                     />
                 ))}
             </View>
 
-            {/* Show Skip and Next only if not on last slide */}
-            {currentIndex !== onboardingData.length - 1 && (
-                <View style={styles.buttonRow}>
-                    <Pressable
-                        style={[styles.button, styles.skipButton]}
-                        onPress={() => {
-                            setCurrentIndex(onboardingData.length - 1);
-                            slidesRef.current?.scrollToIndex({ index: onboardingData.length - 1 });
-                        }}
-                    >
-                        <Text style={styles.buttonText}>Skip</Text>
-                    </Pressable>
-                    <Pressable
-                        style={styles.button}
-                        onPress={() => {
-                            const nextIndex = currentIndex + 1;
-                            setCurrentIndex(nextIndex);
-                            slidesRef.current?.scrollToIndex({ index: nextIndex });
-                        }}
-                    >
-                        <Text style={styles.buttonText}>Next</Text>
-                    </Pressable>
-                </View>
-            )}
-
-            {/* Show Get Started only on last slide */}
+            {/* Show Start Messaging only on last slide */}
             {currentIndex === onboardingData.length - 1 && (
                 <View style={styles.footer}>
-                    <Pressable style={styles.button} onPress={handleGetStarted}>
-                        <Text style={styles.buttonText}>Get Started</Text>
+                    <Pressable style={styles.startButton} onPress={handleGetStarted}>
+                        <Text style={styles.startButtonText}>Start Messaging</Text>
                     </Pressable>
                 </View>
             )}
@@ -100,71 +87,89 @@ const OnboardingScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#FFCDD2', // light red
+        backgroundColor: '#fff',
     },
     slide: {
         alignItems: 'center',
-        paddingHorizontal: 20,
+        justifyContent: 'flex-start',
+        paddingTop: 80,
+        width: '100%',
+    },
+    iconContainer: {
+        alignItems: 'center',
         justifyContent: 'center',
+        marginBottom: 40,
+    },
+    gradientCircle: {
+        width: 200,
+        height: 200,
+        borderRadius: 100,
+        alignItems: 'center',
+        justifyContent: 'center',
+        shadowColor: '#C94FCF',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 8,
+        elevation: 8,
     },
     textContainer: {
-        marginTop: 30,
+        marginTop: 10,
         alignItems: 'center',
+        paddingHorizontal: 20,
     },
     title: {
-        fontSize: 24,
+        fontSize: 28,
         fontWeight: 'bold',
-        marginBottom: 10,
+        marginBottom: 16,
         textAlign: 'center',
+        letterSpacing: 1.5,
     },
     description: {
         fontSize: 16,
         textAlign: 'center',
-        color: '#666',
-        paddingHorizontal: 20,
+        color: '#222',
+        marginBottom: 40,
     },
     indicatorContainer: {
         flexDirection: 'row',
         justifyContent: 'center',
-        marginBottom: 20,
+        marginBottom: 24,
+        marginTop: 0,
     },
     indicator: {
         height: 8,
         width: 8,
         borderRadius: 4,
-        backgroundColor: '#ccc',
+        backgroundColor: '#A9A9A9',
         marginHorizontal: 4,
+        // transition removed; not supported in React Native
     },
     activeIndicator: {
-        backgroundColor: '#000',
-        width: 16,
+        backgroundColor: '#E53935',
+        width: 24,
     },
     footer: {
-        paddingVertical: 20,
+        position: 'absolute',
+        bottom: 40,
+        left: 0,
+        right: 0,
+        alignItems: 'center',
     },
-    button: {
-        backgroundColor: '#007AFF',
+    startButton: {
+        backgroundColor: '#E53935',
         paddingVertical: 14,
         paddingHorizontal: 40,
         borderRadius: 30,
         alignSelf: 'center',
     },
-    buttonText: {
+    startButtonText: {
         color: '#fff',
-        fontSize: 16,
+        fontSize: 18,
         fontWeight: 'bold',
-    },
-    buttonRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        marginHorizontal: 40,
-        marginBottom: 20,
-        zIndex: 2,
-    },
-    skipButton: {
-        backgroundColor: '#aaa',
-        marginRight: 10,
+        textAlign: 'center',
+        letterSpacing: 0.5,
     },
 });
 
 export default OnboardingScreen;
+
