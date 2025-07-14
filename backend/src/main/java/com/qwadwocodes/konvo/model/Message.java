@@ -5,6 +5,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Data
 @Entity
@@ -27,6 +29,26 @@ public class Message {
     @ManyToOne
     @JoinColumn(name = "group_id")
     private ChatGroup group;
+
+    @ManyToOne
+    @JoinColumn(name = "reply_to_message_id")
+    private Message replyTo;
+
+    @ManyToMany
+    @JoinTable(
+        name = "saved_messages",
+        joinColumns = @JoinColumn(name = "message_id"),
+        inverseJoinColumns = @JoinColumn(name = "user_id")
+    )
+    private Set<User> savedBy = new HashSet<>();
+
+    @ManyToMany
+    @JoinTable(
+        name = "pinned_messages",
+        joinColumns = @JoinColumn(name = "message_id"),
+        inverseJoinColumns = @JoinColumn(name = "user_id")
+    )
+    private Set<User> pinnedBy = new HashSet<>();
 
     @Column(nullable = false)
     private String content;

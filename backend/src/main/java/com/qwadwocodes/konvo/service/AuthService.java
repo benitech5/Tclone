@@ -21,6 +21,7 @@ public class AuthService {
 
     private final UserRepository userRepository;
     private final JwtUtil jwtUtil;
+    private final SmsService smsService;
 
     public void requestOtp(OtpRequest request) {
         String otp = generateOtp();
@@ -37,8 +38,8 @@ public class AuthService {
         user.setOtpExpiry(LocalDateTime.now().plusMinutes(10));
         userRepository.save(user);
 
-        // In a real application, you would send the OTP via an SMS gateway (e.g., Twilio)
-        // smsService.sendOtp(request.getPhoneNumber(), otp);
+        // Send OTP via SMS
+        smsService.sendOtp(request.getPhoneNumber(), otp);
     }
 
     public AuthResponse verifyOtp(VerifyOtpRequest request) {
