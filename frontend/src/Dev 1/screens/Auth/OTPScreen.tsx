@@ -76,14 +76,14 @@ const OtpScreen = () => {
                 ))}
             </View>
             {error ? <Text style={styles.error}>{error}</Text> : null}
-            <View style={styles.verifyButtonWrapper}>
+            <View style={[styles.verifyButtonWrapper,{width: '70%', alignSelf: 'center'}]}>
                 <Button
                     title="Verify OTP"
                     onPress={handleVerify}
                     color="#dc1432ff"
                 />
             </View>
-            <View style={styles.backButtonWrapper}>
+            <View style={[styles.backButtonWrapper,{width: '70%', alignSelf: 'center'}]}>
                 <Button
                     title="Back to Login"
                     onPress={() => navigation.goBack()}
@@ -105,10 +105,10 @@ const styles = StyleSheet.create({
     },
     otpInput: {
         width: 45,
-        height: 60,
+        height: 50,
         borderWidth: 1,
         borderColor: '#ccc',
-        borderRadius: 8,
+        borderRadius: 15,
         textAlign: 'center',
         fontSize: 20,
         marginHorizontal: 5,

@@ -123,12 +123,14 @@ const styles = StyleSheet.create({
         marginBottom: 16,
         textAlign: 'center',
         letterSpacing: 1.5,
+        fontStyle: 'italic',
     },
     description: {
         fontSize: 16,
         textAlign: 'center',
         color: '#222',
         marginBottom: 40,
+        fontStyle: 'italic',
     },
     indicatorContainer: {
         flexDirection: 'row',

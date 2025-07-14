@@ -1,6 +1,8 @@
 export const onboardingData = [
     {
         title: 'Orbixa',
+        FontFamily: 'Roboto',
+        FontSize: 30,
         description: 'Connecting people securely',
     },
     {
@@ -13,4 +15,3 @@ export const onboardingData = [
     },
     
 ];
-  

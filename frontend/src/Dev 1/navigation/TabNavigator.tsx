@@ -88,9 +88,10 @@ function CustomDrawerContent(props: any) {
   
   return (
     <DrawerContentScrollView {...props} style={{ backgroundColor: theme.background }}>
-      <View style={[styles.profileContainer, { backgroundColor: theme.accent }]}>
+      <View style={[styles.profileContainer, { backgroundColor: theme.accent, alignItems: 'left', 
+        paddingLeft: 30, borderRadius: 25 , marginBottom: 2, flex: 100}]}>
         <View style={styles.avatarCircle} />
-        <Text style={styles.profileName}>Justin Philips</Text>
+        <Text style={styles.profileName}>Justin Philips,</Text>
         <Text style={styles.profileNumber}>+233 657481924</Text>
       </View>
       <Pressable
@@ -101,8 +102,8 @@ function CustomDrawerContent(props: any) {
             padding: 16, 
             opacity: pressed ? 0.5 : 1,
             backgroundColor: theme.card,
-            marginHorizontal: 8,
-            marginVertical: 4,
+            marginHorizontal: 1,
+            marginVertical: 2,
             borderRadius: 8,
           }
         ]}
@@ -110,8 +111,12 @@ function CustomDrawerContent(props: any) {
       >
         <Ionicons name="person-add" size={24} color={theme.text} style={{ marginRight: 20 }} />
         <Text style={[styles.drawerItemText, { color: theme.text }]}>Add Account</Text>
-      </Pressable>
+      </Pressable>  
+      {/* Horizontal line divider */}
+      <View style={{ height: 1, backgroundColor: '#ccc', marginVertical: 4, marginHorizontal:2 }} />
       <DrawerItemList {...props} />
+      {/* Horizontal line divider above Logout */}
+      <View style={{ height: 1, backgroundColor: '#ccc', marginVertical: 4, marginHorizontal: 2 }} />
       <Pressable
         style={({ pressed }) => [
           { 
@@ -150,20 +155,20 @@ const DrawerNavigator = () => {
         drawerInactiveTintColor: theme.subtext,
       }}
     >
-      <Drawer.Screen 
-        name="Chats" 
-        component={PatchedHomeScreen} 
+       <Drawer.Screen 
+        name="My Profile" 
+        component={MyProfileScreen} 
         options={{ 
-          drawerIcon: ({ color, size }) => <Ionicons name="chatbubble-outline" size={size} color={color} />,
+          drawerIcon: ({ color, size }) => <Ionicons name="person-outline" size={size} color={color} />,
           headerStyle: { backgroundColor: theme.background },
           headerTintColor: theme.text,
         }} 
       />
       <Drawer.Screen 
-        name="My Profile" 
-        component={MyProfileScreen} 
+        name="Chats" 
+        component={PatchedHomeScreen} 
         options={{ 
-          drawerIcon: ({ color, size }) => <Ionicons name="person-outline" size={size} color={color} />,
+          drawerIcon: ({ color, size }) => <Ionicons name="chatbubble-outline" size={size} color={color} />,
           headerStyle: { backgroundColor: theme.background },
           headerTintColor: theme.text,
         }} 
