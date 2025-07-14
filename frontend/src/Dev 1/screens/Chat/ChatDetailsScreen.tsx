@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useRoute } from '@react-navigation/native';
 import {
     View,
@@ -6,12 +6,14 @@ import {
     StyleSheet,
     TextInput,
     FlatList,
-    Image,
-    KeyboardAvoidingView,
     Platform,
-    TouchableOpacity
+    TouchableOpacity,
+    SafeAreaView,
+    Keyboard
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useSettings } from '../../SettingsContext';
+import { useTheme } from '../../ThemeContext';
 
 const mockMessages = [
     { id: '1', text: 'Hey there!', time: '12:30 PM', isMe: false },
@@ -21,93 +23,135 @@ const mockMessages = [
 export default function ChatDetailsScreen() {
     const [message, setMessage] = useState('');
     const route = useRoute();
+    const { chatSettings } = useSettings();
+    const { theme } = useTheme();
     // @ts-ignore
     const chatId = route.params?.chatId;
     const [messages, setMessages] = useState(mockMessages);
+    const flatListRef = useRef<FlatList>(null);
 
     const handleSend = () => {
         if (message.trim() === '') return;
-        setMessages([
-            ...messages,
-            {
-                id: Date.now().toString(),
-                text: message,
-                time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-                isMe: true,
-            },
-        ]);
+        const newMsg = {
+            id: Date.now().toString(),
+            text: message,
+            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            isMe: true,
+        };
+        setMessages(prev => [...prev, newMsg]);
         setMessage('');
+        setTimeout(() => {
+            flatListRef.current?.scrollToEnd({ animated: true });
+        }, 100);
     };
 
     const renderMessage = ({ item }: { item: any }) => (
-        <View style={[styles.messageBubble, item.isMe ? styles.myMessage : styles.theirMessage]}>
-            <Text style={item.isMe ? styles.myMessageText : styles.messageText}>{item.text}</Text>
-            <Text style={styles.messageTime}>{item.time}</Text>
+        <View style={[
+            styles.messageBubble, 
+            item.isMe ? styles.myMessage : styles.theirMessage,
+            { borderRadius: chatSettings.messageCorner },
+            item.isMe ? { backgroundColor: theme.accent } : { backgroundColor: theme.card }
+        ]}>
+            <Text style={[
+                item.isMe ? styles.myMessageText : styles.messageText,
+                { fontSize: chatSettings.messageSize },
+                item.isMe ? { color: '#fff' } : { color: theme.text }
+            ]}>
+                {item.text}
+            </Text>
+            <Text style={[styles.messageTime, { color: theme.subtext }]}>{item.time}</Text>
         </View>
     );
 
     return (
-        <KeyboardAvoidingView
-            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-            style={styles.container}
-        >
-            {/* Show chatId for debugging */}
-            <Text style={{ textAlign: 'center', color: 'gray', marginTop: 10 }}>Chat ID: {chatId}</Text>
-            <FlatList
-                data={mockMessages}
-                renderItem={renderMessage}
-                keyExtractor={(item) => item.id}
-                contentContainerStyle={styles.messagesContainer}
-            />
-            <View style={styles.inputContainer}>
-                <TextInput
-                    style={styles.input}
-                    placeholder="Type a message..."
-                    value={message}
-                    onChangeText={setMessage}
+        <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.background }]}>
+            <View style={[styles.container, { backgroundColor: theme.background }]}>
+                {/* Show chatId for debugging */}
+                <Text style={{ textAlign: 'center', color: theme.subtext, marginTop: 10 }}>Chat ID: {chatId}</Text>
+                <FlatList
+                    ref={flatListRef}
+                    data={messages}
+                    renderItem={renderMessage}
+                    keyExtractor={(item) => item.id}
+                    contentContainerStyle={styles.messagesContainer}
+                    onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
+                    showsVerticalScrollIndicator={false}
+                    keyboardShouldPersistTaps="handled"
                 />
-                <TouchableOpacity style={styles.sendButton} onPress={handleSend}>
-                    <Ionicons name="send" size={24} color="#0088cc" />
-                </TouchableOpacity>
+                <View style={[styles.inputContainer, { backgroundColor: theme.card, borderTopColor: theme.border }]}>
+                    <TextInput
+                        style={[styles.input, { 
+                            borderColor: theme.border, 
+                            backgroundColor: theme.background,
+                            color: theme.text 
+                        }]}
+                        placeholder="Type a message..."
+                        placeholderTextColor={theme.subtext}
+                        value={message}
+                        onChangeText={setMessage}
+                        onSubmitEditing={handleSend}
+                        returnKeyType="send"
+                        multiline={false}
+                        onFocus={() => {
+                            setTimeout(() => {
+                                flatListRef.current?.scrollToEnd({ animated: true });
+                            }, 300);
+                        }}
+                    />
+                    <TouchableOpacity style={styles.sendButton} onPress={handleSend}>
+                        <Ionicons name="send" size={24} color={theme.accent} />
+                    </TouchableOpacity>
+                </View>
             </View>
-        </KeyboardAvoidingView>
+        </SafeAreaView>
     );
 }
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: '#f5f5f5' },
-    messagesContainer: { padding: 15 },
+    safeArea: {
+        flex: 1,
+    },
+    container: { 
+        flex: 1,
+    },
+    messagesContainer: { 
+        padding: 15, 
+        paddingBottom: 20,
+        flexGrow: 1,
+    },
     messageBubble: {
         maxWidth: '80%',
         padding: 10,
-        borderRadius: 10,
         marginBottom: 10,
     },
     myMessage: {
         alignSelf: 'flex-end',
-        backgroundColor: '#0088cc',
     },
     theirMessage: {
         alignSelf: 'flex-start',
-        backgroundColor: '#fff',
     },
-    messageText: { color: '#000' },
-    myMessageText: { color: '#fff' },
-    messageTime: { fontSize: 10, color: '#666', marginTop: 5 },
+    messageText: {},
+    myMessageText: {},
+    messageTime: { fontSize: 10, marginTop: 5 },
     inputContainer: {
         flexDirection: 'row',
-        padding: 10,
-        backgroundColor: '#fff',
+        padding: 15,
         borderTopWidth: 1,
-        borderTopColor: '#f0f0f0',
+        paddingBottom: 15, // Increased padding to move input up and avoid nav buttons
+        alignItems: 'center',
+        marginBottom: Platform.OS === 'android' ? 20 : 0, // Extra margin for Android
     },
     input: {
         flex: 1,
         borderWidth: 1,
-        borderColor: '#ddd',
         borderRadius: 20,
         paddingHorizontal: 15,
-        paddingVertical: 8,
+        paddingVertical: 10,
+        maxHeight: 100,
     },
-    sendButton: { marginLeft: 10, alignSelf: 'center' },
+    sendButton: { 
+        marginLeft: 10, 
+        alignSelf: 'center',
+        padding: 8,
+    },
 });

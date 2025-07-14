@@ -3,16 +3,30 @@ import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-nati
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { MainStackParamList } from '../../types/navigation';
 import { Ionicons } from '@expo/vector-icons';
+import { useTheme } from '../../ThemeContext';
 
 type SettingsScreenProps = {
   navigation: NativeStackNavigationProp<MainStackParamList, 'Settings'>;
 };
 
 const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
+  const { theme } = useTheme();
+  
+  const routeMap: Record<string, string> = {
+    'Chat Settings': 'ChatSettings',
+    'Privacy and Security': 'Privacy',
+    'Notifications and Sounds': 'Notifications',
+    'Data and Storage': 'DataAndStorage',
+    'Devices': 'Devices',
+    'Language': 'Language',
+    'Chat folders': 'ChatFolders',
+    'Power Saving': 'PowerSaving',
+  };
+
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView style={[styles.container, { backgroundColor: theme.background }]}>
       {/* Account Section */}
-      <View style={styles.section}>
+      <View style={[styles.section, { backgroundColor: theme.card, borderColor: theme.border }]}>
         <TouchableOpacity 
           style={styles.profileItem}
           onPress={() => navigation.navigate('Profile')}
@@ -21,38 +35,39 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
             <Ionicons name="person" size={24} color="#0088cc" />
           </View>
           <View style={styles.profileText}>
-            <Text style={styles.profileName}>Justin Philips</Text>
-            <Text style={styles.profilePhone}>+233 725089765</Text>
+            <Text style={[styles.profileName, { color: theme.text }]}>Justin Philips</Text>
+            <Text style={[styles.profilePhone, { color: theme.subtext }]}>+233 725089765</Text>
           </View>
-          <Ionicons name="chevron-forward" size={20} color="#ccc" />
+          <Ionicons name="chevron-forward" size={20} color={theme.subtext} />
         </TouchableOpacity>
       </View>
 
       {/* Main Settings Section */}
-      <View style={styles.section}>
+      <View style={[styles.section, { backgroundColor: theme.card, borderColor: theme.border }]}>
         {[
           'Chat Settings',
           'Privacy and Security',
           'Notifications and Sounds',
           'Data and Storage',
+          'Devices',
           'Language',
           'Chat folders',
           'Power Saving'
         ].map((item, index) => (
           <TouchableOpacity 
             key={index} 
-            style={styles.menuItem}
-            onPress={() => navigation.navigate(item.replace(/\s+/g, '') as any)}
+            style={[styles.menuItem, { borderColor: theme.border }]}
+            onPress={() => navigation.navigate(routeMap[item] as any)}
           >
-            <Text style={styles.menuItemText}>{item}</Text>
-            <Ionicons name="chevron-forward" size={18} color="#ccc" />
+            <Text style={[styles.menuItemText, { color: theme.text }]}>{item}</Text>
+            <Ionicons name="chevron-forward" size={18} color={theme.subtext} />
           </TouchableOpacity>
         ))}
       </View>
 
       {/* Help Section */}
-      <View style={styles.section}>
-        <Text style={styles.sectionHeader}>Help</Text>
+      <View style={[styles.section, { backgroundColor: theme.card, borderColor: theme.border }]}>
+        <Text style={[styles.sectionHeader, { color: theme.accent }]}>Help</Text>
         {[
           'Ask a Question',
           'Convo FAQ',
@@ -60,11 +75,11 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
         ].map((item, index) => (
           <TouchableOpacity 
             key={index} 
-            style={styles.menuItem}
+            style={[styles.menuItem, { borderColor: theme.border }]}
             onPress={() => navigation.navigate(item.replace(/\s+/g, '') as any)}
           >
-            <Text style={styles.menuItemText}>{item}</Text>
-            <Ionicons name="chevron-forward" size={18} color="#ccc" />
+            <Text style={[styles.menuItemText, { color: theme.text }]}>{item}</Text>
+            <Ionicons name="chevron-forward" size={18} color={theme.subtext} />
           </TouchableOpacity>
         ))}
       </View>
@@ -75,18 +90,14 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
   },
   section: {
-    backgroundColor: '#fff',
     marginBottom: 16,
     borderTopWidth: 1,
     borderBottomWidth: 1,
-    borderColor: '#f0f0f0',
   },
   sectionHeader: {
     padding: 16,
-    color: '#0088cc',
     fontWeight: 'bold',
     fontSize: 16,
   },
@@ -110,11 +121,9 @@ const styles = StyleSheet.create({
   profileName: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#000',
   },
   profilePhone: {
     fontSize: 14,
-    color: '#757575',
     marginTop: 4,
   },
   menuItem: {
@@ -123,11 +132,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 16,
     borderBottomWidth: 1,
-    borderColor: '#f5f5f5',
   },
   menuItemText: {
     fontSize: 16,
-    color: '#000',
   },
 });
 

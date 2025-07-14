@@ -7,6 +7,7 @@ import { MainStackParamList, RootStackParamList } from '../../types/navigation';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAppSelector, useAppDispatch } from '../../store/store';
 import { logout } from '../../store/authSlice';
+import { useTheme } from '../../ThemeContext';
 
 type HomeScreenNavigationProp = CompositeNavigationProp<
   NativeStackNavigationProp<MainStackParamList, 'Chats'>,
@@ -64,6 +65,7 @@ const mockStories = [
 const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const user = useAppSelector((state) => state.auth.user);
   const dispatch = useAppDispatch();
+  const { theme } = useTheme();
 
   const handleLogout = async () => {
     await AsyncStorage.clear();
@@ -78,7 +80,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
     <TouchableOpacity
       style={[
         styles.chatItem,
-        item.unread > 0 && styles.unreadChatItem
+        { backgroundColor: theme.card },
+        item.unread > 0 && { backgroundColor: theme.mode === 'dark' ? '#2a2d3a' : '#e6f3ff' }
       ]}
       onPress={() => navigation.navigate('ChatDetails', { chatId: item.id })}
     >
@@ -90,14 +93,15 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
       
       <View style={styles.chatContent}>
         <View style={styles.nameRow}>
-          <Text style={styles.name} numberOfLines={1}>{item.name}</Text>
+          <Text style={[styles.name, { color: theme.text }]} numberOfLines={1}>{item.name}</Text>
           {item.isImportant && <Text style={styles.important}>🌟</Text>}
-          <Text style={styles.time}>{item.time}</Text>
+          <Text style={[styles.time, { color: theme.subtext }]}>{item.time}</Text>
         </View>
         <Text 
           style={[
             styles.lastMessage,
-            item.unread > 0 && styles.unreadMessage
+            { color: theme.subtext },
+            item.unread > 0 && { color: theme.text }
           ]}
           numberOfLines={1}
         >
@@ -120,12 +124,12 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
           {story.name.charAt(0).toUpperCase()}
         </Text>
       </View>
-      <Text style={styles.storyName} numberOfLines={1}>{story.name}</Text>
+      <Text style={[styles.storyName, { color: theme.text }]} numberOfLines={1}>{story.name}</Text>
     </View>
   );
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.background }]}>
       <View style={styles.header}>
         {/* Remove this static welcome message:
         <Text style={styles.title}>Welcome, {user?.name || 'User'}! 🎉</Text> */}
@@ -150,7 +154,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
   },
   listContent: {
     paddingBottom: 10,
@@ -160,7 +163,6 @@ const styles = StyleSheet.create({
     padding: 12,
     marginHorizontal: 10,
     marginVertical: 4,
-    backgroundColor: '#ffffff',
     borderRadius: 10,
     alignItems: 'center',
     elevation: 1,
@@ -168,9 +170,6 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 1,
-  },
-  unreadChatItem: {
-    backgroundColor: '#e6f3ff',
   },
   avatar: {
     width: 50,
@@ -198,83 +197,67 @@ const styles = StyleSheet.create({
   },
   name: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#000',
-    marginRight: 5,
-    flexShrink: 1,
+    fontWeight: 'bold',
+    flex: 1,
   },
   important: {
-    fontSize: 14,
-    marginRight: 5,
+    marginRight: 8,
   },
   time: {
-    color: '#9e9e9e',
     fontSize: 12,
-    marginLeft: 'auto',
   },
   lastMessage: {
-    color: '#757575',
     fontSize: 14,
   },
-  unreadMessage: {
-    color: '#000',
-    fontWeight: '500',
-  },
   unreadBadge: {
-    backgroundColor: '#0088cc',
+    backgroundColor: '#e53935',
     borderRadius: 10,
-    width: 20,
+    minWidth: 20,
     height: 20,
     justifyContent: 'center',
     alignItems: 'center',
-    marginLeft: 10,
+    marginLeft: 8,
   },
   unreadText: {
-    color: 'white',
-    fontSize: 10,
+    color: '#fff',
+    fontSize: 12,
     fontWeight: 'bold',
   },
   header: {
-    alignItems: 'center',
     padding: 16,
-    backgroundColor: '#fff',
-    borderBottomWidth: 1,
-    borderColor: '#eee',
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    textAlign: 'center',
   },
   storiesContainer: {
     paddingVertical: 10,
-    backgroundColor: '#fff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
   },
   storiesList: {
-    paddingHorizontal: 10,
-    alignItems: 'center',
+    paddingHorizontal: 16,
   },
   storyItem: {
     alignItems: 'center',
-    marginRight: 18,
-    width: 60,
+    marginRight: 16,
   },
   storyAvatarNoImg: {
-    width: 54,
-    height: 54,
-    borderRadius: 27,
-    backgroundColor: '#e91e63', // pink background for story
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: '#e1f5fe',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 4,
+    marginBottom: 8,
   },
   storyAvatarLetter: {
-    color: '#fff',
     fontSize: 24,
     fontWeight: 'bold',
+    color: '#0088cc',
   },
   storyName: {
     fontSize: 12,
-    color: '#222',
     textAlign: 'center',
-    width: 60,
   },
 });
 

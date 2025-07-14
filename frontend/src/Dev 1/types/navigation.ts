@@ -53,4 +53,5 @@ export type MainStackParamList = {
   NewChannel: undefined;
   ChannelInfo: undefined;
   JoinRequests: undefined;
+  PowerSaving: undefined;
 };
