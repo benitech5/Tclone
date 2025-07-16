@@ -70,7 +70,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
         <Text style={[styles.sectionHeader, { color: theme.accent }]}>Help</Text>
         {[
           'Ask a Question',
-          'Convo FAQ',
+          'Orbixa FAQ',
           'Privacy Policy'
         ].map((item, index) => (
           <TouchableOpacity 

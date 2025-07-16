@@ -41,7 +41,7 @@ const InviteFriendsScreen = () => {
     <View style={[styles.container, { backgroundColor: theme.background }]}>
       <Text style={[styles.title, { color: theme.text }]}>Invite Friends</Text>
       <Text style={[styles.subtitle, { color: theme.subtext }]}>
-        Share Konvo with your friends and family
+        Share Orbixa with your friends and family
       </Text>
       
       <ScrollView style={styles.optionsContainer}>
@@ -64,7 +64,7 @@ const InviteFriendsScreen = () => {
       
       <View style={[styles.footer, { backgroundColor: theme.card, borderColor: theme.border }]}>
         <Text style={[styles.footerText, { color: theme.subtext }]}>
-          Your friends will receive an invitation to join Konvo
+          Your friends will receive an invitation to join Orbixa
         </Text>
       </View>
     </View>
@@ -92,8 +92,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     padding: 16,
-    marginBottom: 12,
-    borderRadius: 12,
+    marginBottom: 4,
+    borderRadius: 25,
     borderWidth: 1,
   },
   iconContainer: {
@@ -108,7 +108,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   optionTitle: {
-    fontSize: 16,
+    fontSize: 19,
     fontWeight: 'bold',
     marginBottom: 4,
   },
@@ -122,7 +122,7 @@ const styles = StyleSheet.create({
     marginTop: 16,
   },
   footerText: {
-    fontSize: 14,
+    fontSize: 15,
     textAlign: 'center',
   },
 });

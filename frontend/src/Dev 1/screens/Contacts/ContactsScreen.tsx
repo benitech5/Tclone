@@ -52,8 +52,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     padding: 16,
-    marginBottom: 8,
-    borderRadius: 12,
+    marginBottom: 2,
+    borderRadius: 25,
     borderWidth: 1,
   },
   avatar: {
@@ -66,19 +66,19 @@ const styles = StyleSheet.create({
     marginRight: 16,
   },
   avatarText: {
-    fontSize: 20,
+    fontSize: 25,
     fontWeight: 'bold',
   },
   contactInfo: {
     flex: 1,
   },
   contactName: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 4,
   },
   contactPhone: {
-    fontSize: 14,
+    fontSize: 15,
   },
 });
 

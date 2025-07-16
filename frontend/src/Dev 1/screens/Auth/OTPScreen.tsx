@@ -110,10 +110,10 @@ const styles = StyleSheet.create({
         borderColor: '#ccc',
         borderRadius: 15,
         textAlign: 'center',
-        fontSize: 20,
+        fontSize: 25,
         marginHorizontal: 5,
     },
-    error: { color: 'red', marginBottom: 10, textAlign: 'center' },
+    error: { color: 'red', marginBottom: 1, textAlign: 'center' },
     verifyButtonWrapper: {
         borderRadius: 35,
         overflow: 'hidden',
