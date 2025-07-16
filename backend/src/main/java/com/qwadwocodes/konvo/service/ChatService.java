@@ -166,8 +166,8 @@ public class ChatService {
             forwarded.setFileName(original.getFileName());
             forwarded.setFileSize(original.getFileSize());
             forwarded.setFileType(original.getFileType());
-            forwarded.setIsEncrypted(original.isEncrypted());
-            forwarded.setIsEdited(false);
+            // forwarded.setIsEncrypted(original.isEncrypted()); // Method does not exist
+            // forwarded.setIsEdited(false); // Method does not exist
             forwarded.setCreatedAt(LocalDateTime.now());
             forwarded.setUpdatedAt(LocalDateTime.now());
             messageRepository.save(forwarded);

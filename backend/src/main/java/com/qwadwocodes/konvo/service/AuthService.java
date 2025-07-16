@@ -21,7 +21,6 @@ public class AuthService {
 
     private final UserRepository userRepository;
     private final JwtUtil jwtUtil;
-    private final SmsService smsService;
 
     public void requestOtp(OtpRequest request) {
         String otp = generateOtp();
@@ -39,7 +38,6 @@ public class AuthService {
         userRepository.save(user);
 
         // Send OTP via SMS
-        smsService.sendOtp(request.getPhoneNumber(), otp);
     }
 
     public AuthResponse verifyOtp(VerifyOtpRequest request) {

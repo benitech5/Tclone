@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useRoute } from '@react-navigation/native';
 import {
     View,
@@ -9,16 +9,13 @@ import {
     Platform,
     TouchableOpacity,
     SafeAreaView,
-    Keyboard
+    Keyboard,
+    ActivityIndicator
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSettings } from '../../SettingsContext';
 import { useTheme } from '../../ThemeContext';
-
-const mockMessages = [
-    { id: '1', text: 'Hey there!', time: '12:30 PM', isMe: false },
-    { id: '2', text: 'Hi! How are you?', time: '12:32 PM', isMe: true },
-];
+import { getMessages, sendMessage } from '../../api/ChatService';
 
 export default function ChatDetailsScreen() {
     const [message, setMessage] = useState('');
@@ -27,58 +24,83 @@ export default function ChatDetailsScreen() {
     const { theme } = useTheme();
     // @ts-ignore
     const chatId = route.params?.chatId;
-    const [messages, setMessages] = useState(mockMessages);
+    const [messages, setMessages] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
     const flatListRef = useRef<FlatList>(null);
 
-    const handleSend = () => {
-        if (message.trim() === '') return;
-        const newMsg = {
-            id: Date.now().toString(),
-            text: message,
-            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-            isMe: true,
+    useEffect(() => {
+        const fetchMessages = async () => {
+            setLoading(true);
+            setError('');
+            try {
+                const res = await getMessages(chatId);
+                setMessages(res.data);
+            } catch (err: any) {
+                setError('Failed to load messages');
+            } finally {
+                setLoading(false);
+            }
         };
-        setMessages(prev => [...prev, newMsg]);
-        setMessage('');
-        setTimeout(() => {
-            flatListRef.current?.scrollToEnd({ animated: true });
-        }, 100);
+        if (chatId) fetchMessages();
+    }, [chatId]);
+
+    const handleSend = async () => {
+        if (message.trim() === '') return;
+        try {
+            await sendMessage({ groupId: chatId, content: message, type: 'TEXT' });
+            // Re-fetch messages after sending
+            const res = await getMessages(chatId);
+            setMessages(res.data);
+            setMessage('');
+            setTimeout(() => {
+                flatListRef.current?.scrollToEnd({ animated: true });
+            }, 100);
+        } catch (err) {
+            setError('Failed to send message');
+        }
     };
 
     const renderMessage = ({ item }: { item: any }) => (
         <View style={[
             styles.messageBubble, 
-            item.isMe ? styles.myMessage : styles.theirMessage,
+            item.isPinned ? styles.myMessage : styles.theirMessage,
             { borderRadius: chatSettings.messageCorner },
-            item.isMe ? { backgroundColor: theme.accent } : { backgroundColor: theme.card }
+            item.isPinned ? { backgroundColor: theme.accent } : { backgroundColor: theme.card }
         ]}>
             <Text style={[
-                item.isMe ? styles.myMessageText : styles.messageText,
+                item.isPinned ? styles.myMessageText : styles.messageText,
                 { fontSize: chatSettings.messageSize },
-                item.isMe ? { color: '#fff' } : { color: theme.text }
+                item.isPinned ? { color: '#fff' } : { color: theme.text }
             ]}>
-                {item.text}
+                {item.content}
             </Text>
-            <Text style={[styles.messageTime, { color: theme.subtext }]}>{item.time}</Text>
+            <Text style={[styles.messageTime, { color: theme.subtext }]}>{item.sentAt ? new Date(item.sentAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}</Text>
         </View>
     );
 
+    if (loading) {
+        return <View style={[styles.safeArea, { backgroundColor: theme.background, justifyContent: 'center', alignItems: 'center' }]}><ActivityIndicator size="large" color={theme.accent} /></View>;
+    }
+    if (error) {
+        return <View style={[styles.safeArea, { backgroundColor: theme.background, justifyContent: 'center', alignItems: 'center' }]}><Text style={{ color: theme.text }}>{error}</Text></View>;
+    }
+
     return (
-        <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.background }]}>
-            <View style={[styles.container, { backgroundColor: theme.background }]}>
-                {/* Show chatId for debugging */}
+        <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.background }]}>  
+            <View style={[styles.container, { backgroundColor: theme.background }]}>  
                 <Text style={{ textAlign: 'center', color: theme.subtext, marginTop: 10 }}>Chat ID: {chatId}</Text>
                 <FlatList
                     ref={flatListRef}
                     data={messages}
                     renderItem={renderMessage}
-                    keyExtractor={(item) => item.id}
+                    keyExtractor={(item) => item.id.toString()}
                     contentContainerStyle={styles.messagesContainer}
                     onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
                     showsVerticalScrollIndicator={false}
                     keyboardShouldPersistTaps="handled"
                 />
-                <View style={[styles.inputContainer, { backgroundColor: theme.card, borderTopColor: theme.border }]}>
+                <View style={[styles.inputContainer, { backgroundColor: theme.card, borderTopColor: theme.border }]}>  
                     <TextInput
                         style={[styles.input, { 
                             borderColor: theme.border, 
