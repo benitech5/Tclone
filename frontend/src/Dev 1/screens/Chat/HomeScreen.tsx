@@ -83,7 +83,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
         { backgroundColor: theme.card },
         item.unread > 0 && { backgroundColor: theme.mode === 'dark' ? '#2a2d3a' : '#e6f3ff' }
       ]}
-      onPress={() => navigation.navigate('ChatDetails', { chatId: item.id })}
+      onPress={() => navigation.navigate('ChatRoom', { chatId: item.id, chatName: item.name })}
     >
       <View style={styles.avatar}>
         <Text style={styles.avatarText}>

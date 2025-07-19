@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { View, Text, Pressable, StyleSheet, KeyboardAvoidingView, Platform, TextInput } from 'react-native';
 import { CountryPicker } from 'react-native-country-codes-picker';
+import { auth } from '../../api/firebase';
+import { signInWithPhoneNumber, RecaptchaVerifier } from 'firebase/auth';
 
 const PhoneLoginScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
     const [step, setStep] = useState(1);
@@ -13,6 +15,8 @@ const PhoneLoginScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
     const [isValid, setIsValid] = useState(false);
     const [showCountryPicker, setShowCountryPicker] = useState(false);
     const [countryFlag, setCountryFlag] = useState('');
+    const [sending, setSending] = useState(false);
+    const [sendError, setSendError] = useState('');
 
     // Step 1: Name input
     const handleNameChange = (text: string) => {
@@ -56,10 +60,26 @@ const PhoneLoginScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
         }
     };
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
         if (isValid) {
+            setSending(true);
+            setSendError('');
             const fullPhone = `+${callingCode}${phoneNumber}`;
-            navigation.navigate('Auth', { screen: 'Otp', params: { phoneNumber: fullPhone, name } });
+            try {
+                // For Expo web/Expo Go: use window.recaptchaVerifier
+                // @ts-ignore
+                if (!window.recaptchaVerifier) {
+                    // @ts-ignore
+                    window.recaptchaVerifier = new RecaptchaVerifier('recaptcha-container', { size: 'invisible' }, auth);
+                }
+                // @ts-ignore
+                const confirmationResult = await signInWithPhoneNumber(auth, fullPhone, window.recaptchaVerifier);
+                setSending(false);
+                navigation.navigate('Auth', { screen: 'Otp', params: { phoneNumber: fullPhone, name, confirmationResult } });
+            } catch (err: any) {
+                setSending(false);
+                setSendError(err.message || 'Failed to send OTP.');
+            }
         }
     };
 
@@ -122,13 +142,16 @@ const PhoneLoginScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                             }}
                             style={{ modal: { height: 400 } }}
                         />
+                        {sendError ? <Text style={styles.error}>{sendError}</Text> : null}
                         <Pressable
-                            style={[styles.button, !isValid && styles.disabledButton]}
+                            style={[styles.button, (!isValid || sending) && styles.disabledButton]}
                             onPress={handleSubmit}
-                            disabled={!isValid}
+                            disabled={!isValid || sending}
                         >
-                            <Text style={styles.buttonText}>Continue</Text>
+                            <Text style={styles.buttonText}>{sending ? 'Sending...' : 'Continue'}</Text>
                         </Pressable>
+                        {/* Recaptcha container for web/Expo Go */}
+                        <div id="recaptcha-container"></div>
                     </>
                 )}
             </View>

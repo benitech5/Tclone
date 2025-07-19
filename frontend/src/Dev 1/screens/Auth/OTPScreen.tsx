@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { View, Text, TextInput, StyleSheet, Button, Alert } from 'react-native';
+import { View, Text, TextInput, StyleSheet, Button, Alert, ActivityIndicator } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -14,10 +14,11 @@ type OtpScreenRouteProp = RouteProp<AuthStackParamList, 'Otp'>;
 const OtpScreen = () => {
     const [otp, setOtp] = useState<string[]>(['', '', '', '', '', '']);
     const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
     const inputRefs = useRef<Array<TextInput | null>>([]);
     const navigation = useNavigation<OtpScreenNavigationProp>();
     const route = useRoute<OtpScreenRouteProp>();
-    const { phoneNumber } = route.params;
+    const { phoneNumber, confirmationResult } = route.params;
     const dispatch = useAppDispatch();
 
     const handleChange = (text: string, index: number) => {
@@ -39,18 +40,26 @@ const OtpScreen = () => {
         inputRefs.current[index] = el;
     };
 
-    const handleVerify = () => {
+    const handleVerify = async () => {
         const otpValue = otp.join('');
         if (otpValue.length !== 6) {
             setError('Please enter the 6-digit OTP.');
             return;
         }
         setError('');
-        // @ts-ignore
-        navigation.getParent()?.reset({
-            index: 0,
-            routes: [{ name: 'Main', params: { screen: 'Home' } }],
-        });
+        setLoading(true);
+        try {
+            await confirmationResult.confirm(otpValue);
+            setLoading(false);
+            // @ts-ignore
+            navigation.getParent()?.reset({
+                index: 0,
+                routes: [{ name: 'Main', params: { screen: 'Home' } }],
+            });
+        } catch (err: any) {
+            setLoading(false);
+            setError(err.message || 'Invalid OTP. Please try again.');
+        }
     };
 
     return (
@@ -76,7 +85,8 @@ const OtpScreen = () => {
                 ))}
             </View>
             {error ? <Text style={styles.error}>{error}</Text> : null}
-            <Button title="Verify OTP" onPress={handleVerify} />
+            {loading ? <ActivityIndicator size="large" color="#007AFF" style={{ marginBottom: 10 }} /> : null}
+            <Button title="Verify OTP" onPress={handleVerify} disabled={loading} />
             <Button title="Back to Login" onPress={() => navigation.goBack()} color="#999" />
         </View>
     );

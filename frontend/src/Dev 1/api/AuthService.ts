@@ -12,3 +12,7 @@ export const verifyOtp = async (phoneNumber: string, otp: string) => {
     const response = await axios.post(`${API_URL}/verify-otp`, { phoneNumber, otp });
     return response.data; // This should contain the token
 };
+
+export const registerUser = async (email: string, phone: string, password: string) => {
+    return axios.post(`${API_URL}/register`, { email, phone, password });
+};

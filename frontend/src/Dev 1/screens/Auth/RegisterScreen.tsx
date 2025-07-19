@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AuthStackParamList } from '../../types/navigation';
+import { registerUser } from '../../api/AuthService';
 
 type RegisterScreenNavigationProp = NativeStackNavigationProp<
   AuthStackParamList,
@@ -22,16 +23,15 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
   const handleRegister = async () => {
     setLoading(true);
     try {
-      // TODO: Replace with actual authentication logic
-      console.log('Registering with:', { email, phone, password });
-      
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
+      await registerUser(email, phone, password);
       Alert.alert('Success', 'Account created successfully!');
       navigation.navigate('Login');
-    } catch (error) {
-      Alert.alert('Error', 'Registration failed. Please try again.');
+    } catch (error: any) {
+      let message = 'Registration failed. Please try again.';
+      if (error.response && error.response.data && error.response.data.message) {
+        message = error.response.data.message;
+      }
+      Alert.alert('Error', message);
     } finally {
       setLoading(false);
     }

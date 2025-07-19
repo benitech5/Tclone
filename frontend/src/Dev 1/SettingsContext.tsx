@@ -6,10 +6,23 @@ interface ChatSettings {
   messageCorner: number;
 }
 
+interface DataAndStorageSettings {
+  autoDownloadMobileData: boolean;
+  autoDownloadWifi: boolean;
+  autoDownloadRoaming: boolean;
+  saveToGalleryPrivate: boolean;
+  saveToGalleryGroups: boolean;
+  saveToGalleryChannels: boolean;
+  streaming: boolean;
+}
+
 interface SettingsContextType {
   chatSettings: ChatSettings;
   updateMessageSize: (size: number) => void;
   updateMessageCorner: (corner: number) => void;
+  dataAndStorageSettings: DataAndStorageSettings;
+  updateDataAndStorageSetting: (key: keyof DataAndStorageSettings, value: boolean) => void;
+  resetDataAndStorageSettings: () => void;
   isLoading: boolean;
 }
 
@@ -18,15 +31,29 @@ const defaultSettings: ChatSettings = {
   messageCorner: 17,
 };
 
+const defaultDataAndStorageSettings: DataAndStorageSettings = {
+  autoDownloadMobileData: false,
+  autoDownloadWifi: false,
+  autoDownloadRoaming: false,
+  saveToGalleryPrivate: false,
+  saveToGalleryGroups: false,
+  saveToGalleryChannels: false,
+  streaming: true,
+};
+
 const SettingsContext = createContext<SettingsContextType>({
   chatSettings: defaultSettings,
   updateMessageSize: () => {},
   updateMessageCorner: () => {},
+  dataAndStorageSettings: defaultDataAndStorageSettings,
+  updateDataAndStorageSetting: () => {},
+  resetDataAndStorageSettings: () => {},
   isLoading: true,
 });
 
 export const SettingsProvider = ({ children }: { children: ReactNode }) => {
   const [chatSettings, setChatSettings] = useState<ChatSettings>(defaultSettings);
+  const [dataAndStorageSettings, setDataAndStorageSettings] = useState<DataAndStorageSettings>(defaultDataAndStorageSettings);
   const [isLoading, setIsLoading] = useState(true);
 
   // Load settings from AsyncStorage on app start
@@ -36,13 +63,18 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
 
   const loadSettings = async () => {
     try {
-      const savedSettings = await AsyncStorage.getItem('chatSettings');
-      if (savedSettings) {
-        const parsedSettings = JSON.parse(savedSettings);
+      const savedChatSettings = await AsyncStorage.getItem('chatSettings');
+      if (savedChatSettings) {
+        const parsedSettings = JSON.parse(savedChatSettings);
         setChatSettings(parsedSettings);
       }
+      const savedDataAndStorageSettings = await AsyncStorage.getItem('dataAndStorageSettings');
+      if (savedDataAndStorageSettings) {
+        const parsedDataSettings = JSON.parse(savedDataAndStorageSettings);
+        setDataAndStorageSettings(parsedDataSettings);
+      }
     } catch (error) {
-      console.error('Error loading chat settings:', error);
+      console.error('Error loading settings:', error);
     } finally {
       setIsLoading(false);
     }
@@ -53,6 +85,14 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
       await AsyncStorage.setItem('chatSettings', JSON.stringify(newSettings));
     } catch (error) {
       console.error('Error saving chat settings:', error);
+    }
+  };
+
+  const saveDataAndStorageSettings = async (newSettings: DataAndStorageSettings) => {
+    try {
+      await AsyncStorage.setItem('dataAndStorageSettings', JSON.stringify(newSettings));
+    } catch (error) {
+      console.error('Error saving data and storage settings:', error);
     }
   };
 
@@ -68,12 +108,46 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
     saveSettings(newSettings);
   };
 
+  const updateDataAndStorageSetting = (key: keyof DataAndStorageSettings, value: boolean) => {
+    const newSettings = { ...dataAndStorageSettings, [key]: value };
+    setDataAndStorageSettings(newSettings);
+    saveDataAndStorageSettings(newSettings);
+    // Example: What should happen when toggles are true/false
+    switch (key) {
+      case 'saveToGalleryPrivate':
+      case 'saveToGalleryGroups':
+      case 'saveToGalleryChannels':
+        // If true: Media is saved to gallery. If false: Media is not saved.
+        // Implement actual media handling logic elsewhere in the app.
+        break;
+      case 'autoDownloadMobileData':
+      case 'autoDownloadWifi':
+      case 'autoDownloadRoaming':
+        // If true: Media auto-downloads under that condition. If false: User must manually download.
+        break;
+      case 'streaming':
+        // If true: Stream videos/audio directly. If false: Require full download before playback.
+        break;
+      default:
+        break;
+    }
+  };
+
+  const resetDataAndStorageSettings = () => {
+    setDataAndStorageSettings(defaultDataAndStorageSettings);
+    saveDataAndStorageSettings(defaultDataAndStorageSettings);
+    // Reset logic: All toggles to default values
+  };
+
   return (
     <SettingsContext.Provider
       value={{
         chatSettings,
         updateMessageSize,
         updateMessageCorner,
+        dataAndStorageSettings,
+        updateDataAndStorageSetting,
+        resetDataAndStorageSettings,
         isLoading,
       }}
     >

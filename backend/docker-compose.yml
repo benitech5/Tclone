@@ -1,0 +1,72 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15
+    container_name: orbixa-postgres
+    environment:
+      POSTGRES_DB: orbixa
+      POSTGRES_USER: orbixa_user
+      POSTGRES_PASSWORD: orbixa_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - orbixa-network
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: orbixa-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - orbixa-network
+
+  # Orbixa Backend Application
+  orbixa-backend:
+    build: .
+    container_name: orbixa-backend
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/orbixa
+      SPRING_DATASOURCE_USERNAME: orbixa_user
+      SPRING_DATASOURCE_PASSWORD: orbixa_password
+      SPRING_REDIS_HOST: redis
+      SPRING_REDIS_PORT: 6379
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - orbixa-network
+    volumes:
+      - ./uploads:/app/uploads
+
+  # Nginx Reverse Proxy (Optional)
+  nginx:
+    image: nginx:alpine
+    container_name: orbixa-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./ssl:/etc/nginx/ssl
+    depends_on:
+      - orbixa-backend
+    networks:
+      - orbixa-network
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  orbixa-network:
+    driver: bridge 

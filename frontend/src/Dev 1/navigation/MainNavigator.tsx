@@ -5,10 +5,20 @@ import { MainStackParamList, AuthStackParamList } from '../types/navigation';
 import HomeScreen from '../screens/Chat/HomeScreen';
 import ChatSettingsScreen from '../screens/Settings/ChatSettingsScreen';
 import ChatDetailsScreen from '../screens/Chat/ChatDetailsScreen';
+import ChatRoomScreen from '../screens/Chat/ChatRoomScreen';
 import SettingsScreen from '../screens/Settings/SettingsScreen';
 import NotificationsAndSoundsScreen from '../screens/Settings/NotificationsAndSoundsScreen';
 import ContactsScreen from '../screens/Contacts/ContactsScreen';
 import CallsScreen from '../screens/Contacts/CallsScreen';
+import CallScreen from '../screens/Calls/CallScreen';
+import RecentCallsScreen from '../screens/Contacts/RecentCallsScreen';
+import GroupChatScreen from '../screens/Chat/GroupChatScreen';
+import MediaGalleryScreen from '../screens/Chat/MediaGalleryScreen';
+import SearchScreen from '../screens/Search/SearchScreen';
+import VoiceMessageScreen from '../screens/Chat/VoiceMessageScreen';
+import NewGroupScreen from '../screens/Other/NewGroupScreen';
+import GroupInfoScreen from '../screens/Other/GroupInfoScreen';
+import InviteFriendsScreen from '../screens/Contacts/InviteFriendsScreen';
 import ProfileScreen from '../screens/Profile/ProfileScreen';
 import AccountScreen from '../screens/Profile/AccountScreen';
 import PrivacyAndSecurityScreen from '../screens/Settings/PrivacyAndSecurityScreen';
@@ -24,18 +34,14 @@ import DevicesScreen from '../screens/Settings/DevicesScreen';
 import LanguageScreen from '../screens/Settings/LanguageScreen';
 import ThemeScreen from '../screens/Settings/ThemeScreen';
 import ChatFoldersScreen from '../screens/Settings/ChatFoldersScreen';
-import InviteFriendsScreen from '../screens/Contacts/InviteFriendsScreen';
 import AddContactScreen from '../screens/Contacts/AddContactScreen';
 import ContactProfileScreen from '../screens/Contacts/ContactProfileScreen';
-import RecentCallsScreen from '../screens/Contacts/RecentCallsScreen';
 import CallInfoScreen from '../screens/Contacts/CallInfoScreen';
 import GlobalSearchScreen from '../screens/Search/GlobalSearchScreen';
 import InChatSearchScreen from '../screens/Search/InChatSearchScreen';
 import EditProfileScreen from '../screens/Profile/EditProfileScreen';
 import BlockedUsersScreen from '../screens/Profile/BlockedUsersScreen';
 import ChatFolderViewScreen from '../screens/Other/ChatFolderViewScreen';
-import NewGroupScreen from '../screens/Other/NewGroupScreen';
-import GroupInfoScreen from '../screens/Other/GroupInfoScreen';
 import InviteToGroupScreen from '../screens/Other/InviteToGroupScreen';
 import NewChannelScreen from '../screens/Other/NewChannelScreen';
 import ChannelInfoScreen from '../screens/Other/ChannelInfoScreen';
@@ -53,6 +59,7 @@ export const MainNavigator = () => (
     }}
   >
     <Stack.Screen name="Home" component={TabNavigator} />
+    <Stack.Screen name="ChatRoom" component={ChatRoomScreen} />
     <Stack.Screen name="ChatDetails" component={ChatDetailsScreen} options={{ headerShown: true, title: '' }} />
     <Stack.Screen name="Settings" component={SettingsScreen} />
     <Stack.Screen
@@ -68,6 +75,12 @@ export const MainNavigator = () => (
     <Stack.Screen name="Account" component={AccountScreen} />
     <Stack.Screen name="Contacts" component={ContactsScreen} />
     <Stack.Screen name="Calls" component={CallsScreen} />
+    <Stack.Screen name="CallScreen" component={CallScreen} />
+    <Stack.Screen name="CallHistory" component={RecentCallsScreen} />
+    <Stack.Screen name="GroupChat" component={GroupChatScreen} />
+    <Stack.Screen name="MediaGallery" component={MediaGalleryScreen} />
+    <Stack.Screen name="Search" component={SearchScreen} />
+    <Stack.Screen name="VoiceMessage" component={VoiceMessageScreen} />
     <Stack.Screen name="ForwardMessage" component={ForwardMessageScreen} />
     <Stack.Screen name="SavedMessages" component={SavedMessagesScreen} />
     <Stack.Screen name="PinnedMessages" component={PinnedMessagesScreen} />

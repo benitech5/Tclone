@@ -1,0 +1,76 @@
+spring:
+  datasource:
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/orbixa}
+    username: ${DATABASE_USERNAME:orbixa_user}
+    password: ${DATABASE_PASSWORD:orbixa_password}
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+      connection-timeout: 30000
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        jdbc:
+          batch_size: 20
+  redis:
+    host: ${REDIS_HOST:localhost}
+    port: ${REDIS_PORT:6379}
+    password: ${REDIS_PASSWORD:}
+    database: 0
+    timeout: 2000ms
+    lettuce:
+      pool:
+        max-active: 8
+        max-idle: 8
+        min-idle: 0
+  security:
+    jwt:
+      secret: ${JWT_SECRET:your-production-jwt-secret-key-here}
+      expiration: ${JWT_EXPIRATION:86400000}
+
+server:
+  port: ${PORT:8080}
+  compression:
+    enabled: true
+    mime-types: text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json
+  error:
+    include-message: never
+    include-binding-errors: never
+
+logging:
+  level:
+    com.qwadwocodes.orbixa: INFO
+    org.springframework.security: WARN
+    org.springframework.web: WARN
+    org.hibernate.SQL: WARN
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+  file:
+    name: logs/orbixa.log
+    max-size: 100MB
+    max-history: 30
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: when-authorized
+
+# File upload configuration
+file:
+  upload:
+    path: /app/uploads
+    max-size: 10MB
+    allowed-types: image/*,video/*,audio/*,application/pdf
+
+# WebSocket configuration
+websocket:
+  allowed-origins: ${ALLOWED_ORIGINS:https://orbixa.com,https://www.orbixa.com} 

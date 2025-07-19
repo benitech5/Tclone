@@ -13,6 +13,7 @@ export type AuthStackParamList = {
   PhoneLogin: undefined;
   Register: undefined;
   Otp: { phoneNumber: string };
+  ProfileSetup: { phoneNumber: string };
 };
 
 export type MainStackParamList = {
@@ -24,7 +25,15 @@ export type MainStackParamList = {
   Notifications: undefined;
   Profile: undefined;
   Account: undefined;
+  ChatRoom: { chatId: string; chatName: string };
   ChatDetails: { chatId: string };
+  CallScreen: { callId: string; callerName: string; callType: 'audio' | 'video'; isIncoming: boolean };
+  CallHistory: undefined;
+  GroupChat: { groupId: string; groupName: string };
+  MediaGallery: { chatId: string; chatName: string };
+  Search: undefined;
+  VoiceMessage: { chatId: string; chatName: string };
+  InviteToGroup: { groupId: string };
   ForwardMessage: undefined;
   SavedMessages: undefined;
   PinnedMessages: undefined;
@@ -37,9 +46,9 @@ export type MainStackParamList = {
   Language: undefined;
   Theme: undefined;
   ChatFolders: undefined;
-  InviteFriends: undefined;
+  InviteFriends: { groupId?: string; groupName?: string };
   AddContact: undefined;
-  ContactProfile: undefined;
+  ContactProfile: { contactId: string };
   RecentCalls: undefined;
   CallInfo: undefined;
   GlobalSearch: undefined;
@@ -48,8 +57,7 @@ export type MainStackParamList = {
   BlockedUsers: undefined;
   ChatFolderView: undefined;
   NewGroup: undefined;
-  GroupInfo: undefined;
-  InviteToGroup: undefined;
+  GroupInfo: { groupId: string };
   NewChannel: undefined;
   ChannelInfo: undefined;
   JoinRequests: undefined;

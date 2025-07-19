@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orbixa WebSocket Test</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.1/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .container {
+            display: flex;
+            gap: 20px;
+        }
+        .panel {
+            flex: 1;
+            border: 1px solid #ccc;
+            padding: 15px;
+            border-radius: 5px;
+        }
+        .log {
+            height: 300px;
+            overflow-y: auto;
+            background-color: #f5f5f5;
+            padding: 10px;
+            border-radius: 3px;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        input, button {
+            margin: 5px 0;
+            padding: 5px;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 3px;
+        }
+        .connected {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .disconnected {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+    <h1>Orbixa WebSocket Test Client</h1>
+    
+    <div class="container">
+        <div class="panel">
+            <h3>Connection</h3>
+            <div id="status" class="status disconnected">Disconnected</div>
+            
+            <label for="token">JWT Token:</label>
+            <input type="text" id="token" placeholder="Enter your JWT token" style="width: 100%;">
+            
+            <label for="userId">User ID:</label>
+            <input type="number" id="userId" placeholder="Enter your user ID">
+            
+            <button onclick="connect()">Connect</button>
+            <button onclick="disconnect()">Disconnect</button>
+            
+            <h3>Subscribe to Topics</h3>
+            <button onclick="subscribeToChat()">Subscribe to Chat</button>
+            <button onclick="subscribeToPresence()">Subscribe to Presence</button>
+            <button onclick="subscribeToNotifications()">Subscribe to Notifications</button>
+            
+            <h3>Send Messages</h3>
+            <label for="chatId">Chat ID:</label>
+            <input type="number" id="chatId" placeholder="Enter chat ID">
+            
+            <label for="messageContent">Message:</label>
+            <input type="text" id="messageContent" placeholder="Enter message content">
+            
+            <button onclick="sendMessage()">Send Message</button>
+            <button onclick="sendTypingIndicator()">Send Typing Indicator</button>
+        </div>
+        
+        <div class="panel">
+            <h3>Received Messages</h3>
+            <div id="log" class="log"></div>
+            <button onclick="clearLog()">Clear Log</button>
+        </div>
+    </div>
+
+    <script>
+        let stompClient = null;
+        let userId = null;
+
+        function connect() {
+            const token = document.getElementById('token').value;
+            const userIdInput = document.getElementById('userId').value;
+            
+            if (!token || !userIdInput) {
+                alert('Please enter both token and user ID');
+                return;
+            }
+            
+            userId = parseInt(userIdInput);
+            
+            // Create SockJS connection
+            const socket = new SockJS('/ws');
+            stompClient = Stomp.over(socket);
+            
+            // Add headers for authentication
+            const headers = {
+                'Authorization': 'Bearer ' + token,
+                'X-Auth-Token': token
+            };
+            
+            stompClient.connect(headers, function(frame) {
+                log('Connected: ' + frame);
+                updateStatus(true);
+                
+                // Subscribe to user-specific queues
+                subscribeToUserQueues();
+                
+            }, function(error) {
+                log('Connection error: ' + error);
+                updateStatus(false);
+            });
+        }
+
+        function disconnect() {
+            if (stompClient !== null) {
+                stompClient.disconnect();
+                log('Disconnected');
+                updateStatus(false);
+            }
+        }
+
+        function subscribeToUserQueues() {
+            if (!stompClient || !userId) return;
+            
+            // Subscribe to user-specific message queue
+            stompClient.subscribe('/user/' + userId + '/queue/messages', function(message) {
+                log('Received message: ' + message.body);
+            });
+            
+            // Subscribe to user-specific notification queue
+            stompClient.subscribe('/user/' + userId + '/queue/notifications', function(message) {
+                log('Received notification: ' + message.body);
+            });
+            
+            // Subscribe to user-specific presence queue
+            stompClient.subscribe('/user/' + userId + '/queue/presence', function(message) {
+                log('Received presence update: ' + message.body);
+            });
+            
+            // Subscribe to user-specific call queue
+            stompClient.subscribe('/user/' + userId + '/queue/calls', function(message) {
+                log('Received call signal: ' + message.body);
+            });
+        }
+
+        function subscribeToChat() {
+            const chatId = document.getElementById('chatId').value;
+            if (!chatId || !stompClient) {
+                alert('Please enter chat ID and ensure connection is established');
+                return;
+            }
+            
+            stompClient.subscribe('/topic/chat/' + chatId, function(message) {
+                log('Chat message: ' + message.body);
+            });
+            
+            stompClient.subscribe('/topic/chat/' + chatId + '/typing', function(message) {
+                log('Typing indicator: ' + message.body);
+            });
+            
+            log('Subscribed to chat ' + chatId);
+        }
+
+        function subscribeToPresence() {
+            if (!stompClient) {
+                alert('Please connect first');
+                return;
+            }
+            
+            stompClient.subscribe('/topic/presence', function(message) {
+                log('Presence update: ' + message.body);
+            });
+            
+            log('Subscribed to presence updates');
+        }
+
+        function subscribeToNotifications() {
+            if (!stompClient) {
+                alert('Please connect first');
+                return;
+            }
+            
+            stompClient.subscribe('/topic/notifications', function(message) {
+                log('Broadcast notification: ' + message.body);
+            });
+            
+            log('Subscribed to broadcast notifications');
+        }
+
+        function sendMessage() {
+            const chatId = document.getElementById('chatId').value;
+            const content = document.getElementById('messageContent').value;
+            
+            if (!chatId || !content || !stompClient) {
+                alert('Please enter chat ID, message content and ensure connection is established');
+                return;
+            }
+            
+            const message = {
+                chatId: parseInt(chatId),
+                content: content,
+                messageType: 'TEXT',
+                timestamp: new Date().toISOString()
+            };
+            
+            stompClient.send('/app/chat.send', {}, JSON.stringify(message));
+            log('Sent message: ' + JSON.stringify(message));
+        }
+
+        function sendTypingIndicator() {
+            const chatId = document.getElementById('chatId').value;
+            
+            if (!chatId || !stompClient) {
+                alert('Please enter chat ID and ensure connection is established');
+                return;
+            }
+            
+            const typingIndicator = {
+                chatId: parseInt(chatId),
+                isTyping: true
+            };
+            
+            stompClient.send('/app/chat.typing', {}, JSON.stringify(typingIndicator));
+            log('Sent typing indicator: ' + JSON.stringify(typingIndicator));
+        }
+
+        function updateStatus(connected) {
+            const statusDiv = document.getElementById('status');
+            if (connected) {
+                statusDiv.textContent = 'Connected';
+                statusDiv.className = 'status connected';
+            } else {
+                statusDiv.textContent = 'Disconnected';
+                statusDiv.className = 'status disconnected';
+            }
+        }
+
+        function log(message) {
+            const logDiv = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            logDiv.innerHTML += '[' + timestamp + '] ' + message + '<br>';
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        function clearLog() {
+            document.getElementById('log').innerHTML = '';
+        }
+
+        // Auto-connect on page load (for testing)
+        // Uncomment the line below to auto-connect
+        // window.onload = function() { connect(); };
+    </script>
+</body>
+</html> 
