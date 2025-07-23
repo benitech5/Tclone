@@ -12,6 +12,8 @@ import org.springframework.stereotype.Service;
 import java.time.Duration;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.Set;
+import java.util.HashSet;
 
 @Service
 @RequiredArgsConstructor
@@ -25,7 +27,7 @@ public class WebSocketServiceImpl implements WebSocketService {
 
     // In-memory session mapping (for faster lookups)
     private final Map<String, Long> sessionToUser = new ConcurrentHashMap<>();
-    private final Map<Long, String> userToSession = new ConcurrentHashMap<>();
+    private final Map<Long, Set<String>> userToSessions = new ConcurrentHashMap<>();
 
     private static final String USER_SESSION_KEY = "websocket:user_session:";
     private static final String SESSION_USER_KEY = "websocket:session_user:";
@@ -36,9 +38,9 @@ public class WebSocketServiceImpl implements WebSocketService {
         try {
             // Store in memory for fast access
             sessionToUser.put(sessionId, userId);
-            userToSession.put(userId, sessionId);
+            userToSessions.computeIfAbsent(userId, k -> new HashSet<>()).add(sessionId);
             
-            // Store in mock Redis for persistence
+            // Store in mock Redis for persistence (optional: update to support sets)
             mockRedisService.set(USER_SESSION_KEY + userId, sessionId, Duration.ofHours(24));
             mockRedisService.set(SESSION_USER_KEY + sessionId, userId.toString(), Duration.ofHours(24));
             mockRedisService.addToSet(ONLINE_USERS_KEY, userId.toString());
@@ -62,7 +64,13 @@ public class WebSocketServiceImpl implements WebSocketService {
         try {
             // Remove from memory
             sessionToUser.remove(sessionId);
-            userToSession.remove(userId);
+            Set<String> sessions = userToSessions.get(userId);
+            if (sessions != null) {
+                sessions.remove(sessionId);
+                if (sessions.isEmpty()) {
+                    userToSessions.remove(userId);
+                }
+            }
             
             // Remove from mock Redis
             mockRedisService.delete(USER_SESSION_KEY + userId);
@@ -84,15 +92,14 @@ public class WebSocketServiceImpl implements WebSocketService {
     }
 
     @Override
-    public String getUserSessionId(Long userId) {
+    public Set<String> getUserSessionIds(Long userId) {
         // Check memory first
-        String sessionId = userToSession.get(userId);
-        if (sessionId != null) {
-            return sessionId;
+        Set<String> sessions = userToSessions.get(userId);
+        if (sessions != null && !sessions.isEmpty()) {
+            return sessions;
         }
-        
-        // Fallback to mock Redis
-        return mockRedisService.get(USER_SESSION_KEY + userId);
+        // Fallback to mock Redis (not implemented for sets)
+        return new HashSet<>();
     }
 
     @Override
@@ -124,9 +131,11 @@ public class WebSocketServiceImpl implements WebSocketService {
     public void sendMessageToUser(Long userId, ChatMessage message) {
         try {
             WebSocketMessage<ChatMessage> wsMessage = new WebSocketMessage<>("CHAT_MESSAGE", message);
-            String destination = "/user/" + userId + "/queue/messages";
-            messagingTemplate.convertAndSendToUser(userId.toString(), "/queue/messages", wsMessage);
-            log.debug("Sent message to user {}: {}", userId, message.getMessageId());
+            Set<String> sessions = getUserSessionIds(userId);
+            for (String sessionId : sessions) {
+                messagingTemplate.convertAndSendToUser(sessionId, "/queue/messages", wsMessage);
+            }
+            log.debug("Sent message to all sessions of user {}: {}", userId, message.getMessageId());
         } catch (Exception e) {
             log.error("Error sending message to user {}: {}", userId, e.getMessage(), e);
         }
@@ -165,8 +174,11 @@ public class WebSocketServiceImpl implements WebSocketService {
     public void sendPresenceUpdateToUser(Long userId, PresenceMessage presenceMessage) {
         try {
             WebSocketMessage<PresenceMessage> wsMessage = new WebSocketMessage<>("PRESENCE_UPDATE", presenceMessage);
-            messagingTemplate.convertAndSendToUser(userId.toString(), "/queue/presence", wsMessage);
-            log.debug("Sent presence update to user: {}", userId);
+            Set<String> sessions = getUserSessionIds(userId);
+            for (String sessionId : sessions) {
+                messagingTemplate.convertAndSendToUser(sessionId, "/queue/presence", wsMessage);
+            }
+            log.debug("Sent presence update to all sessions of user: {}", userId);
         } catch (Exception e) {
             log.error("Error sending presence update to user {}: {}", userId, e.getMessage(), e);
         }
@@ -176,8 +188,11 @@ public class WebSocketServiceImpl implements WebSocketService {
     public void sendCallSignal(Long userId, CallMessage callMessage) {
         try {
             WebSocketMessage<CallMessage> wsMessage = new WebSocketMessage<>("CALL_SIGNAL", callMessage);
-            messagingTemplate.convertAndSendToUser(userId.toString(), "/queue/calls", wsMessage);
-            log.debug("Sent call signal to user: {}", userId);
+            Set<String> sessions = getUserSessionIds(userId);
+            for (String sessionId : sessions) {
+                messagingTemplate.convertAndSendToUser(sessionId, "/queue/calls", wsMessage);
+            }
+            log.debug("Sent call signal to all sessions of user: {}", userId);
         } catch (Exception e) {
             log.error("Error sending call signal to user {}: {}", userId, e.getMessage(), e);
         }
@@ -199,8 +214,11 @@ public class WebSocketServiceImpl implements WebSocketService {
     public void sendNotification(Long userId, NotificationMessage notification) {
         try {
             WebSocketMessage<NotificationMessage> wsMessage = new WebSocketMessage<>("NOTIFICATION", notification);
-            messagingTemplate.convertAndSendToUser(userId.toString(), "/queue/notifications", wsMessage);
-            log.debug("Sent notification to user: {}", userId);
+            Set<String> sessions = getUserSessionIds(userId);
+            for (String sessionId : sessions) {
+                messagingTemplate.convertAndSendToUser(sessionId, "/queue/notifications", wsMessage);
+            }
+            log.debug("Sent notification to all sessions of user: {}", userId);
         } catch (Exception e) {
             log.error("Error sending notification to user {}: {}", userId, e.getMessage(), e);
         }
@@ -220,8 +238,11 @@ public class WebSocketServiceImpl implements WebSocketService {
     @Override
     public void sendToUser(Long userId, WebSocketMessage<?> message) {
         try {
-            messagingTemplate.convertAndSendToUser(userId.toString(), "/queue/messages", message);
-            log.debug("Sent message to user: {}", userId);
+            Set<String> sessions = getUserSessionIds(userId);
+            for (String sessionId : sessions) {
+                messagingTemplate.convertAndSendToUser(sessionId, "/queue/messages", message);
+            }
+            log.debug("Sent message to all sessions of user: {}", userId);
         } catch (Exception e) {
             log.error("Error sending message to user {}: {}", userId, e.getMessage(), e);
         }
@@ -250,7 +271,7 @@ public class WebSocketServiceImpl implements WebSocketService {
 
     @Override
     public boolean isUserOnline(Long userId) {
-        return userToSession.containsKey(userId) || 
+        return userToSessions.containsKey(userId) || 
                mockRedisService.isMember(ONLINE_USERS_KEY, userId.toString());
     }
 

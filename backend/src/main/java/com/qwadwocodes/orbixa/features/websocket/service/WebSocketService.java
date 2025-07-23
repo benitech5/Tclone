@@ -2,12 +2,14 @@ package com.qwadwocodes.orbixa.features.websocket.service;
 
 import com.qwadwocodes.orbixa.features.websocket.dto.*;
 
+import java.util.Set;
+
 public interface WebSocketService {
-    
+
     // User session management
     void userConnected(String sessionId, Long userId);
     void userDisconnected(String sessionId, Long userId);
-    String getUserSessionId(Long userId);
+    Set<String> getUserSessionIds(Long userId);
     Long getUserIdFromSession(String sessionId);
     
     // Chat messaging

@@ -16,6 +16,8 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { MainStackParamList, RootStackParamList } from '../../types/navigation';
 import { useTheme } from '../../ThemeContext';
 import Icon from 'react-native-vector-icons/Ionicons';
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 type MediaGalleryNavigationProp = CompositeNavigationProp<
   NativeStackNavigationProp<MainStackParamList, 'MediaGallery'>,
@@ -206,6 +208,26 @@ const MediaGalleryScreen: React.FC<MediaGalleryScreenProps> = ({ navigation, rou
     } catch (error) {
       Alert.alert('Error', 'Failed to share file');
     }
+  };
+
+  const uploadMedia = async (file) => {
+    try {
+      const token = await AsyncStorage.getItem('token');
+      const formData = new FormData();
+      formData.append('file', file);
+      await axios.post('http://192.168.96.216:8082/api/media/upload', formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      // Refresh media list after upload
+      fetchMedia();
+    } catch (e) {}
+  };
+
+  const fetchMedia = async () => {
+    // Implement logic to fetch media for the chat, e.g., GET /api/media/{mediaId}
   };
 
   const renderGridItem = ({ item }: { item: MediaItem }) => (

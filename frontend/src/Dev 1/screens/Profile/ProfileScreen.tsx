@@ -4,6 +4,7 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { MainStackParamList } from '../../types/navigation';
 import { Ionicons } from '@expo/vector-icons';
+import SettingsHeader from '../Settings/SettingsHeader';
 
 type ProfileScreenNavigationProp = NativeStackNavigationProp<
   MainStackParamList,
@@ -13,6 +14,7 @@ type ProfileScreenNavigationProp = NativeStackNavigationProp<
 const ProfileScreen = ({ navigation }: { navigation: ProfileScreenNavigationProp }) => {
   return (
     <View style={styles.container}>
+      <SettingsHeader title="Profile" onBack={() => navigation.goBack()} />
       <TouchableOpacity 
         style={styles.profileHeader}
         onPress={() => navigation.navigate('Account')}

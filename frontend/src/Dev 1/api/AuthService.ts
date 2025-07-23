@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Replace 'YOUR_COMPUThER_IP' with your actual computer's IP address
 // You can find this by running 'ipconfig' in Windows Command Prompt
-const API_URL = 'http://192.168.123.32:8080/api/auth';
+const API_URL = 'http://localhost:8082/api/auth';
 
 export const requestOtp = async (phoneNumber: string, name: string) => {
     return axios.post(`${API_URL}/request-otp`, { phoneNumber, name });

@@ -111,4 +111,21 @@ public class UserController {
         profileService.deleteUserProfile(userId);
         return ResponseEntity.ok().build();
     }
+
+    @PostMapping("/me/link-account")
+    public ResponseEntity<Void> linkAccount(@AuthenticationPrincipal UserDetails userDetails, @RequestParam Long otherUserId) {
+        // Implement logic to link the current user to another account (otherUserId)
+        // This could involve adding a record to a LinkedAccounts table or a field in the User entity
+        // For now, just log and return OK
+        System.out.println("Linking account: " + userDetails.getUsername() + " to userId: " + otherUserId);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/me/unlink-account")
+    public ResponseEntity<Void> unlinkAccount(@AuthenticationPrincipal UserDetails userDetails, @RequestParam Long otherUserId) {
+        // Implement logic to unlink the current user from another account (otherUserId)
+        // For now, just log and return OK
+        System.out.println("Unlinking account: " + userDetails.getUsername() + " from userId: " + otherUserId);
+        return ResponseEntity.ok().build();
+    }
 } 

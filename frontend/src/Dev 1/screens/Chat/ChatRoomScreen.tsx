@@ -10,6 +10,7 @@ import {
   Platform,
   Alert,
   ActivityIndicator,
+  ActionSheetIOS,
 } from 'react-native';
 import { CompositeNavigationProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -17,6 +18,9 @@ import { MainStackParamList, RootStackParamList } from '../../types/navigation';
 import { useTheme } from '../../ThemeContext';
 import { useAppSelector } from '../../store/store';
 import Icon from 'react-native-vector-icons/Ionicons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
+import { useSettings } from '../../SettingsContext';
 
 type ChatRoomNavigationProp = CompositeNavigationProp<
   NativeStackNavigationProp<MainStackParamList, 'ChatRoom'>,
@@ -85,12 +89,63 @@ const mockMessages: Message[] = [
 const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({ navigation, route }) => {
   const { chatId, chatName } = route.params;
   const { theme } = useTheme();
+  const { chatSettings } = useSettings();
   const user = useAppSelector((state) => state.auth.user);
   
-  const [messages, setMessages] = useState<Message[]>(mockMessages);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const flatListRef = useRef<FlatList>(null);
+
+  // Load messages from AsyncStorage on mount
+  useEffect(() => {
+    const loadMessages = async () => {
+      try {
+        const stored = await AsyncStorage.getItem(`chat_messages_${chatId}`);
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          // Convert timestamp strings back to Date objects
+          setMessages(parsed.map((msg: any) => ({ ...msg, timestamp: new Date(msg.timestamp) })));
+        } else {
+          setMessages([]);
+        }
+      } catch (e) {
+        setMessages([]);
+      }
+    };
+    loadMessages();
+  }, [chatId]);
+
+  // Save messages to AsyncStorage whenever they change
+  useEffect(() => {
+    if (messages.length > 0) {
+      AsyncStorage.setItem(`chat_messages_${chatId}`,
+        JSON.stringify(messages.map(msg => ({ ...msg, timestamp: msg.timestamp.toISOString() })))
+      );
+    }
+  }, [messages, chatId]);
+
+  useEffect(() => {
+    const fetchMessages = async () => {
+      try {
+        const token = await AsyncStorage.getItem('token');
+        const response = await axios.get(`http://192.168.96.216:8082/api/messages/chat/${chatId}`,
+          { headers: { Authorization: `Bearer ${token}` } });
+        // Convert timestamp strings to Date objects
+        setMessages(response.data.map((msg: any) => ({ ...msg, timestamp: new Date(msg.timestamp), isMine: msg.senderId === user?.id })));
+      } catch (e) {
+        // fallback to local
+        const stored = await AsyncStorage.getItem(`chat_messages_${chatId}`);
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          setMessages(parsed.map((msg: any) => ({ ...msg, timestamp: new Date(msg.timestamp) })));
+        } else {
+          setMessages([]);
+        }
+      }
+    };
+    fetchMessages();
+  }, [chatId]);
 
   useEffect(() => {
     // Set up navigation header
@@ -108,7 +163,28 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({ navigation, route }) =>
           </TouchableOpacity>
           <TouchableOpacity 
             style={styles.headerButton}
-            onPress={() => navigation.navigate('ChatDetails', { chatId })}
+            onPress={() => {
+              ActionSheetIOS.showActionSheetWithOptions({
+                options: ['View Details', 'Mute', 'Clear Chat', 'Delete Chat', 'Cancel'],
+                destructiveButtonIndex: 3,
+                cancelButtonIndex: 4,
+                title: chatName,
+              }, (buttonIndex) => {
+                if (buttonIndex === 0) {
+                  // View Details action
+                  Alert.alert('View Details', 'Show chat details here.');
+                } else if (buttonIndex === 1) {
+                  // Mute action
+                  Alert.alert('Mute', 'Chat muted.');
+                } else if (buttonIndex === 2) {
+                  // Clear Chat action
+                  setMessages([]);
+                } else if (buttonIndex === 3) {
+                  // Delete Chat action
+                  Alert.alert('Delete Chat', 'Chat deleted.');
+                }
+              });
+            }}
           >
             <Icon name="ellipsis-vertical" size={24} color={theme.text} />
           </TouchableOpacity>
@@ -117,51 +193,88 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({ navigation, route }) =>
     });
   }, [navigation, chatName, theme]);
 
-  const sendMessage = () => {
+  const sendMessage = async () => {
     if (newMessage.trim()) {
-      const message: Message = {
-        id: Date.now().toString(),
+      const message = {
         content: newMessage.trim(),
-        senderId: 'me',
+        senderId: user?.id,
         senderName: user?.name || 'Me',
-        timestamp: new Date(),
+        timestamp: new Date().toISOString(),
         type: 'text',
-        isMine: true,
       };
-
-      setMessages(prev => [message, ...prev]);
-      setNewMessage('');
-      
-      // TODO: Send message to backend
-      // sendMessageToBackend(message);
+      try {
+        const token = await AsyncStorage.getItem('token');
+        await axios.post(`http://192.168.96.216:8082/api/messages/chat/${chatId}`, message, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setMessages(prev => [
+          { ...message, id: Date.now().toString(), isMine: true, timestamp: new Date() },
+          ...prev
+        ]);
+        setNewMessage('');
+      } catch (e) {
+        Alert.alert('Error', 'Failed to send message to backend. Message will be saved locally.');
+        setMessages(prev => [
+          { ...message, id: Date.now().toString(), isMine: true, timestamp: new Date() },
+          ...prev
+        ]);
+        setNewMessage('');
+      }
     }
+  };
+
+  const reactToMessage = async (messageId, reaction) => {
+    try {
+      const token = await AsyncStorage.getItem('token');
+      await axios.post(`http://192.168.96.216:8082/api/messages/${messageId}/react`, null, {
+        params: { reaction },
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      // Optionally refresh messages
+    } catch (e) {}
+  };
+
+  const editMessage = async (messageId, updatedContent) => {
+    try {
+      const token = await AsyncStorage.getItem('token');
+      await axios.put(`http://192.168.96.216:8082/api/messages/${messageId}`, { content: updatedContent }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      // Optionally refresh messages
+    } catch (e) {}
+  };
+
+  const deleteMessage = async (messageId) => {
+    try {
+      const token = await AsyncStorage.getItem('token');
+      await axios.delete(`http://192.168.96.216:8082/api/messages/${messageId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      // Optionally refresh messages
+    } catch (e) {}
   };
 
   const renderMessage = ({ item }: { item: Message }) => (
     <View style={[
-      styles.messageContainer,
-      item.isMine ? styles.myMessage : styles.otherMessage
+      styles.messageRow,
+      item.isMine ? styles.myMessageRow : styles.theirMessageRow
     ]}>
       <View style={[
         styles.messageBubble,
-        item.isMine 
-          ? [styles.myBubble, { backgroundColor: theme.primary }]
-          : [styles.otherBubble, { backgroundColor: theme.card }]
+        { borderRadius: chatSettings.messageCorner },
+        item.isMine
+          ? { backgroundColor: '#e53935' } // red for sent
+          : { backgroundColor: '#fff', borderWidth: 1, borderColor: theme.border } // white/gray for received
       ]}>
         <Text style={[
           styles.messageText,
-          { color: item.isMine ? '#fff' : theme.text }
+          { fontSize: chatSettings.messageSize },
+          item.isMine ? { color: '#fff' } : { color: theme.text }
         ]}>
           {item.content}
         </Text>
-        <Text style={[
-          styles.messageTime,
-          { color: item.isMine ? 'rgba(255,255,255,0.7)' : theme.subtext }
-        ]}>
-          {item.timestamp.toLocaleTimeString([], { 
-            hour: '2-digit', 
-            minute: '2-digit' 
-          })}
+        <Text style={[styles.messageTime, { color: item.isMine ? 'rgba(255,255,255,0.7)' : theme.subtext }]}>
+          {item.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
         </Text>
       </View>
     </View>
@@ -241,37 +354,24 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
   },
-  messageContainer: {
-    marginVertical: 4,
+  messageRow: {
     flexDirection: 'row',
+    marginVertical: 4,
+    paddingHorizontal: 8,
   },
-  myMessage: {
+  myMessageRow: {
     justifyContent: 'flex-end',
   },
-  otherMessage: {
+  theirMessageRow: {
     justifyContent: 'flex-start',
   },
   messageBubble: {
     maxWidth: '80%',
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 18,
+    padding: 10,
+    marginBottom: 10,
   },
-  myBubble: {
-    borderBottomRightRadius: 4,
-  },
-  otherBubble: {
-    borderBottomLeftRadius: 4,
-  },
-  messageText: {
-    fontSize: 16,
-    lineHeight: 20,
-  },
-  messageTime: {
-    fontSize: 12,
-    marginTop: 4,
-    alignSelf: 'flex-end',
-  },
+  messageText: {},
+  messageTime: { fontSize: 10, marginTop: 5, alignSelf: 'flex-end' },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'flex-end',

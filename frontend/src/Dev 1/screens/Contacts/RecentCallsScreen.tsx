@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -14,6 +14,9 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { MainStackParamList, RootStackParamList } from '../../types/navigation';
 import { useTheme } from '../../ThemeContext';
 import Icon from 'react-native-vector-icons/Ionicons';
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useAppSelector } from '../../store/store';
 
 type RecentCallsNavigationProp = CompositeNavigationProp<
   NativeStackNavigationProp<MainStackParamList, 'RecentCalls'>,
@@ -150,6 +153,22 @@ const RecentCallsScreen: React.FC<RecentCallsScreenProps> = ({ navigation }) => 
   const [searchQuery, setSearchQuery] = useState('');
   const [filterType, setFilterType] = useState<'all' | 'audio' | 'video'>('all');
   const [filterDirection, setFilterDirection] = useState<'all' | 'incoming' | 'outgoing' | 'missed'>('all');
+  const user = useAppSelector((state) => state.auth.user);
+
+  useEffect(() => {
+    const fetchCallRecords = async () => {
+      try {
+        const token = await AsyncStorage.getItem('token');
+        const response = await axios.get(`http://192.168.96.216:8082/api/calls/history/user/${user?.id}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setCallRecords(response.data);
+      } catch (e) {
+        setCallRecords([]);
+      }
+    };
+    fetchCallRecords();
+  }, []);
 
   const filteredCalls = callRecords.filter(call => {
     const matchesSearch = call.contactName.toLowerCase().includes(searchQuery.toLowerCase()) ||

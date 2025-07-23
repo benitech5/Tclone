@@ -15,7 +15,7 @@ import { CompositeNavigationProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AuthStackParamList, RootStackParamList } from '../../types/navigation';
 import { useTheme } from '../../ThemeContext';
-import { useAppDispatch } from '../../store/store';
+import { useAppDispatch, useAppSelector } from '../../store/store';
 import { updateProfile } from '../../store/authSlice';
 import Icon from 'react-native-vector-icons/Ionicons';
 import * as ImagePicker from 'expo-image-picker';
@@ -38,6 +38,7 @@ const ProfileSetupScreen: React.FC<ProfileSetupScreenProps> = ({ navigation, rou
   const { phoneNumber } = route.params;
   const { theme } = useTheme();
   const dispatch = useAppDispatch();
+  const user = useAppSelector((state) => state.auth.user);
 
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');

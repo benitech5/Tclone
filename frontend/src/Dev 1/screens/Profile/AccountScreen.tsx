@@ -3,11 +3,35 @@ import React from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { MainStackParamList } from '../../types/navigation';
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useAppSelector } from '../../store/store';
 
 type AccountScreenNavigationProp = NativeStackNavigationProp<
   MainStackParamList,
   'Account'
 >;
+
+const updateStatus = async (isOnline) => {
+  try {
+    const token = await AsyncStorage.getItem('token');
+    const user = useAppSelector((state) => state.auth.user);
+    await axios.put(`http://192.168.96.216:8082/api/user/${user?.id}/status`, null, {
+      params: { isOnline },
+      headers: { Authorization: `Bearer ${token}` }
+    });
+  } catch (e) {}
+};
+
+const fetchOnlineUsers = async () => {
+  try {
+    const token = await AsyncStorage.getItem('token');
+    const response = await axios.get('http://192.168.96.216:8082/api/user/online', {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    // Use response.data for online users
+  } catch (e) {}
+};
 
 const AccountScreen = ({ navigation }: { navigation: AccountScreenNavigationProp }) => {
   return (

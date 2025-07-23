@@ -16,6 +16,9 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { MainStackParamList, RootStackParamList } from '../../types/navigation';
 import { useTheme } from '../../ThemeContext';
 import Icon from 'react-native-vector-icons/Ionicons';
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import SettingsHeader from '../Settings/SettingsHeader';
 
 type NewGroupNavigationProp = CompositeNavigationProp<
   NativeStackNavigationProp<MainStackParamList, 'NewGroup'>,
@@ -91,35 +94,23 @@ const NewGroupScreen: React.FC<NewGroupScreenProps> = ({ navigation }) => {
     setIsCreating(true);
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
-
+      const token = await AsyncStorage.getItem('token');
       const groupData = {
-        id: Date.now().toString(),
-        name: groupName.trim(),
+        title: groupName.trim(),
         description: groupDescription.trim(),
-        members: selectedContacts,
-        createdAt: new Date(),
+        members: selectedContacts.map(c => c.id),
+        type: 'GROUP',
+        createdAt: new Date().toISOString(),
       };
-
-      // TODO: Send to backend
-      console.log('Creating group:', groupData);
-
-      Alert.alert(
-        'Success', 
-        `Group "${groupName}" created successfully!`,
-        [
-          {
-            text: 'OK',
-            onPress: () => {
-              navigation.navigate('GroupChat', {
-                groupId: groupData.id,
-                groupName: groupData.name,
-              });
-            }
-          }
-        ]
-      );
+      const response = await axios.post('http://192.168.96.216:8082/api/chats', groupData, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const newGroup = response.data;
+      Alert.alert('Success', `Group "${groupName}" created successfully!`);
+      navigation.navigate('GroupChat', {
+        groupId: newGroup.id,
+        groupName: newGroup.title,
+      });
     } catch (error) {
       Alert.alert('Error', 'Failed to create group. Please try again.');
     } finally {
@@ -187,34 +178,7 @@ const NewGroupScreen: React.FC<NewGroupScreenProps> = ({ navigation }) => {
       style={[styles.container, { backgroundColor: theme.background }]}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-      {/* Header */}
-      <View style={[styles.header, { backgroundColor: theme.background }]}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={[styles.cancelButton, { color: theme.primary }]}>
-            Cancel
-          </Text>
-        </TouchableOpacity>
-        
-        <Text style={[styles.headerTitle, { color: theme.text }]}>
-          New Group
-        </Text>
-        
-        <TouchableOpacity 
-          onPress={handleCreateGroup}
-          disabled={!groupName.trim() || selectedContacts.length === 0 || isCreating}
-        >
-          <Text style={[
-            styles.createButton,
-            { 
-              color: (groupName.trim() && selectedContacts.length > 0 && !isCreating) 
-                ? theme.primary 
-                : theme.subtext 
-            }
-          ]}>
-            {isCreating ? 'Creating...' : 'Create'}
-          </Text>
-        </TouchableOpacity>
-      </View>
+      <SettingsHeader title="New Group" onBack={() => navigation.goBack()} />
 
       {/* Group Info Section */}
       <View style={[styles.groupInfoSection, { backgroundColor: theme.card }]}>
@@ -431,4 +395,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default NewGroupScreen; 
+export default NewGroupScreen;

@@ -16,6 +16,8 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { MainStackParamList, RootStackParamList } from '../../types/navigation';
 import { useTheme } from '../../ThemeContext';
 import Icon from 'react-native-vector-icons/Ionicons';
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 type NewChannelNavigationProp = CompositeNavigationProp<
   NativeStackNavigationProp<MainStackParamList, 'NewChannel'>,
@@ -74,37 +76,24 @@ const NewChannelScreen: React.FC<NewChannelScreenProps> = ({ navigation }) => {
     setIsCreating(true);
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
-
+      const token = await AsyncStorage.getItem('token');
       const channelData = {
-        id: Date.now().toString(),
-        name: channelName.trim(),
+        title: channelName.trim(),
         description: channelDescription.trim(),
         username: channelUsername.trim(),
+        type: 'CHANNEL',
+        createdAt: new Date().toISOString(),
         settings,
-        createdAt: new Date(),
-        memberCount: 1, // Creator
       };
-
-      // TODO: Send to backend
-      console.log('Creating channel:', channelData);
-
-      Alert.alert(
-        'Success', 
-        `Channel "${channelName}" created successfully!`,
-        [
-          {
-            text: 'OK',
-            onPress: () => {
-              navigation.navigate('ChannelInfo', {
-                channelId: channelData.id,
-                channelName: channelData.name,
-              });
-            }
-          }
-        ]
-      );
+      const response = await axios.post('http://192.168.96.216:8082/api/chats', channelData, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const newChannel = response.data;
+      Alert.alert('Success', `Channel "${channelName}" created successfully!`);
+      navigation.navigate('ChannelInfo', {
+        channelId: newChannel.id,
+        channelName: newChannel.title,
+      });
     } catch (error) {
       Alert.alert('Error', 'Failed to create channel. Please try again.');
     } finally {

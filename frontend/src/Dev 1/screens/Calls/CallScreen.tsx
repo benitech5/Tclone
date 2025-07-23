@@ -13,6 +13,8 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { MainStackParamList, RootStackParamList } from '../../types/navigation';
 import { useTheme } from '../../ThemeContext';
 import Icon from 'react-native-vector-icons/Ionicons';
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 type CallScreenNavigationProp = CompositeNavigationProp<
   NativeStackNavigationProp<MainStackParamList, 'CallScreen'>,
@@ -74,8 +76,14 @@ const CallScreen: React.FC<CallScreenProps> = ({ navigation, route }) => {
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const handleEndCall = () => {
+  const handleEndCall = async () => {
     setCallStatus('ended');
+    try {
+      const token = await AsyncStorage.getItem('token');
+      await axios.post(`http://192.168.96.216:8082/api/calls/${callId}/end`, {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+    } catch (e) {}
     setTimeout(() => {
       navigation.goBack();
     }, 1000);
@@ -92,9 +100,15 @@ const CallScreen: React.FC<CallScreenProps> = ({ navigation, route }) => {
     }, 1000);
   };
 
-  const toggleMute = () => {
+  const toggleMute = async () => {
     setIsMuted(!isMuted);
-    // TODO: Implement actual mute functionality
+    try {
+      const token = await AsyncStorage.getItem('token');
+      await axios.post(`http://192.168.96.216:8082/api/calls/${callId}/mute`, null, {
+        params: { muted: !isMuted },
+        headers: { Authorization: `Bearer ${token}` }
+      });
+    } catch (e) {}
   };
 
   const toggleSpeaker = () => {

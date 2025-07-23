@@ -5,11 +5,36 @@ import { useTheme } from '../../ThemeContext';
 import { useSettings } from '../../SettingsContext';
 import { useNavigation } from '@react-navigation/native';
 import SettingsHeader from './SettingsHeader';
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useAppSelector } from '../../store/store';
 
 const ChatSettingsScreen = () => {
   const { theme, toggleTheme, isDarkMode } = useTheme();
   const { chatSettings, updateMessageSize, updateMessageCorner } = useSettings();
   const navigation = useNavigation();
+  const user = useAppSelector((state) => state.auth.user);
+
+  const fetchSettings = async () => {
+    try {
+      const token = await AsyncStorage.getItem('token');
+      const response = await axios.get(`http://192.168.96.216:8082/api/settings/user/${user?.id}/map`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      // Update local settings state with response.data
+    } catch (e) {}
+  };
+
+  const updateSetting = async (key, value) => {
+    try {
+      const token = await AsyncStorage.getItem('token');
+      const response = await axios.post(`http://192.168.96.216:8082/api/settings/user/${user?.id}`, null, {
+        params: { key, value },
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      fetchSettings();
+    } catch (e) {}
+  };
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.background }}>

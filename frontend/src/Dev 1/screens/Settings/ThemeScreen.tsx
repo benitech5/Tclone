@@ -1,16 +1,22 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import SettingsHeader from './SettingsHeader';
 
-const ThemeScreen: React.FC = () => (
-  <View style={styles.container}>
-    <Text style={styles.header}>Theme</Text>
-    <Text style={styles.placeholder}>Feature coming soon...</Text>
-  </View>
-);
+const ThemeScreen: React.FC = () => {
+  const navigation = useNavigation();
+  return (
+    <View style={{ flex: 1, backgroundColor: '#fff' }}>
+      <SettingsHeader title="Theme" onBack={() => navigation.goBack()} />
+      <View style={styles.container}>
+        <Text style={styles.placeholder}>Feature coming soon...</Text>
+      </View>
+    </View>
+  );
+};
 
 const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#fff' },
-  header: { fontSize: 24, fontWeight: 'bold', marginBottom: 16 },
+  container: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   placeholder: { fontSize: 16, color: '#888' },
 });
 

@@ -18,6 +18,8 @@ import { MainStackParamList, RootStackParamList } from '../../types/navigation';
 import { useTheme } from '../../ThemeContext';
 import { useAppSelector } from '../../store/store';
 import Icon from 'react-native-vector-icons/Ionicons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
 
 type GroupChatNavigationProp = CompositeNavigationProp<
   NativeStackNavigationProp<MainStackParamList, 'GroupChat'>,
@@ -109,12 +111,60 @@ const GroupChatScreen: React.FC<GroupChatScreenProps> = ({ navigation, route }) 
   const { theme } = useTheme();
   const user = useAppSelector((state) => state.auth.user);
   
-  const [messages, setMessages] = useState<GroupMessage[]>(mockGroupMessages);
+  const [messages, setMessages] = useState<GroupMessage[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showMembersModal, setShowMembersModal] = useState(false);
   const [members, setMembers] = useState<GroupMember[]>(mockGroupMembers);
   const flatListRef = useRef<FlatList>(null);
+
+  // Load messages from AsyncStorage on mount
+  useEffect(() => {
+    const loadMessages = async () => {
+      try {
+        const stored = await AsyncStorage.getItem(`group_messages_${groupId}`);
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          setMessages(parsed.map((msg: any) => ({ ...msg, timestamp: new Date(msg.timestamp) })));
+        } else {
+          setMessages([]);
+        }
+      } catch (e) {
+        setMessages([]);
+      }
+    };
+    loadMessages();
+  }, [groupId]);
+
+  useEffect(() => {
+    const fetchMessages = async () => {
+      try {
+        const token = await AsyncStorage.getItem('token');
+        const response = await axios.get(`http://192.168.96.216:8082/api/messages/chat/${groupId}`,
+          { headers: { Authorization: `Bearer ${token}` } });
+        setMessages(response.data.map((msg: any) => ({ ...msg, timestamp: new Date(msg.timestamp), isMine: msg.senderId === user?.id })));
+      } catch (e) {
+        // fallback to local
+        const stored = await AsyncStorage.getItem(`group_messages_${groupId}`);
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          setMessages(parsed.map((msg: any) => ({ ...msg, timestamp: new Date(msg.timestamp) })));
+        } else {
+          setMessages([]);
+        }
+      }
+    };
+    fetchMessages();
+  }, [groupId]);
+
+  // Save messages to AsyncStorage whenever they change
+  useEffect(() => {
+    if (messages.length > 0) {
+      AsyncStorage.setItem(`group_messages_${groupId}`,
+        JSON.stringify(messages.map(msg => ({ ...msg, timestamp: msg.timestamp.toISOString() })))
+      );
+    }
+  }, [messages, groupId]);
 
   useEffect(() => {
     navigation.setOptions({
@@ -143,21 +193,33 @@ const GroupChatScreen: React.FC<GroupChatScreenProps> = ({ navigation, route }) 
     });
   }, [navigation, groupName, theme]);
 
-  const sendMessage = () => {
+  const sendMessage = async () => {
     if (newMessage.trim()) {
-      const message: GroupMessage = {
-        id: Date.now().toString(),
+      const message = {
         content: newMessage.trim(),
-        senderId: 'me',
+        senderId: user?.id,
         senderName: user?.name || 'Me',
-        timestamp: new Date(),
+        timestamp: new Date().toISOString(),
         type: 'text',
-        isMine: true,
-        reactions: [],
       };
-
-      setMessages(prev => [message, ...prev]);
-      setNewMessage('');
+      try {
+        const token = await AsyncStorage.getItem('token');
+        await axios.post(`http://192.168.96.216:8082/api/messages/chat/${groupId}`, message, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setMessages(prev => [
+          { ...message, id: Date.now().toString(), isMine: true, timestamp: new Date(), reactions: [] },
+          ...prev
+        ]);
+        setNewMessage('');
+      } catch (e) {
+        Alert.alert('Error', 'Failed to send message to backend. Message will be saved locally.');
+        setMessages(prev => [
+          { ...message, id: Date.now().toString(), isMine: true, timestamp: new Date(), reactions: [] },
+          ...prev
+        ]);
+        setNewMessage('');
+      }
     }
   };
 

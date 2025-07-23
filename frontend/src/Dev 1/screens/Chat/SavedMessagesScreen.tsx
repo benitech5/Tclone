@@ -1,17 +1,39 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { useChatSettings } from '../../hooks/useChatSettings';
 import { useTheme } from '../../ThemeContext';
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useAppSelector } from '../../store/store';
 
 const SavedMessagesScreen = () => {
   const { getMessageStyle, getReplyStyle } = useChatSettings();
   const { theme } = useTheme();
+  const [savedMessages, setSavedMessages] = useState([]);
+  const user = useAppSelector((state) => state.auth.user);
 
-  const savedMessages = [
-    { id: '1', text: 'This is a saved message', isReply: false },
-    { id: '2', text: 'Another important message to remember', isReply: true },
-    { id: '3', text: 'Meeting notes: Tomorrow at 3 PM', isReply: false },
-  ];
+  const fetchSavedMessages = async () => {
+    try {
+      const token = await AsyncStorage.getItem('token');
+      const response = await axios.get(`http://192.168.96.216:8082/api/messages/user/${user?.id}/saved`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setSavedMessages(response.data);
+    } catch (e) {
+      setSavedMessages([]);
+    }
+  };
+
+  const saveMessage = async (messageId) => {
+    try {
+      const token = await AsyncStorage.getItem('token');
+      await axios.post(`http://192.168.96.216:8082/api/messages/${messageId}/save`, null, {
+        params: { userId: user?.id },
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      fetchSavedMessages();
+    } catch (e) {}
+  };
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>

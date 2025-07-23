@@ -15,6 +15,9 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { MainStackParamList, RootStackParamList } from '../../types/navigation';
 import { useTheme } from '../../ThemeContext';
 import Icon from 'react-native-vector-icons/Ionicons';
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useAppSelector } from '../../store/store';
 
 type SearchNavigationProp = CompositeNavigationProp<
   NativeStackNavigationProp<MainStackParamList, 'Search'>,
@@ -93,6 +96,7 @@ const SearchScreen: React.FC<SearchScreenProps> = ({ navigation }) => {
   const [isSearching, setIsSearching] = useState(false);
   const [activeFilter, setActiveFilter] = useState<'all' | 'chats' | 'messages' | 'contacts' | 'files'>('all');
   const [recentSearches, setRecentSearches] = useState<string[]>(['meeting', 'project', 'john']);
+  const user = useAppSelector((state) => state.auth.user);
 
   useEffect(() => {
     navigation.setOptions({
@@ -127,20 +131,28 @@ const SearchScreen: React.FC<SearchScreenProps> = ({ navigation }) => {
       setSearchResults([]);
       return;
     }
-
     setIsSearching(true);
-    
-    // Simulate API call delay
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
-    // Filter mock results based on query
-    const filtered = mockSearchResults.filter(result => 
-      result.title.toLowerCase().includes(query.toLowerCase()) ||
-      result.subtitle.toLowerCase().includes(query.toLowerCase()) ||
-      result.preview?.toLowerCase().includes(query.toLowerCase())
-    );
-    
-    setSearchResults(filtered);
+    try {
+      const token = await AsyncStorage.getItem('token');
+      const response = await axios.get(`http://192.168.96.216:8082/api/search/global`, {
+        params: { query, currentUserId: user?.id },
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      // Flatten and format results as needed for UI
+      const results = [];
+      if (response.data.chats) {
+        results.push(...response.data.chats.map(chat => ({ type: 'chat', ...chat })));
+      }
+      if (response.data.messages) {
+        results.push(...response.data.messages.map(msg => ({ type: 'message', ...msg })));
+      }
+      if (response.data.users) {
+        results.push(...response.data.users.map(user => ({ type: 'contact', ...user })));
+      }
+      setSearchResults(results);
+    } catch (e) {
+      setSearchResults([]);
+    }
     setIsSearching(false);
   };
 

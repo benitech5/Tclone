@@ -4,10 +4,14 @@ import { Ionicons, MaterialIcons, MaterialCommunityIcons, FontAwesome } from '@e
 import { useTheme } from '../../ThemeContext';
 import { useNavigation } from '@react-navigation/native';
 import SettingsHeader from './SettingsHeader';
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useAppSelector } from '../../store/store';
 
 const NotificationsAndSoundsScreen = () => {
   const { theme } = useTheme();
   const navigation = useNavigation();
+  const user = useAppSelector((state) => state.auth.user);
 
   // State for toggles
   const [allAccounts, setAllAccounts] = React.useState(true);
@@ -16,6 +20,16 @@ const NotificationsAndSoundsScreen = () => {
   const [channels, setChannels] = React.useState(true);
   const [stories, setStories] = React.useState(false);
   const [reactions, setReactions] = React.useState(true);
+
+  const updateNotificationSetting = async (key, value) => {
+    try {
+      const token = await AsyncStorage.getItem('token');
+      await axios.post(`http://192.168.96.216:8082/api/settings/user/${user?.id}`, null, {
+        params: { key, value },
+        headers: { Authorization: `Bearer ${token}` }
+      });
+    } catch (e) {}
+  };
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.background }}>

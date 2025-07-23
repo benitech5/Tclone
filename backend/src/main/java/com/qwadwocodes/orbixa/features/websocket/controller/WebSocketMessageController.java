@@ -112,31 +112,30 @@ public class WebSocketMessageController {
             // Handle different call actions
             switch (callMessage.getAction()) {
                 case "RING":
-                    // Send call signal to participants
-                    for (Long participantId : callMessage.getParticipants()) {
-                        if (!participantId.equals(userId)) {
-                            webSocketService.sendCallSignal(participantId, callMessage);
-                        }
-                    }
-                    break;
                 case "ANSWER":
                 case "REJECT":
                 case "END":
-                    // Send response to caller
-                    webSocketService.sendCallSignal(callMessage.getCallerId(), callMessage);
-                    break;
+                case "MUTE":
+                case "UNMUTE":
+                case "HOLD":
+                case "UNHOLD":
                 case "ICE_CANDIDATE":
-                    // Forward ICE candidate to other participants
+                case "SDP_OFFER":
+                case "SDP_ANSWER":
+                case "START_SCREEN_SHARE":
+                case "STOP_SCREEN_SHARE":
+                    // Relay to all participants except sender
                     for (Long participantId : callMessage.getParticipants()) {
                         if (!participantId.equals(userId)) {
                             webSocketService.sendCallSignal(participantId, callMessage);
                         }
                     }
                     break;
+                default:
+                    log.warn("Unknown call action: {}", callMessage.getAction());
             }
-            
-            log.debug("Call signal handled: {} for call: {}", callMessage.getAction(), callMessage.getCallId());
-            
+
+            log.debug("Call signal handled: {} for call: {} type: {}", callMessage.getAction(), callMessage.getCallId(), callMessage.getCallType());
         } catch (Exception e) {
             log.error("Error handling call signal: {}", e.getMessage(), e);
         }

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -14,6 +14,8 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { MainStackParamList, RootStackParamList } from '../../types/navigation';
 import { useTheme } from '../../ThemeContext';
 import Icon from 'react-native-vector-icons/Ionicons';
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 type CallInfoNavigationProp = CompositeNavigationProp<
   NativeStackNavigationProp<MainStackParamList, 'CallInfo'>,
@@ -75,6 +77,19 @@ const CallInfoScreen: React.FC<CallInfoScreenProps> = ({ navigation, route }) =>
   
   const [callInfo, setCallInfo] = useState<CallInfo>(mockCallInfo);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+
+  useEffect(() => {
+    const fetchCallInfo = async () => {
+      try {
+        const token = await AsyncStorage.getItem('token');
+        const response = await axios.get(`http://192.168.96.216:8082/api/calls/${callId}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setCallInfo(response.data);
+      } catch (e) {}
+    };
+    fetchCallInfo();
+  }, [callId]);
 
   const handleStartCall = (type: 'audio' | 'video') => {
     navigation.navigate('CallScreen', {

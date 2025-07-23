@@ -14,6 +14,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { MainStackParamList, RootStackParamList } from '../../types/navigation';
 import { useTheme } from '../../ThemeContext';
 import Icon from 'react-native-vector-icons/Ionicons';
+import { useRoute } from '@react-navigation/native';
 
 type InviteFriendsNavigationProp = CompositeNavigationProp<
   NativeStackNavigationProp<MainStackParamList, 'InviteFriends'>,
@@ -90,13 +91,21 @@ const inviteMethods: InviteMethod[] = [
 ];
 
 const InviteFriendsScreen: React.FC<InviteFriendsScreenProps> = ({ navigation, route }) => {
-  const { groupId, groupName } = route.params;
+  const { groupId, groupName } = route.params || {}; // <-- This prevents the crash
   const { theme } = useTheme();
   
   const [contacts, setContacts] = useState<Contact[]>(mockContacts);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedContacts, setSelectedContacts] = useState<Contact[]>([]);
   const [isInviting, setIsInviting] = useState(false);
+
+  if (!groupId) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <Text>No group selected. Please open this screen from a group context.</Text>
+      </View>
+    );
+  }
 
   const availableContacts = contacts.filter(contact => !contact.isAlreadyMember);
   const filteredContacts = availableContacts.filter(contact =>

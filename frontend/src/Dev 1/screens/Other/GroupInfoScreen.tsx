@@ -15,6 +15,8 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { MainStackParamList, RootStackParamList } from '../../types/navigation';
 import { useTheme } from '../../ThemeContext';
 import Icon from 'react-native-vector-icons/Ionicons';
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 type GroupInfoNavigationProp = CompositeNavigationProp<
   NativeStackNavigationProp<MainStackParamList, 'GroupInfo'>,
@@ -259,6 +261,27 @@ const GroupInfoScreen: React.FC<GroupInfoScreenProps> = ({ navigation, route }) 
         },
       ]
     );
+  };
+
+  const updateGroupInfo = async (updatedInfo) => {
+    try {
+      const token = await AsyncStorage.getItem('token');
+      await axios.put(`http://192.168.96.216:8082/api/chats/${groupId}`, updatedInfo, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      // Optionally refresh group info
+    } catch (e) {}
+  };
+
+  const promoteMember = async (userId) => {
+    try {
+      const token = await AsyncStorage.getItem('token');
+      await axios.post(`http://192.168.96.216:8082/api/chats/${groupId}/members`, null, {
+        params: { userId, role: 'ADMIN' },
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      // Optionally refresh members list
+    } catch (e) {}
   };
 
   const renderGroupHeader = () => (

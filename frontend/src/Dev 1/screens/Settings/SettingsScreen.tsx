@@ -162,6 +162,14 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
       title: 'Chats',
       items: [
         {
+          id: 'chat-settings',
+          title: 'Chat Settings',
+          subtitle: 'Dark mode, message font, and more',
+          icon: 'chatbubble-ellipses',
+          type: 'navigate',
+          route: 'ChatSettings',
+        },
+        {
           id: 'theme',
           title: 'Theme',
           subtitle: 'Light, Dark, or System',

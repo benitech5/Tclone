@@ -18,7 +18,7 @@ const OtpScreen = () => {
     const inputRefs = useRef<Array<TextInput | null>>([]);
     const navigation = useNavigation<OtpScreenNavigationProp>();
     const route = useRoute<OtpScreenRouteProp>();
-    const { phoneNumber, confirmationResult } = route.params;
+    const { phoneNumber } = route.params;
     const dispatch = useAppDispatch();
 
     const handleChange = (text: string, index: number) => {
@@ -49,16 +49,19 @@ const OtpScreen = () => {
         setError('');
         setLoading(true);
         try {
-            await confirmationResult.confirm(otpValue);
+            const data = await verifyOtp(phoneNumber, otpValue);
+            // Save JWT and user info
+            await AsyncStorage.setItem('token', data.token);
+            await AsyncStorage.setItem('user', JSON.stringify(data.user));
+            dispatch(login(data.user));
             setLoading(false);
-            // @ts-ignore
             navigation.getParent()?.reset({
                 index: 0,
                 routes: [{ name: 'Main', params: { screen: 'Home' } }],
             });
         } catch (err: any) {
             setLoading(false);
-            setError(err.message || 'Invalid OTP. Please try again.');
+            setError(err.response?.data?.message || err.message || 'Invalid OTP. Please try again.');
         }
     };
 
