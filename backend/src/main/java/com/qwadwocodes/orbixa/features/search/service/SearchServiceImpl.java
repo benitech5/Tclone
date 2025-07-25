@@ -198,8 +198,10 @@ public class SearchServiceImpl implements SearchService {
         return new UserDto(
             user.getId(),
             user.getFirstName(),
+            user.getOtherName(),
             user.getPhoneNumber(),
-            user.getProfilePictureUrl()
+            user.getProfilePictureUrl(),
+            user.getUsername()
         );
     }
 

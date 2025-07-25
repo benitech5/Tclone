@@ -10,6 +10,8 @@ import com.qwadwocodes.orbixa.features.profile.model.User;
 import com.qwadwocodes.orbixa.features.profile.repository.UserRepository;
 import com.qwadwocodes.orbixa.security.JwtUtil;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.http.HttpStatus;
 
 import java.time.LocalDateTime;
 import java.util.Random;
@@ -40,20 +42,12 @@ public class AuthServiceImpl implements AuthService {
         // Save OTP to Redis with 10 minutes TTL
         otpService.saveOtp(request.getPhoneNumber(), otp, 10);
         
-        // Find or create user
-        User user = userRepository.findByPhoneNumber(request.getPhoneNumber())
-                .orElseGet(() -> User.builder()
-                        .firstName(request.getName())
-                        .phoneNumber(request.getPhoneNumber())
-                        .isOnline(false)
-                        .createdAt(LocalDateTime.now())
-                        .updatedAt(LocalDateTime.now())
-                        .build());
-
-        // Update user's OTP fields (for backward compatibility)
-        user.setOtp(otp);
-        user.setOtpExpiry(LocalDateTime.now().plusMinutes(10));
-        userRepository.save(user);
+        // Only update OTP fields if user exists
+        userRepository.findByPhoneNumber(request.getPhoneNumber()).ifPresent(user -> {
+            user.setOtp(otp);
+            user.setOtpExpiry(LocalDateTime.now().plusMinutes(10));
+            userRepository.save(user);
+        });
 
         // Send OTP via SMS
         smsService.sendOtp(request.getPhoneNumber(), otp);
@@ -63,12 +57,12 @@ public class AuthServiceImpl implements AuthService {
     public AuthResponse verifyOtp(VerifyOtpRequest request) {
         // Verify OTP from Redis
         if (!otpService.isOtpValid(request.getPhoneNumber(), request.getOtp())) {
-            throw new RuntimeException("Invalid OTP");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid OTP");
         }
 
         // Get user from database
         User user = userRepository.findByPhoneNumber(request.getPhoneNumber())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
         // Clear OTP from both Redis and database
         otpService.deleteOtp(request.getPhoneNumber());
@@ -85,8 +79,10 @@ public class AuthServiceImpl implements AuthService {
         UserDto userDto = new UserDto(
             user.getId(), 
             user.getFirstName(), 
+            user.getOtherName(),
             user.getPhoneNumber(), 
-            user.getProfilePictureUrl()
+            user.getProfilePictureUrl(),
+            user.getUsername()
         );
 
         return new AuthResponse(token, userDto);

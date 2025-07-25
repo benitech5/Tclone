@@ -1,8 +1,9 @@
 import axios from 'axios';
 
-// Replace 'YOUR_COMPUThER_IP' with your actual computer's IP address
-// You can find this by running 'ipconfig' in Windows Command Prompt
-const API_URL = 'http://localhost:8082/api/auth';
+// IMPORTANT: Replace with your laptop's local IP address for mobile testing
+// Example in AuthService.ts
+const API_BASE_URL = 'http://192.168.188.18:8082'; // <-- Set this to your laptop's IP
+const API_URL = `${API_BASE_URL}/api/auth`;
 
 export const requestOtp = async (phoneNumber: string, name: string) => {
     return axios.post(`${API_URL}/request-otp`, { phoneNumber, name });

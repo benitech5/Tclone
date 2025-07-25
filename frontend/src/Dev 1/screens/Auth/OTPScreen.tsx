@@ -7,6 +7,7 @@ import { AuthStackParamList } from '../../types/navigation';
 import { useAppDispatch } from '../../store/store';
 import { login } from '../../store/authSlice';
 import { verifyOtp } from '../../api/AuthService';
+import { checkUserExists } from '../../api/AuthService';
 
 type OtpScreenNavigationProp = NativeStackNavigationProp<AuthStackParamList, 'Otp'>;
 type OtpScreenRouteProp = RouteProp<AuthStackParamList, 'Otp'>;
@@ -54,14 +55,26 @@ const OtpScreen = () => {
             await AsyncStorage.setItem('token', data.token);
             await AsyncStorage.setItem('user', JSON.stringify(data.user));
             dispatch(login(data.user));
+            // Check if user exists in backend
+            const exists = await checkUserExists(phoneNumber);
             setLoading(false);
-            navigation.getParent()?.reset({
-                index: 0,
-                routes: [{ name: 'Main', params: { screen: 'Home' } }],
-            });
+            if (exists) {
+                navigation.getParent()?.reset({
+                    index: 0,
+                    routes: [{ name: 'Main', params: { screen: 'Home' } }],
+                });
+            } else {
+                navigation.navigate('ProfileSetup', { phoneNumber });
+            }
         } catch (err: any) {
             setLoading(false);
-            setError(err.response?.data?.message || err.message || 'Invalid OTP. Please try again.');
+            if (err.response?.status === 400) {
+                setError('Invalid OTP. Please try again.');
+            } else if (err.response?.status === 404) {
+                navigation.navigate('ProfileSetup', { phoneNumber });
+            } else {
+                setError(err.response?.data?.message || err.message || 'Invalid OTP. Please try again.');
+            }
         }
     };
 

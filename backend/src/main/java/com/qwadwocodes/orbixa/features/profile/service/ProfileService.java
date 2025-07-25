@@ -20,4 +20,5 @@ public interface ProfileService {
     List<UserDto> getOnlineUsers();
     void updateUserBio(Long userId, String bio);
     void updateUsername(Long userId, String newUsername);
+    UserDto createUserProfile(UserDto userDto);
 } 

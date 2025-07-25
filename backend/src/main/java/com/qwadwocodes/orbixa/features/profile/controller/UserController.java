@@ -101,9 +101,39 @@ public class UserController {
     }
 
     @GetMapping("/phone/{phoneNumber}")
-    public ResponseEntity<Optional<User>> getUserByPhoneNumber(@PathVariable String phoneNumber) {
-        Optional<User> user = profileService.getUserByPhoneNumber(phoneNumber);
-        return ResponseEntity.ok(user);
+    public ResponseEntity<UserDto> getUserByPhoneNumber(@PathVariable String phoneNumber) {
+        Optional<User> userOpt = profileService.getUserByPhoneNumber(phoneNumber);
+        if (userOpt.isPresent()) {
+            UserDto userDto = profileService.getUserProfile(userOpt.get().getId());
+            return ResponseEntity.ok(userDto);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PostMapping("")
+    public ResponseEntity<UserDto> createUserProfile(@RequestBody UserDto userDto) {
+        // Validate firstName
+        if (userDto.getFirstName() == null || userDto.getFirstName().trim().isEmpty()) {
+            return ResponseEntity.badRequest().body(null);
+        }
+        // Validate username
+        String username = userDto.getUsername();
+        if (username == null || !username.startsWith("@") || username.length() < 5) {
+            return ResponseEntity.badRequest().body(null);
+        }
+        // Check for at least 2 special characters or numbers (not letters)
+        int specialOrDigitCount = 0;
+        for (char c : username.toCharArray()) {
+            if (!Character.isLetter(c)) {
+                specialOrDigitCount++;
+            }
+        }
+        if (specialOrDigitCount < 2) {
+            return ResponseEntity.badRequest().body(null);
+        }
+        UserDto createdUser = profileService.createUserProfile(userDto);
+        return ResponseEntity.ok(createdUser);
     }
 
     @DeleteMapping("/{userId}")

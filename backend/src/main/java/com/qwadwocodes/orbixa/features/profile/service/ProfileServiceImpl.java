@@ -127,13 +127,30 @@ public class ProfileServiceImpl implements ProfileService {
         userRepository.delete(user);
     }
 
+    @Override
+    public UserDto createUserProfile(UserDto userDto) {
+        User user = User.builder()
+            .firstName(userDto.getFirstName())
+            .otherName(userDto.getOtherName())
+            .phoneNumber(userDto.getPhoneNumber())
+            .profilePictureUrl(userDto.getProfilePictureUrl())
+            .username(userDto.getUsername())
+            .createdAt(LocalDateTime.now())
+            .updatedAt(LocalDateTime.now())
+            .build();
+        User savedUser = userRepository.save(user);
+        return convertToDto(savedUser);
+    }
+
     // Helper method to convert User entity to UserDto
     private UserDto convertToDto(User user) {
         return new UserDto(
             user.getId(),
             user.getFirstName(),
+            user.getOtherName(),
             user.getPhoneNumber(),
-            user.getProfilePictureUrl()
+            user.getProfilePictureUrl(),
+            user.getUsername()
         );
     }
 

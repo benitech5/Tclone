@@ -10,15 +10,17 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
+  Button,
 } from 'react-native';
 import { CompositeNavigationProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AuthStackParamList, RootStackParamList } from '../../types/navigation';
 import { useTheme } from '../../ThemeContext';
 import { useAppDispatch, useAppSelector } from '../../store/store';
-import { updateProfile } from '../../store/authSlice';
+import { login } from '../../store/authSlice';
 import Icon from 'react-native-vector-icons/Ionicons';
 import * as ImagePicker from 'expo-image-picker';
+import axios from 'axios';
 
 type ProfileSetupNavigationProp = CompositeNavigationProp<
   NativeStackNavigationProp<AuthStackParamList, 'ProfileSetup'>,
@@ -42,6 +44,9 @@ const ProfileSetupScreen: React.FC<ProfileSetupScreenProps> = ({ navigation, rou
 
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
+  const [otherName, setOtherName] = useState('');
+  const [firstNameError, setFirstNameError] = useState('');
+  const [lastNameError, setLastNameError] = useState('');
   const [username, setUsername] = useState('');
   const [bio, setBio] = useState('');
   const [profileImage, setProfileImage] = useState<string | null>(null);
@@ -113,9 +118,36 @@ const ProfileSetupScreen: React.FC<ProfileSetupScreenProps> = ({ navigation, rou
     setUsername(`${base}${randomNum}`);
   };
 
+  const validateName = (name: string) => {
+    // Only allow letters, spaces, hyphens, and apostrophes
+    return /^[A-Za-z\s\-']{4,}$/.test(name);
+  };
+
+  const handleFirstNameChange = (text: string) => {
+    setFirstName(text);
+    if (!validateName(text)) {
+      setFirstNameError('First name must be at least 4 letters and contain only valid characters');
+    } else {
+      setFirstNameError('');
+    }
+  };
+  const handleLastNameChange = (text: string) => {
+    setLastName(text);
+    if (!validateName(text)) {
+      setLastNameError('Last name must be at least 4 letters and contain only valid characters');
+    } else {
+      setLastNameError('');
+    }
+  };
+
   const handleSave = async () => {
     if (!firstName.trim()) {
       Alert.alert('Error', 'First name is required');
+      return;
+    }
+
+    if (!lastName.trim()) {
+      Alert.alert('Error', 'Last name is required');
       return;
     }
 
@@ -127,35 +159,39 @@ const ProfileSetupScreen: React.FC<ProfileSetupScreenProps> = ({ navigation, rou
     setIsLoading(true);
 
     try {
-      // TODO: Call backend API to update profile
       const profileData = {
         firstName: firstName.trim(),
-        lastName: lastName.trim(),
+        otherName: otherName.trim() || null,
         username: username.trim(),
-        bio: bio.trim(),
-        profileImage,
+        profilePictureUrl: profileImage || null,
         phoneNumber,
       };
-
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      // Update Redux store
-      dispatch(updateProfile(profileData));
+      console.log('Profile data being sent:', profileData);
+      // Call backend API to create user profile
+      const response = await axios.post('http://192.168.188.18:8082/api/user', profileData);
+      console.log('Profile save response:', response.data);
+      // Optionally, you can use response.data if you want to update Redux with backend data
+      dispatch(login(response.data));
 
       // Navigate to main app
       navigation.reset({
         index: 0,
-        routes: [{ name: 'Main' as never }],
+        routes: [{ name: 'Main' }],
       });
     } catch (error) {
+      console.log('Profile save error:', error.response || error);
       Alert.alert('Error', 'Failed to save profile');
     } finally {
       setIsLoading(false);
     }
   };
 
-  const isFormValid = firstName.trim() && username.trim();
+  const isFormValid =
+    firstName.trim().length >= 4 &&
+    lastName.trim().length >= 4 &&
+    !firstNameError &&
+    !lastNameError &&
+    username.trim();
 
   return (
     <KeyboardAvoidingView 
@@ -199,15 +235,16 @@ const ProfileSetupScreen: React.FC<ProfileSetupScreenProps> = ({ navigation, rou
                 borderColor: theme.border 
               }]}
               value={firstName}
-              onChangeText={setFirstName}
+              onChangeText={handleFirstNameChange}
               placeholder="Enter your first name"
               placeholderTextColor={theme.subtext}
               autoFocus
             />
+            {firstNameError ? <Text style={{ color: 'red', fontSize: 12 }}>{firstNameError}</Text> : null}
           </View>
 
           <View style={styles.inputGroup}>
-            <Text style={[styles.label, { color: theme.text }]}>Last Name</Text>
+            <Text style={[styles.label, { color: theme.text }]}>Last Name *</Text>
             <TextInput
               style={[styles.input, { 
                 backgroundColor: theme.card, 
@@ -215,8 +252,24 @@ const ProfileSetupScreen: React.FC<ProfileSetupScreenProps> = ({ navigation, rou
                 borderColor: theme.border 
               }]}
               value={lastName}
-              onChangeText={setLastName}
+              onChangeText={handleLastNameChange}
               placeholder="Enter your last name"
+              placeholderTextColor={theme.subtext}
+            />
+            {lastNameError ? <Text style={{ color: 'red', fontSize: 12 }}>{lastNameError}</Text> : null}
+          </View>
+
+          <View style={styles.inputGroup}>
+            <Text style={[styles.label, { color: theme.text }]}>Other Name (optional)</Text>
+            <TextInput
+              style={[styles.input, { 
+                backgroundColor: theme.card, 
+                color: theme.text,
+                borderColor: theme.border 
+              }]}
+              value={otherName}
+              onChangeText={setOtherName}
+              placeholder="Enter your other name (optional)"
               placeholderTextColor={theme.subtext}
             />
           </View>
@@ -267,23 +320,11 @@ const ProfileSetupScreen: React.FC<ProfileSetupScreenProps> = ({ navigation, rou
         </View>
 
         {/* Save Button */}
-        <TouchableOpacity
-          style={[
-            styles.saveButton,
-            { 
-              backgroundColor: isFormValid ? theme.primary : theme.border,
-              opacity: isFormValid ? 1 : 0.6
-            }
-          ]}
+        <Button
+          title={isLoading ? 'Saving...' : 'Save'}
           onPress={handleSave}
           disabled={!isFormValid || isLoading}
-        >
-          {isLoading ? (
-            <Text style={styles.saveButtonText}>Saving...</Text>
-          ) : (
-            <Text style={styles.saveButtonText}>Save Profile</Text>
-          )}
-        </TouchableOpacity>
+        />
       </ScrollView>
     </KeyboardAvoidingView>
   );
