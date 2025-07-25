@@ -1,14 +1,16 @@
-import axios from 'axios';
+// import axios from 'axios';
 
 // Replace 'YOUR_COMPUThER_IP' with your actual computer's IP address
 // You can find this by running 'ipconfig' in Windows Command Prompt
-const API_URL = 'http://192.168.123.32:8080/api/auth';
+// const API_URL = 'http://192.168.123.32:8080/api/auth';
 
 export const requestOtp = async (phoneNumber: string, name: string) => {
-    return axios.post(`${API_URL}/request-otp`, { phoneNumber, name });
+  // return axios.post(`${API_URL}/request-otp`, { phoneNumber, name });
+  return Promise.resolve({ data: { message: "OTP request disabled" } });
 };
 
 export const verifyOtp = async (phoneNumber: string, otp: string) => {
-    const response = await axios.post(`${API_URL}/verify-otp`, { phoneNumber, otp });
-    return response.data; // This should contain the token
+  // const response = await axios.post(`${API_URL}/verify-otp`, { phoneNumber, otp });
+  // return response.data; // This should contain the token
+  return Promise.resolve({ data: { message: "OTP verification disabled" } });
 };
