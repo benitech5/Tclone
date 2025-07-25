@@ -32,7 +32,7 @@ const PowerSavingScreen = () => {
           </Text>
         </Text>
         <View style={styles.row}>
-          <Text style={[styles.label, { color: theme.text }]}>Off when below {20}%</Text>
+          <Text style={[styles.label, { color: theme.text }]}>Off when below {batteryThreshold}%</Text>
           <Switch 
             value={powerSavingMode} 
             onValueChange={setPowerSavingMode}
@@ -42,17 +42,15 @@ const PowerSavingScreen = () => {
           <Text style={[styles.label, { color: theme.text }]}>On</Text>
         </View>
         <Slider 
-          style={{width: '100%'}} 
-          minimumValue={5} 
+          style={{width: '100%', marginTop: 10}} 
+          minimumValue={15} 
           maximumValue={50} 
           value={batteryThreshold} 
-          onValueChange={setBatteryThreshold}
+          onValueChange={value => setBatteryThreshold(Math.round(value))}
           minimumTrackTintColor={theme.accent} 
           thumbTintColor={theme.accent} 
         />
-        <Text style={[styles.infoText, { color: theme.subtext }]}>
-          Automatically reduce power usage and animations when your battery is below {20}%.
-        </Text>
+        <Text style={[styles.infoText, { color: theme.subtext }]}>Automatically reduce power usage and animations when your battery is below {batteryThreshold}%.</Text>
 
         {/* Power saving options */}
         <Text style={[styles.sectionHeader, { color: theme.accent }]}>Power saving options</Text>

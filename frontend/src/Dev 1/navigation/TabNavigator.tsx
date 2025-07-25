@@ -87,54 +87,65 @@ function CustomDrawerContent(props: any) {
   };
   
   return (
-    <DrawerContentScrollView {...props} style={{ backgroundColor: theme.background }}>
-      <View style={[styles.profileContainer, { backgroundColor: theme.accent, alignItems: 'left', 
-        paddingLeft: 30, borderRadius: 25 , marginBottom: 2, flex: 100}]}>
-        <View style={styles.avatarCircle} />
-        <Text style={styles.profileName}>Justin Philips,</Text>
-        <Text style={styles.profileNumber}>+233 657481924</Text>
+    <DrawerContentScrollView {...props} style={{ backgroundColor: theme.background }} contentContainerStyle={{ flexGrow: 1 }}>
+      <View style={{ flex: 1, flexGrow: 1 }}>
+        <View style={[
+          styles.profileContainer,
+          {
+            backgroundColor: theme.accent,
+            alignItems: 'flex-start',
+            paddingLeft: 30,
+            borderRadius: 20,
+            marginBottom: 2,
+            flex: 1,
+          }
+        ]}>
+          <View style={styles.avatarCircle} />
+          <Text style={styles.profileName}>Justin Philips,</Text>
+          <Text style={styles.profileNumber}>+233 657481924</Text>
+        </View>
+        <Pressable
+          style={({ pressed }) => [
+            { 
+              flexDirection: 'row', 
+              alignItems: 'center', 
+              padding: 16, 
+              opacity: pressed ? 0.5 : 1,
+              backgroundColor: theme.background,
+              marginHorizontal: 1,
+              marginVertical: 0,
+              borderRadius: 8,
+            }
+          ]}
+          onPress={handleAddAccount}
+        >
+          <Ionicons name="person-add" size={24} color={theme.text} style={{ marginRight: 20 }} />
+          <Text style={[styles.drawerItemText, { color: theme.text }]}>Add Account</Text>
+        </Pressable>  
+        {/* Horizontal line divider */}
+        <View style={{ height: 1, backgroundColor: '#ccc', marginVertical: 4, marginHorizontal:2 }} />
+        <DrawerItemList {...props} />
+        {/* Horizontal line divider above Logout */}
+        <View style={{ height: 1, backgroundColor: '#ccc', marginVertical: 4, marginHorizontal: 2 }} />
+        <Pressable
+          style={({ pressed }) => [
+            { 
+              flexDirection: 'row', 
+              alignItems: 'center', 
+              padding: 16, 
+              opacity: pressed ? 0.5 : 1,
+              backgroundColor: theme.background,
+              marginHorizontal: 1,
+              marginVertical: 0,
+              borderRadius: 0,
+            }
+          ]}
+          onPress={handleLogout}
+        >
+          <MaterialIcons name="logout" size={24} color={theme.text} style={{ marginRight: 20 }} />
+          <Text style={[styles.drawerItemText, { color: theme.text }]}>Logout</Text>
+        </Pressable>
       </View>
-      <Pressable
-        style={({ pressed }) => [
-          { 
-            flexDirection: 'row', 
-            alignItems: 'center', 
-            padding: 16, 
-            opacity: pressed ? 0.5 : 1,
-            backgroundColor: theme.card,
-            marginHorizontal: 1,
-            marginVertical: 2,
-            borderRadius: 8,
-          }
-        ]}
-        onPress={handleAddAccount}
-      >
-        <Ionicons name="person-add" size={24} color={theme.text} style={{ marginRight: 20 }} />
-        <Text style={[styles.drawerItemText, { color: theme.text }]}>Add Account</Text>
-      </Pressable>  
-      {/* Horizontal line divider */}
-      <View style={{ height: 1, backgroundColor: '#ccc', marginVertical: 4, marginHorizontal:2 }} />
-      <DrawerItemList {...props} />
-      {/* Horizontal line divider above Logout */}
-      <View style={{ height: 1, backgroundColor: '#ccc', marginVertical: 4, marginHorizontal: 2 }} />
-      <Pressable
-        style={({ pressed }) => [
-          { 
-            flexDirection: 'row', 
-            alignItems: 'center', 
-            padding: 16, 
-            opacity: pressed ? 0.5 : 1,
-            backgroundColor: theme.card,
-            marginHorizontal: 8,
-            marginVertical: 4,
-            borderRadius: 8,
-          }
-        ]}
-        onPress={handleLogout}
-      >
-        <MaterialIcons name="logout" size={24} color={theme.text} style={{ marginRight: 20 }} />
-        <Text style={[styles.drawerItemText, { color: theme.text }]}>Logout</Text>
-      </Pressable>
     </DrawerContentScrollView>
   );
 }
