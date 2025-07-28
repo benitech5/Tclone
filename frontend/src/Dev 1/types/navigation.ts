@@ -1,5 +1,5 @@
 // src/types/navigation.ts
-import { NavigatorScreenParams } from '@react-navigation/native';
+import { NavigatorScreenParams } from "@react-navigation/native";
 
 export type RootStackParamList = {
   Splash: undefined;
@@ -29,7 +29,11 @@ export type MainStackParamList = {
   SavedMessages: undefined;
   PinnedMessages: undefined;
   MediaShared: undefined;
-  Confirmation: { message: string; onConfirm: () => void; onCancel?: () => void };
+  Confirmation: {
+    message: string;
+    onConfirm: () => void;
+    onCancel?: () => void;
+  };
   Contacts: undefined;
   Calls: undefined;
   DataAndStorage: undefined;
@@ -54,4 +58,6 @@ export type MainStackParamList = {
   ChannelInfo: undefined;
   JoinRequests: undefined;
   PowerSaving: undefined;
+  StoryShow: { storyId: string };
+  AddStory: undefined;
 };

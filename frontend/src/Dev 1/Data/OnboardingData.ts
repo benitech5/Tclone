@@ -1,17 +1,18 @@
 export const onboardingData = [
-    {
-        title: 'Orbixa',
-        FontFamily: 'Roboto',
-        FontSize: 30,
-        description: 'Connecting people securely',
-    },
-    {
-        title: 'Fast & Reliable',
-        description: 'Chat, call, and share instantly with zero downtime.',
-    },
-    {
-        title: 'Your Privacy, Your Power',
-        description: 'End-to-end encryption ensures only you control your data.',
-    },
-    
+  {
+    title: "Orbixa",
+    FontFamily: "Roboto",
+    description:
+      "A convenient and effective messaging platform. It is free and reliable.",
+  },
+  {
+    title: "Fast & Reliable",
+    description:
+      "Orbixa delivers messages at lightning speed, ensuring your chats and media reach their destination instantly without any lag.",
+  },
+  {
+    title: "Free",
+    description:
+      "Orbixa is completely free to download and use with unlimited storage for chats and media",
+  },
 ];
