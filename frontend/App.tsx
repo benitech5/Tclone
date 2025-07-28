@@ -7,6 +7,25 @@ import { ThemeProvider } from "./src/Dev 1/ThemeContext";
 import { SettingsProvider } from "./src/Dev 1/SettingsContext";
 import ErrorBoundary from "./src/Dev 1/components/ErrorBoundary";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+// i18n imports
+import "./src/Dev 1/i18n";
+import { I18nextProvider, useTranslation } from "react-i18next";
+import i18n from "./src/Dev 1/i18n";
+import { Text } from "react-native";
+
+function DemoWelcome() {
+  const { t } = useTranslation();
+  return (
+    <>
+      {/* Example: Remove this after confirming i18n works */}
+      <React.Fragment>
+        <Text style={{ textAlign: "center", marginTop: 20, fontSize: 18 }}>
+          {t("welcome")}
+        </Text>
+      </React.Fragment>
+    </>
+  );
+}
 
 export default function App() {
   return (
@@ -15,9 +34,13 @@ export default function App() {
         <Provider store={store}>
           <ThemeProvider>
             <SettingsProvider>
-              <NavigationContainer>
-                <AppNavigator />
-              </NavigationContainer>
+              <I18nextProvider i18n={i18n}>
+                <NavigationContainer>
+                  {/* Demo translation, remove after confirming */}
+                  {/* <DemoWelcome /> */}
+                  <AppNavigator />
+                </NavigationContainer>
+              </I18nextProvider>
             </SettingsProvider>
           </ThemeProvider>
         </Provider>
