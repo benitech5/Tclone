@@ -1,17 +1,17 @@
 export const onboardingData = [
     {
-        title: 'Orbixa',
+        title: 'ORBIXA',
         FontFamily: 'Roboto',
         FontSize: 30,
-        description: 'Connecting people securely',
+        description: 'stay connected effortlessly with a strong and reliable messaging app-built to last ',
     },
     {
         title: 'Fast & Reliable',
-        description: 'Chat, call, and share instantly with zero downtime.',
+        description: 'ensures that your chats are safe from malicious intruders and parties',
     },
     {
         title: 'Your Privacy, Your Power',
-        description: 'End-to-end encryption ensures only you control your data.',
+        description: 'is a high-performance messaging app that delivers your messages instantly and optimizes data usage. Enjoy a seamless,uninterrupted experience-communicate quickly and reliably every time',
     },
     
 ];

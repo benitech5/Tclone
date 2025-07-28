@@ -41,7 +41,7 @@ const OnboardingScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
             <View style={styles.textContainer}>
                 <Text style={styles.title}>{item.title.toUpperCase()}</Text>
                 <Text style={styles.description}>
-                    <Text style={{ fontWeight: 'bold' }}>Orbixa</Text> delivers messages at lightning speed, ensuring your chats and media reach their destination instantly without any lag.
+                    <Text style={{ fontWeight: 'bold' }}>ORBIXA</Text> {item.description}
                 </Text>
             </View>
         </View>
