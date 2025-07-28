@@ -170,14 +170,6 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
           route: 'ChatSettings',
         },
         {
-          id: 'theme',
-          title: 'Theme',
-          subtitle: 'Light, Dark, or System',
-          icon: 'color-palette',
-          type: 'navigate',
-          route: 'Theme',
-        },
-        {
           id: 'chat-folders',
           title: 'Chat Folders',
           subtitle: 'Organize your chats',
@@ -350,19 +342,31 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
         {settingsSections.map((section) => (
           <View key={section.id} style={styles.section}>
             {renderSectionHeader({ item: section })}
-            {section.items.map((settingsItem) => (
-              <View key={settingsItem.id}>
-                {renderSettingsItem({ item: settingsItem })}
+            {section.items.map((item) => (
+              <View key={item.id}>
+                {renderSettingsItem({ item })}
               </View>
             ))}
           </View>
         ))}
 
-        {/* App Version */}
-        <View style={styles.versionContainer}>
-          <Text style={[styles.versionText, { color: theme.subtext }]}>
-            App Version 1.0.0
-          </Text>
+        {/* Help Section */}
+        <View style={[styles.section, { backgroundColor: theme.card, borderColor: theme.border }]}>
+          <Text style={[styles.sectionHeader, { color: theme.accent }]}>Help</Text>
+          {[
+            'Ask a Question',
+            'Convo FAQ',
+            'Privacy Policy'
+          ].map((item, index) => (
+            <TouchableOpacity 
+              key={index} 
+              style={[styles.menuItem, { borderColor: theme.border }]}
+              onPress={() => navigation.navigate(item.replace(/\s+/g, '') as any)}
+            >
+              <Text style={[styles.menuItemText, { color: theme.text }]}>{item}</Text>
+              <Icon name="chevron-forward" size={18} color={theme.subtext} />
+            </TouchableOpacity>
+          ))}
         </View>
       </ScrollView>
     </View>
@@ -456,6 +460,19 @@ const styles = StyleSheet.create({
   },
   versionText: {
     fontSize: 14,
+  },
+  menuItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  menuItemText: {
+    fontSize: 16,
+    fontWeight: '500',
   },
 });
 

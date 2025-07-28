@@ -8,6 +8,7 @@ import SettingsHeader from './SettingsHeader';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAppSelector } from '../../store/store';
+import { API_ENDPOINTS } from '../../api/config';
 
 const ChatSettingsScreen = () => {
   const { theme, toggleTheme, isDarkMode } = useTheme();
@@ -18,7 +19,7 @@ const ChatSettingsScreen = () => {
   const fetchSettings = async () => {
     try {
       const token = await AsyncStorage.getItem('token');
-      const response = await axios.get(`http://192.168.96.216:8082/api/settings/user/${user?.id}/map`, {
+      const response = await axios.get(`${API_ENDPOINTS.SETTINGS}/user/${user?.id}/map`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       // Update local settings state with response.data
@@ -28,7 +29,7 @@ const ChatSettingsScreen = () => {
   const updateSetting = async (key, value) => {
     try {
       const token = await AsyncStorage.getItem('token');
-      const response = await axios.post(`http://192.168.96.216:8082/api/settings/user/${user?.id}`, null, {
+      const response = await axios.post(`${API_ENDPOINTS.SETTINGS}/user/${user?.id}`, null, {
         params: { key, value },
         headers: { Authorization: `Bearer ${token}` }
       });

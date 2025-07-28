@@ -8,7 +8,7 @@
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "splash": {
-      "image": "./assets/avatars/konvologo.png",
+      "image": "./assets/avatars/orbixa.png",
       "resizeMode": "contain",
       "backgroundColor": "#000000"
     },

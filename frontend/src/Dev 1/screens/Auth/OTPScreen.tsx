@@ -6,8 +6,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AuthStackParamList } from '../../types/navigation';
 import { useAppDispatch } from '../../store/store';
 import { login } from '../../store/authSlice';
-import { verifyOtp } from '../../api/AuthService';
-import { checkUserExists } from '../../api/AuthService';
+import { verifyOtp, checkUserExists } from '../../api/AuthService';
 
 type OtpScreenNavigationProp = NativeStackNavigationProp<AuthStackParamList, 'Otp'>;
 type OtpScreenRouteProp = RouteProp<AuthStackParamList, 'Otp'>;
@@ -51,11 +50,9 @@ const OtpScreen = () => {
         setLoading(true);
         try {
             const data = await verifyOtp(phoneNumber, otpValue);
-            // Save JWT and user info
             await AsyncStorage.setItem('token', data.token);
             await AsyncStorage.setItem('user', JSON.stringify(data.user));
             dispatch(login(data.user));
-            // Check if user exists in backend
             const exists = await checkUserExists(phoneNumber);
             setLoading(false);
             if (exists) {
@@ -101,15 +98,29 @@ const OtpScreen = () => {
                 ))}
             </View>
             {error ? <Text style={styles.error}>{error}</Text> : null}
-            {loading ? <ActivityIndicator size="large" color="#007AFF" style={{ marginBottom: 10 }} /> : null}
-            <Button title="Verify OTP" onPress={handleVerify} disabled={loading} />
-            <Button title="Back to Login" onPress={() => navigation.goBack()} color="#999" />
+            {loading ? <ActivityIndicator size="large" color="#dc1432ff" style={{ marginBottom: 10 }} /> : null}
+            <View style={[styles.verifyButtonWrapper,{width: '70%', alignSelf: 'center'}]}>
+                <Button
+                    title="Verify OTP"
+                    onPress={handleVerify}
+                    color="#dc1432ff"
+                    disabled={loading}
+                />
+            </View>
+            <View style={[styles.backButtonWrapper,{width: '70%', alignSelf: 'center'}]}>
+                <Button
+                    title="Back to Login"
+                    onPress={() => navigation.goBack()}
+                    color="#5A646F"
+                    disabled={loading}
+                />
+            </View>
         </View>
     );
 };
 
 const styles = StyleSheet.create({
-    container: { flex: 1, justifyContent: 'center', padding: 20 },
+    container: { flex: 1, justifyContent: 'center', padding: 20 ,},
     title: { fontSize: 22, marginBottom: 10, textAlign: 'center' },
     subtitle: { fontSize: 16, color: '#666', marginBottom: 20, textAlign: 'center' },
     otpContainer: {
@@ -119,15 +130,25 @@ const styles = StyleSheet.create({
     },
     otpInput: {
         width: 45,
-        height: 60,
+        height: 50,
         borderWidth: 1,
         borderColor: '#ccc',
-        borderRadius: 8,
+        borderRadius: 15,
         textAlign: 'center',
-        fontSize: 20,
+        fontSize: 25,
         marginHorizontal: 5,
     },
-    error: { color: 'red', marginBottom: 10, textAlign: 'center' },
+    error: { color: 'red', marginBottom: 1, textAlign: 'center' },
+    verifyButtonWrapper: {
+        borderRadius: 35,
+        overflow: 'hidden',
+        marginBottom: 5,
+    },
+    backButtonWrapper: {
+        borderRadius: 35,
+        overflow: 'hidden',
+        marginTop: 5,
+    },
 });
 
 export default OtpScreen;

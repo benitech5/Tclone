@@ -21,6 +21,7 @@ import { login } from '../../store/authSlice';
 import Icon from 'react-native-vector-icons/Ionicons';
 import * as ImagePicker from 'expo-image-picker';
 import axios from 'axios';
+import { API_ENDPOINTS } from '../../api/config';
 
 type ProfileSetupNavigationProp = CompositeNavigationProp<
   NativeStackNavigationProp<AuthStackParamList, 'ProfileSetup'>,
@@ -168,7 +169,7 @@ const ProfileSetupScreen: React.FC<ProfileSetupScreenProps> = ({ navigation, rou
       };
       console.log('Profile data being sent:', profileData);
       // Call backend API to create user profile
-      const response = await axios.post('http://192.168.188.18:8082/api/user', profileData);
+              const response = await axios.post(`${API_ENDPOINTS.USER}`, profileData);
       console.log('Profile save response:', response.data);
       // Optionally, you can use response.data if you want to update Redux with backend data
       dispatch(login(response.data));

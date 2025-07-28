@@ -84,8 +84,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     padding: 16,
-    marginBottom: 12,
-    borderRadius: 12,
+    marginBottom: 4,
+    borderRadius: 25,
     borderWidth: 1,
   },
   avatar: {
@@ -98,14 +98,14 @@ const styles = StyleSheet.create({
     marginRight: 16,
   },
   avatarText: {
-    fontSize: 20,
+    fontSize: 25,
     fontWeight: 'bold',
   },
   callInfo: {
     flex: 1,
   },
   callName: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 4,
   },
@@ -114,7 +114,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   callType: {
-    fontSize: 14,
+    fontSize: 15,
     marginLeft: 8,
   },
   callTime: {

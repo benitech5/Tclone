@@ -44,7 +44,6 @@ export type MainStackParamList = {
   DataAndStorage: undefined;
   Devices: undefined;
   Language: undefined;
-  Theme: undefined;
   ChatFolders: undefined;
   InviteFriends: { groupId?: string; groupName?: string };
   AddContact: undefined;

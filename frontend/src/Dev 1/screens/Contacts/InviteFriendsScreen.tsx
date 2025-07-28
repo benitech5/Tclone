@@ -269,37 +269,32 @@ const InviteFriendsScreen: React.FC<InviteFriendsScreenProps> = ({ navigation, r
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
-      {/* Header */}
-      <View style={[styles.header, { backgroundColor: theme.background }]}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={[styles.cancelButton, { color: theme.primary }]}>
-            Cancel
-          </Text>
-        </TouchableOpacity>
-        
-        <Text style={[styles.headerTitle, { color: theme.text }]}>
-          Invite Friends
-        </Text>
-        
-        {selectedContacts.length > 0 && (
-          <TouchableOpacity 
-            onPress={handleInviteSelectedContacts}
-            disabled={isInviting}
+      <Text style={[styles.title, { color: theme.text }]}>Invite Friends</Text>
+      <Text style={[styles.subtitle, { color: theme.subtext }]}>
+        Share Konvo with your friends and family
+      </Text>
+      
+      <ScrollView style={styles.optionsContainer}>
+        {inviteOptions.map((option) => (
+          <TouchableOpacity
+            key={option.id}
+            style={[styles.optionItem, { backgroundColor: theme.card, borderColor: theme.border }]}
           >
-            <Text style={[
-              styles.inviteButton,
-              { color: isInviting ? theme.subtext : theme.primary }
-            ]}>
-              {isInviting ? 'Inviting...' : `Invite (${selectedContacts.length})`}
-            </Text>
+            <View style={[styles.iconContainer, { backgroundColor: option.color }]}>
+              <Ionicons name={option.icon as any} size={24} color="#fff" />
+            </View>
+            <View style={styles.optionContent}>
+              <Text style={[styles.optionTitle, { color: theme.text }]}>{option.title}</Text>
+              <Text style={[styles.optionSubtitle, { color: theme.subtext }]}>{option.subtitle}</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color={theme.subtext} />
           </TouchableOpacity>
-        )}
-      </View>
-
-      {/* Invite Methods Section */}
-      <View style={styles.inviteMethodsSection}>
-        <Text style={[styles.sectionTitle, { color: theme.text }]}>
-          Quick Invite
+        ))}
+      </ScrollView>
+      
+      <View style={[styles.footer, { backgroundColor: theme.card, borderColor: theme.border }]}>
+        <Text style={[styles.footerText, { color: theme.subtext }]}>
+          Your friends will receive an invitation to join Konvo
         </Text>
         <FlatList
           data={inviteMethods}
@@ -403,8 +398,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     padding: 16,
-    marginVertical: 4,
+    marginBottom: 12,
     borderRadius: 12,
+    borderWidth: 1,
   },
   methodIcon: {
     width: 50,
@@ -417,10 +413,10 @@ const styles = StyleSheet.create({
   methodContent: {
     flex: 1,
   },
-  methodTitle: {
+  optionTitle: {
     fontSize: 16,
-    fontWeight: '500',
-    marginBottom: 2,
+    fontWeight: 'bold',
+    marginBottom: 4,
   },
   methodSubtitle: {
     fontSize: 14,
@@ -473,49 +469,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginRight: 16,
   },
-  contactAvatarText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    fontSize: 18,
-  },
-  contactInfo: {
-    flex: 1,
-  },
-  contactName: {
-    fontSize: 16,
-    fontWeight: '500',
-    marginBottom: 2,
-  },
-  contactPhone: {
+  footerText: {
     fontSize: 14,
-    marginBottom: 2,
-  },
-  alreadyMember: {
-    fontSize: 12,
-    fontWeight: '500',
-  },
-  checkbox: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    borderWidth: 2,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  bottomAction: {
-    padding: 16,
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(0,0,0,0.1)',
-  },
-  inviteAllButton: {
-    paddingVertical: 16,
-    borderRadius: 12,
-    alignItems: 'center',
-  },
-  inviteAllButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
+    textAlign: 'center',
   },
 });
 

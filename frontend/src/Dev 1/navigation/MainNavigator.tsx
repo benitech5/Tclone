@@ -31,7 +31,6 @@ import TabNavigator from './TabNavigator';
 import DataAndStorageScreen from '../screens/Settings/DataAndStorageScreen';
 import DevicesScreen from '../screens/Settings/DevicesScreen';
 import LanguageScreen from '../screens/Settings/LanguageScreen';
-import ThemeScreen from '../screens/Settings/ThemeScreen';
 import ChatFoldersScreen from '../screens/Settings/ChatFoldersScreen';
 import AddContactScreen from '../screens/Contacts/AddContactScreen';
 import ContactProfileScreen from '../screens/Contacts/ContactProfileScreen';
@@ -87,7 +86,6 @@ export const MainNavigator = () => (
     <Stack.Screen name="DataAndStorage" component={DataAndStorageScreen} />
     <Stack.Screen name="Devices" component={DevicesScreen} />
     <Stack.Screen name="Language" component={LanguageScreen} />
-    <Stack.Screen name="Theme" component={ThemeScreen} />
     <Stack.Screen name="ChatFolders" component={ChatFoldersScreen} />
     <Stack.Screen name="InviteFriends" component={InviteFriendsScreen} />
     <Stack.Screen name="AddContact" component={AddContactScreen} />

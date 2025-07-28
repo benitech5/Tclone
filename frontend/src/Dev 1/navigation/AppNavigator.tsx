@@ -11,9 +11,10 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export const AppNavigator = () => (
   <Stack.Navigator
-    initialRouteName="Onboarding"
+    initialRouteName="Splash"
     screenOptions={{ headerShown: false }}
   >
+    <Stack.Screen name="Splash" component={SplashScreen} />
     <Stack.Screen name="Onboarding" component={OnboardingScreen} />
     <Stack.Screen name="Auth" component={AuthNavigator} />
     <Stack.Screen name="Main" component={MainNavigator} />
