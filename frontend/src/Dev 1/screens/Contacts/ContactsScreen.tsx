@@ -1,84 +1,274 @@
-import React from 'react';
-import { FlatList, StyleSheet, Text, View, Image, ImageSourcePropType, TouchableOpacity } from 'react-native';
-import { useTheme } from '../../ThemeContext';
+import React, { useState } from "react";
+import {
+  FlatList,
+  StyleSheet,
+  Text,
+  View,
+  Image,
+  TouchableOpacity,
+  SafeAreaView,
+  StatusBar,
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
+import AddContactScreen from "./AddContactScreen";
 
-// Mock data for contacts
+// Mock data for contacts based on the Figma design
 const mockContacts = [
-  { id: '1', name: 'Alice Johnson', phone: '+233 123456789', avatar: null },
-  { id: '2', name: 'Bob Smith', phone: '+233 987654321', avatar: null },
-  { id: '3', name: 'Carol Davis', phone: '+233 555666777', avatar: null },
-  { id: '4', name: 'David Wilson', phone: '+233 111222333', avatar: null },
-  { id: '5', name: 'Eva Brown', phone: '+233 444555666', avatar: null },
+  {
+    id: "1",
+    name: "Humphrey Oddo",
+    lastSeen: "last seen 3 minutes ago",
+    avatar: require("../../../../assets/avatars/everything/extema.jpeg"),
+  },
+  {
+    id: "2",
+    name: "Nasim Davids",
+    lastSeen: "last seen an hour ago",
+    avatar: require("../../../../assets/avatars/everything/fierycar.jpeg"),
+  },
+  {
+    id: "3",
+    name: "Edgar K. White",
+    lastSeen: "last seen 3 hours ago",
+    avatar: require("../../../../assets/avatars/everything/roro.jpeg"),
+  },
+  {
+    id: "4",
+    name: "Angella Reece",
+    lastSeen: "last seen yesterday at 19:16",
+    avatar: require("../../../../assets/avatars/everything/purpleroom.jpeg"),
+  },
+  {
+    id: "5",
+    name: "Christine Rudolph",
+    lastSeen: "last seen yesterday at 20:24",
+    avatar: require("../../../../assets/avatars/everything/Madara Uchiha.jpeg"),
+  },
+  {
+    id: "6",
+    name: "Maximillian Akuffo Saah",
+    lastSeen: "last seen within 1 month",
+    avatar: require("../../../../assets/avatars/everything/tennisballs.jpeg"),
+  },
+  {
+    id: "7",
+    name: "Emmanuel Amsterdam",
+    lastSeen: "last seen Jul 05 at 12:12",
+    avatar: require("../../../../assets/avatars/everything/lapee.jpeg"),
+  },
+  {
+    id: "8",
+    name: "Jordan Ambrosini",
+    lastSeen: "last seen recently",
+    avatar: require("../../../../assets/avatars/everything/wow.jpeg"),
+  },
+  {
+    id: "9",
+    name: "Victor Nacho Hernandez",
+    lastSeen: "last seen Feb 21 at 09:24",
+    avatar: require("../../../../assets/avatars/everything/jordan.jpeg"),
+  },
+  {
+    id: "10",
+    name: "Julio Gomez",
+    lastSeen: "last seen 3 hours ago",
+    avatar: require("../../../../assets/avatars/everything/O.jpeg"),
+  },
+  {
+    id: "11",
+    name: "Abdul Russel",
+    lastSeen: "last seen a long time ago",
+    avatar: require("../../../../assets/avatars/everything/gojo.jpeg"),
+  },
+  {
+    id: "12",
+    name: "~Michael Tyron",
+    lastSeen: "last seen within a year",
+    avatar: require("../../../../assets/avatars/everything/juliameme.jpeg"),
+  },
+  {
+    id: "13",
+    name: "Kurosaki Ichigo",
+    lastSeen: "last seen recently",
+    avatar: require("../../../../assets/avatars/everything/techrrt.jpeg"),
+  },
+];
+
+// Special entries for New Group and New Contacts
+const specialEntries = [
+  { id: "new-group", name: "New Group", icon: "people", type: "special" },
+  {
+    id: "new-contacts",
+    name: "New Contacts",
+    icon: "person-add",
+    type: "special",
+  },
+  {
+    id: "new-channel",
+    name: "New Channel",
+    icon: "chatbubbles-outline",
+    type: "special",
+  },
 ];
 
 const ContactsScreen = () => {
-  const { theme } = useTheme();
+  const navigation = useNavigation();
+  const [showAddContact, setShowAddContact] = useState(false);
 
-  const renderContact = ({ item }: { item: typeof mockContacts[0] }) => (
-    <TouchableOpacity style={[styles.contactItem, { backgroundColor: theme.card, borderColor: theme.border }]}>
-      <View style={styles.avatar}>
-        <Text style={[styles.avatarText, { color: theme.accent }]}>
-          {item.name.charAt(0).toUpperCase()}
-        </Text>
+  const handleAddContact = () => {
+    setShowAddContact(true);
+  };
+
+  const handleCloseAddContact = () => {
+    setShowAddContact(false);
+  };
+
+  const handleSpecialEntry = (item: any) => {
+    if (item.id === "new-group") {
+      navigation.navigate("NewGroup" as never);
+    } else if (item.id === "new-contacts") {
+      console.log("Add new contacts");
+    } else if (item.id === "new-channel") {
+      navigation.navigate("NewChannel" as never);
+    }
+  };
+
+  const handleContactPress = (contact: any) => {
+    // Handle contact selection
+    console.log("Selected contact:", contact.name);
+  };
+
+  const renderSpecialEntry = ({ item }: { item: any }) => (
+    <TouchableOpacity
+      style={styles.specialEntry}
+      onPress={() => handleSpecialEntry(item)}
+    >
+      <View style={styles.specialIcon}>
+        <Ionicons name={item.icon as any} size={24} color="#666" />
       </View>
+      <Text style={styles.specialText}>{item.name}</Text>
+    </TouchableOpacity>
+  );
+
+  const renderContact = ({ item }: { item: any }) => (
+    <TouchableOpacity
+      style={styles.contactItem}
+      onPress={() => handleContactPress(item)}
+    >
+      <Image source={item.avatar} style={styles.avatar} />
       <View style={styles.contactInfo}>
-        <Text style={[styles.contactName, { color: theme.text }]}>{item.name}</Text>
-        <Text style={[styles.contactPhone, { color: theme.subtext }]}>{item.phone}</Text>
+        <Text style={styles.contactName}>{item.name}</Text>
+        <Text style={styles.lastSeen}>{item.lastSeen}</Text>
       </View>
     </TouchableOpacity>
   );
 
+  const renderItem = ({ item }: { item: any }) => {
+    if (item.type === "special") {
+      return renderSpecialEntry({ item });
+    }
+    return renderContact({ item });
+  };
+
+  const allData = [...specialEntries, ...mockContacts];
+
   return (
-    <View style={[styles.container, { backgroundColor: theme.background }]}>
+    <SafeAreaView style={styles.container}>
+      {/* Contact List */}
       <FlatList
-        data={mockContacts}
-        renderItem={renderContact}
+        data={allData}
+        renderItem={renderItem}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.listContainer}
+        showsVerticalScrollIndicator={false}
       />
-    </View>
+
+      {/* Floating Action Button */}
+      <TouchableOpacity style={styles.fab} onPress={handleAddContact}>
+        <Ionicons name="person-add" size={24} color="#fff" />
+      </TouchableOpacity>
+
+      {/* Add Contact Modal */}
+      {showAddContact && <AddContactScreen onClose={handleCloseAddContact} />}
+    </SafeAreaView>
   );
 };
 
-// Stylesheet with proper typing
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: "#fff",
   },
+
   listContainer: {
-    padding: 16,
+    paddingTop: 8,
+  },
+  specialEntry: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    backgroundColor: "#fff",
+  },
+  specialIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "#f0f0f0",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 16,
+  },
+  specialText: {
+    fontSize: 16,
+    color: "#333",
+    fontWeight: "500",
   },
   contactItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 16,
-    marginBottom: 2,
-    borderRadius: 25,
-    borderWidth: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    backgroundColor: "#fff",
   },
   avatar: {
     width: 50,
     height: 50,
     borderRadius: 25,
-    backgroundColor: '#e1f5fe',
-    justifyContent: 'center',
-    alignItems: 'center',
     marginRight: 16,
-  },
-  avatarText: {
-    fontSize: 25,
-    fontWeight: 'bold',
   },
   contactInfo: {
     flex: 1,
   },
   contactName: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 4,
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#333",
+    marginBottom: 2,
   },
-  contactPhone: {
-    fontSize: 15,
+  lastSeen: {
+    fontSize: 14,
+    color: "#666",
+  },
+  fab: {
+    position: "absolute",
+    bottom: 20,
+    right: 20,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: "#dc143c",
+    justifyContent: "center",
+    alignItems: "center",
+    elevation: 8,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 4.65,
   },
 });
 

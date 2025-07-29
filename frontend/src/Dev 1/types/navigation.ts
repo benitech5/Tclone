@@ -1,5 +1,5 @@
 // src/types/navigation.ts
-import { NavigatorScreenParams } from '@react-navigation/native';
+import { NavigatorScreenParams } from "@react-navigation/native";
 
 export type RootStackParamList = {
   Splash: undefined;
@@ -29,7 +29,11 @@ export type MainStackParamList = {
   SavedMessages: undefined;
   PinnedMessages: undefined;
   MediaShared: undefined;
-  Confirmation: { message: string; onConfirm: () => void; onCancel?: () => void };
+  Confirmation: {
+    message: string;
+    onConfirm: () => void;
+    onCancel?: () => void;
+  };
   Contacts: undefined;
   Calls: undefined;
   DataAndStorage: undefined;
@@ -37,9 +41,9 @@ export type MainStackParamList = {
   Language: undefined;
   Theme: undefined;
   ChatFolders: undefined;
-  InviteFriends: undefined;
+  InviteFriends: { groupId: string; groupName: string };
   AddContact: undefined;
-  ContactProfile: undefined;
+  ContactProfile: { contactId: string };
   RecentCalls: undefined;
   CallInfo: undefined;
   GlobalSearch: undefined;
@@ -51,7 +55,11 @@ export type MainStackParamList = {
   GroupInfo: undefined;
   InviteToGroup: undefined;
   NewChannel: undefined;
-  ChannelInfo: undefined;
+  ChannelInfo: { channelId: string; channelName: string };
   JoinRequests: undefined;
   PowerSaving: undefined;
+  StoryShow: { storyId: string };
+  AddStory: undefined;
+  GroupChat: { groupId: string; groupName: string };
+  ChatRoom: { chatId: string; chatName: string };
 };

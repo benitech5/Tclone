@@ -1,4 +1,4 @@
-export const onboardingData = [
+export const onboardingData=[
     {
         title: 'ORBIXA',
         FontFamily: 'Roboto',
@@ -13,5 +13,4 @@ export const onboardingData = [
         title: 'Your Privacy, Your Power',
         description: 'is a high-performance messaging app that delivers your messages instantly and optimizes data usage. Enjoy a seamless,uninterrupted experience-communicate quickly and reliably every time',
     },
-    
-];
+]
