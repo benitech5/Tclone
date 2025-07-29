@@ -1,397 +1,200 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
   TextInput,
-  FlatList,
   TouchableOpacity,
   StyleSheet,
-  Alert,
-  Image,
-  KeyboardAvoidingView,
+  SafeAreaView,
+  StatusBar,
   Platform,
+  Image
 } from 'react-native';
-import { CompositeNavigationProp } from '@react-navigation/native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { MainStackParamList, RootStackParamList } from '../../types/navigation';
-import { useTheme } from '../../ThemeContext';
 import Icon from 'react-native-vector-icons/Ionicons';
-import axios from 'axios';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import SettingsHeader from '../Settings/SettingsHeader';
+import { useNavigation } from '@react-navigation/native';
 
-type NewGroupNavigationProp = CompositeNavigationProp<
-  NativeStackNavigationProp<MainStackParamList, 'NewGroup'>,
-  NativeStackNavigationProp<RootStackParamList>
->;
-
-interface NewGroupScreenProps {
-  navigation: NewGroupNavigationProp;
-}
-
-interface Contact {
-  id: string;
-  name: string;
-  phoneNumber: string;
-  avatar?: string;
-  isSelected: boolean;
-}
-
-const mockContacts: Contact[] = [
-  { id: '1', name: 'John Doe', phoneNumber: '+1234567890', isSelected: false },
-  { id: '2', name: 'Jane Smith', phoneNumber: '+1234567891', isSelected: false },
-  { id: '3', name: 'Mike Johnson', phoneNumber: '+1234567892', isSelected: false },
-  { id: '4', name: 'Sarah Wilson', phoneNumber: '+1234567893', isSelected: false },
-  { id: '5', name: 'Alex Brown', phoneNumber: '+1234567894', isSelected: false },
-  { id: '6', name: 'Emily Davis', phoneNumber: '+1234567895', isSelected: false },
-  { id: '7', name: 'David Miller', phoneNumber: '+1234567896', isSelected: false },
-  { id: '8', name: 'Lisa Garcia', phoneNumber: '+1234567897', isSelected: false },
-];
-
-const NewGroupScreen: React.FC<NewGroupScreenProps> = ({ navigation }) => {
-  const { theme } = useTheme();
-  
-  const [contacts, setContacts] = useState<Contact[]>(mockContacts);
+const NewGroupScreen: React.FC = () => {
+  const navigation = useNavigation();
   const [groupName, setGroupName] = useState('');
   const [groupDescription, setGroupDescription] = useState('');
-  const [isCreating, setIsCreating] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [groupImage, setGroupImage] = useState(null);
 
-  const selectedContacts = contacts.filter(contact => contact.isSelected);
-
-  const handleContactToggle = (contactId: string) => {
-    setContacts(prev => prev.map(contact => 
-      contact.id === contactId 
-        ? { ...contact, isSelected: !contact.isSelected }
-        : contact
-    ));
+  // Placeholder for picking image
+  const handlePickImage = () => {
+    // TODO: Implement image picker
   };
 
-  const handleRemoveContact = (contactId: string) => {
-    setContacts(prev => prev.map(contact => 
-      contact.id === contactId 
-        ? { ...contact, isSelected: false }
-        : contact
-    ));
+  // Placeholder for emoji picker
+  const handlePickEmoji = () => {
+    // TODO: Implement emoji picker
   };
 
-  const filteredContacts = contacts.filter(contact =>
-    contact.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    contact.phoneNumber.includes(searchQuery)
-  );
-
-  const handleCreateGroup = async () => {
-    if (!groupName.trim()) {
-      Alert.alert('Error', 'Please enter a group name');
-      return;
-    }
-
-    if (selectedContacts.length === 0) {
-      Alert.alert('Error', 'Please select at least one contact');
-      return;
-    }
-
-    setIsCreating(true);
-
-    try {
-      const token = await AsyncStorage.getItem('token');
-      const groupData = {
-        title: groupName.trim(),
-        description: groupDescription.trim(),
-        members: selectedContacts.map(c => c.id),
-        type: 'GROUP',
-        createdAt: new Date().toISOString(),
-      };
-      const response = await axios.post('http://192.168.96.216:8082/api/chats', groupData, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      const newGroup = response.data;
-      Alert.alert('Success', `Group "${groupName}" created successfully!`);
-      navigation.navigate('GroupChat', {
-        groupId: newGroup.id,
-        groupName: newGroup.title,
-      });
-    } catch (error) {
-      Alert.alert('Error', 'Failed to create group. Please try again.');
-    } finally {
-      setIsCreating(false);
-    }
+  // Placeholder for submit
+  const handleSubmit = () => {
+    // TODO: Implement group creation logic
   };
-
-  const renderSelectedContact = ({ item }: { item: Contact }) => (
-    <TouchableOpacity
-      style={styles.selectedContact}
-      onPress={() => handleRemoveContact(item.id)}
-    >
-      <View style={[styles.selectedAvatar, { backgroundColor: theme.primary }]}>
-        <Text style={styles.selectedAvatarText}>
-          {item.name.charAt(0).toUpperCase()}
-        </Text>
-      </View>
-      <Text style={[styles.selectedName, { color: theme.text }]} numberOfLines={1}>
-        {item.name}
-      </Text>
-      <Icon name="close-circle" size={16} color={theme.subtext} />
-    </TouchableOpacity>
-  );
-
-  const renderContact = ({ item }: { item: Contact }) => (
-    <TouchableOpacity
-      style={[
-        styles.contactItem,
-        { backgroundColor: theme.card },
-        item.isSelected && { backgroundColor: theme.primary + '20' }
-      ]}
-      onPress={() => handleContactToggle(item.id)}
-    >
-      <View style={[styles.contactAvatar, { backgroundColor: theme.primary }]}>
-        <Text style={styles.contactAvatarText}>
-          {item.name.charAt(0).toUpperCase()}
-        </Text>
-      </View>
-      
-      <View style={styles.contactInfo}>
-        <Text style={[styles.contactName, { color: theme.text }]}>
-          {item.name}
-        </Text>
-        <Text style={[styles.contactPhone, { color: theme.subtext }]}>
-          {item.phoneNumber}
-        </Text>
-      </View>
-      
-      <View style={[
-        styles.checkbox,
-        { 
-          backgroundColor: item.isSelected ? theme.primary : 'transparent',
-          borderColor: item.isSelected ? theme.primary : theme.border
-        }
-      ]}>
-        {item.isSelected && (
-          <Icon name="checkmark" size={16} color="#fff" />
-        )}
-      </View>
-    </TouchableOpacity>
-  );
 
   return (
-    <KeyboardAvoidingView 
-      style={[styles.container, { backgroundColor: theme.background }]}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-    >
-      <SettingsHeader title="New Group" onBack={() => navigation.goBack()} />
+    <SafeAreaView style={styles.safeArea}>
+      <StatusBar barStyle="light-content" backgroundColor="#b30032" />
+      {/* Header */}
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.headerIcon}>
+          <Icon name="arrow-back" size={24} color="#fff" />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>New Group</Text>
+        <TouchableOpacity onPress={handleSubmit} style={styles.headerIcon}>
+          <Icon name="checkmark" size={28} color="#fff" />
+        </TouchableOpacity>
+      </View>
 
-      {/* Group Info Section */}
-      <View style={[styles.groupInfoSection, { backgroundColor: theme.card }]}>
-        <View style={styles.groupAvatar}>
-          <Icon name="people" size={32} color={theme.primary} />
-        </View>
-        
-        <View style={styles.groupInfo}>
-          <TextInput
-            style={[styles.groupNameInput, { color: theme.text }]}
-            value={groupName}
-            onChangeText={setGroupName}
-            placeholder="Group name"
-            placeholderTextColor={theme.subtext}
-            maxLength={50}
-          />
-          
-          <TextInput
-            style={[styles.groupDescriptionInput, { color: theme.text }]}
-            value={groupDescription}
-            onChangeText={setGroupDescription}
-            placeholder="Group description (optional)"
-            placeholderTextColor={theme.subtext}
-            multiline
-            maxLength={200}
-          />
+      {/* Group Avatar and Name */}
+      <View style={styles.groupInfoRow}>
+        <TouchableOpacity style={styles.avatarContainer} onPress={handlePickImage}>
+          <View style={styles.avatarCircle}>
+            <Icon name="camera" size={32} color="#b30032" />
+          </View>
+        </TouchableOpacity>
+        <View style={styles.groupNameInputContainer}>
+          <View style={styles.groupNameRow}>
+            <TextInput
+              style={styles.groupNameInput}
+              placeholder="Enter a group name"
+              placeholderTextColor="#888"
+              value={groupName}
+              onChangeText={setGroupName}
+            />
+            <TouchableOpacity onPress={handlePickEmoji}>
+              <Icon name="happy-outline" size={24} color="#888" />
+            </TouchableOpacity>
+          </View>
+          <View style={styles.underline} />
         </View>
       </View>
 
-      {/* Selected Contacts */}
-      {selectedContacts.length > 0 && (
-        <View style={styles.selectedSection}>
-          <Text style={[styles.sectionTitle, { color: theme.text }]}>
-            Selected ({selectedContacts.length})
-          </Text>
-          <FlatList
-            data={selectedContacts}
-            renderItem={renderSelectedContact}
-            keyExtractor={(item) => item.id}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.selectedList}
-          />
-        </View>
-      )}
-
-      {/* Search */}
-      <View style={[styles.searchContainer, { backgroundColor: theme.card }]}>
-        <Icon name="search" size={20} color={theme.subtext} style={styles.searchIcon} />
+      {/* Description */}
+      <View style={styles.descriptionSection}>
+        <Text style={styles.descriptionLabel}>Description</Text>
         <TextInput
-          style={[styles.searchInput, { color: theme.text }]}
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-          placeholder="Search contacts..."
-          placeholderTextColor={theme.subtext}
+          style={styles.descriptionInput}
+          placeholder="You can provide an optional description for your channel"
+          placeholderTextColor="#bbb"
+          value={groupDescription}
+          onChangeText={setGroupDescription}
+          multiline
         />
       </View>
 
-      {/* Contacts List */}
-      <FlatList
-        data={filteredContacts}
-        renderItem={renderContact}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.contactsList}
-        showsVerticalScrollIndicator={false}
-      />
-    </KeyboardAvoidingView>
+      {/* Floating Action Button */}
+      <TouchableOpacity style={styles.fab} onPress={handleSubmit}>
+        <Icon name="checkmark" size={28} color="#fff" />
+      </TouchableOpacity>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
+  safeArea: {
     flex: 1,
+    backgroundColor: '#fff',
   },
   header: {
+    backgroundColor: '#b30032',
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(0,0,0,0.1)',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingTop: Platform.OS === 'android' ? 30 : 0,
+    paddingBottom: 12,
+    height: 70,
   },
-  cancelButton: {
-    fontSize: 16,
-    fontWeight: '500',
+  headerIcon: {
+    padding: 8,
   },
   headerTitle: {
-    fontSize: 18,
-    fontWeight: '600',
+    color: '#fff',
+    fontSize: 20,
+    fontWeight: 'bold',
   },
-  createButton: {
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  groupInfoSection: {
+  groupInfoRow: {
     flexDirection: 'row',
-    padding: 16,
-    margin: 16,
-    borderRadius: 12,
-  },
-  groupAvatar: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: 'rgba(0,136,204,0.1)',
-    justifyContent: 'center',
     alignItems: 'center',
+    marginTop: 32,
+    marginBottom: 16,
+    paddingHorizontal: 24,
+  },
+  avatarContainer: {
     marginRight: 16,
   },
-  groupInfo: {
+  avatarCircle: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: '#fff',
+    borderWidth: 3,
+    borderColor: '#b30032',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  groupNameInputContainer: {
     flex: 1,
+    justifyContent: 'center',
+  },
+  groupNameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   groupNameInput: {
-    fontSize: 18,
-    fontWeight: '600',
-    marginBottom: 8,
-  },
-  groupDescriptionInput: {
-    fontSize: 14,
-    lineHeight: 20,
-  },
-  selectedSection: {
-    paddingHorizontal: 16,
-    marginBottom: 16,
-  },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    marginBottom: 12,
-  },
-  selectedList: {
-    paddingRight: 16,
-  },
-  selectedContact: {
-    alignItems: 'center',
-    marginRight: 16,
-    maxWidth: 80,
-  },
-  selectedAvatar: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 4,
-  },
-  selectedAvatarText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    fontSize: 18,
-  },
-  selectedName: {
-    fontSize: 12,
-    textAlign: 'center',
-    marginBottom: 4,
-  },
-  searchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginHorizontal: 16,
-    marginBottom: 16,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderRadius: 12,
-  },
-  searchIcon: {
-    marginRight: 12,
-  },
-  searchInput: {
     flex: 1,
-    fontSize: 16,
-  },
-  contactsList: {
-    paddingHorizontal: 16,
-  },
-  contactItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 16,
-    marginVertical: 4,
-    borderRadius: 12,
-  },
-  contactAvatar: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 16,
-  },
-  contactAvatarText: {
-    color: '#fff',
-    fontWeight: 'bold',
     fontSize: 18,
+    color: '#222',
+    paddingVertical: 0,
+    paddingRight: 8,
   },
-  contactInfo: {
-    flex: 1,
+  underline: {
+    height: 2,
+    backgroundColor: '#b30032',
+    marginTop: 2,
+    borderRadius: 2,
   },
-  contactName: {
+  descriptionSection: {
+    marginTop: 24,
+    paddingHorizontal: 24,
+  },
+  descriptionLabel: {
     fontSize: 16,
-    fontWeight: '500',
-    marginBottom: 2,
+    color: '#888',
+    marginBottom: 4,
+    fontWeight: 'bold',
   },
-  contactPhone: {
-    fontSize: 14,
+  descriptionInput: {
+    fontSize: 15,
+    color: '#444',
+    minHeight: 40,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+    paddingBottom: 8,
   },
-  checkbox: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    borderWidth: 2,
-    justifyContent: 'center',
+  fab: {
+    position: 'absolute',
+    right: 24,
+    bottom: 40,
+    backgroundColor: '#b30032',
+    width: 56,
+    height: 56,
+    borderRadius: 28,
     alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
   },
 });
 

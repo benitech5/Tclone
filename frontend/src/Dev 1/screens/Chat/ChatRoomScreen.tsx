@@ -11,6 +11,8 @@ import {
   Alert,
   ActivityIndicator,
   ActionSheetIOS,
+  Modal,
+  TouchableWithoutFeedback,
 } from 'react-native';
 import { CompositeNavigationProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -94,8 +96,10 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({ navigation, route }) =>
   
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(true); // default to true
   const flatListRef = useRef<FlatList>(null);
+  const [menuVisible, setMenuVisible] = useState(false);
 
   // Load messages from AsyncStorage on mount
   useEffect(() => {
@@ -120,21 +124,31 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({ navigation, route }) =>
   useEffect(() => {
     if (messages.length > 0) {
       AsyncStorage.setItem(`chat_messages_${chatId}`,
-        JSON.stringify(messages.map(msg => ({ ...msg, timestamp: msg.timestamp.toISOString() })))
+        JSON.stringify(messages.map(msg => ({
+          ...msg,
+          timestamp: msg.timestamp ? msg.timestamp.toISOString() : null
+        })))
       );
     }
   }, [messages, chatId]);
 
   useEffect(() => {
     const fetchMessages = async () => {
+      setIsLoading(true);
+      setError('');
       try {
         const token = await AsyncStorage.getItem('token');
-        const response = await axios.get(`http://192.168.96.216:8082/api/messages/chat/${chatId}`,
+        const response = await axios.get(`http://10.132.219.185:8082/api/messages/chat/${chatId}`,
           { headers: { Authorization: `Bearer ${token}` } });
         // Convert timestamp strings to Date objects
-        setMessages(response.data.map((msg: any) => ({ ...msg, timestamp: new Date(msg.timestamp), isMine: msg.senderId === user?.id })));
+        setMessages(response.data.map((msg: any) => ({
+          ...msg,
+          timestamp: msg.timestamp && !isNaN(Date.parse(msg.timestamp)) ? new Date(msg.timestamp) : null,
+          isMine: msg.senderId === user?.id
+        })));
       } catch (e) {
         // fallback to local
+        setError('Failed to load messages');
         const stored = await AsyncStorage.getItem(`chat_messages_${chatId}`);
         if (stored) {
           const parsed = JSON.parse(stored);
@@ -142,6 +156,8 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({ navigation, route }) =>
         } else {
           setMessages([]);
         }
+      } finally {
+        setIsLoading(false);
       }
     };
     fetchMessages();
@@ -164,26 +180,7 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({ navigation, route }) =>
           <TouchableOpacity 
             style={styles.headerButton}
             onPress={() => {
-              ActionSheetIOS.showActionSheetWithOptions({
-                options: ['View Details', 'Mute', 'Clear Chat', 'Delete Chat', 'Cancel'],
-                destructiveButtonIndex: 3,
-                cancelButtonIndex: 4,
-                title: chatName,
-              }, (buttonIndex) => {
-                if (buttonIndex === 0) {
-                  // View Details action
-                  Alert.alert('View Details', 'Show chat details here.');
-                } else if (buttonIndex === 1) {
-                  // Mute action
-                  Alert.alert('Mute', 'Chat muted.');
-                } else if (buttonIndex === 2) {
-                  // Clear Chat action
-                  setMessages([]);
-                } else if (buttonIndex === 3) {
-                  // Delete Chat action
-                  Alert.alert('Delete Chat', 'Chat deleted.');
-                }
-              });
+              setMenuVisible(true);
             }}
           >
             <Icon name="ellipsis-vertical" size={24} color={theme.text} />
@@ -204,7 +201,7 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({ navigation, route }) =>
       };
       try {
         const token = await AsyncStorage.getItem('token');
-        await axios.post(`http://192.168.96.216:8082/api/messages/chat/${chatId}`, message, {
+        await axios.post(`http://10.132.219.185:8082/api/messages/chat/${chatId}`, message, {
           headers: { Authorization: `Bearer ${token}` }
         });
         setMessages(prev => [
@@ -212,6 +209,9 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({ navigation, route }) =>
           ...prev
         ]);
         setNewMessage('');
+        setTimeout(() => {
+          flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
+        }, 100);
       } catch (e) {
         Alert.alert('Error', 'Failed to send message to backend. Message will be saved locally.');
         setMessages(prev => [
@@ -219,6 +219,9 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({ navigation, route }) =>
           ...prev
         ]);
         setNewMessage('');
+        setTimeout(() => {
+          flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
+        }, 100);
       }
     }
   };
@@ -274,67 +277,121 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({ navigation, route }) =>
           {item.content}
         </Text>
         <Text style={[styles.messageTime, { color: item.isMine ? 'rgba(255,255,255,0.7)' : theme.subtext }]}>
-          {item.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+          {item.timestamp ? item.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}
         </Text>
       </View>
     </View>
   );
 
-  const renderInputBar = () => (
-    <View style={[styles.inputContainer, { backgroundColor: theme.background }]}>
-      <TouchableOpacity style={styles.attachButton}>
-        <Icon name="add" size={24} color={theme.text} />
-      </TouchableOpacity>
-      
-      <View style={[styles.textInputContainer, { backgroundColor: theme.card }]}>
-        <TextInput
-          style={[styles.textInput, { color: theme.text }]}
-          value={newMessage}
-          onChangeText={setNewMessage}
-          placeholder="Type a message..."
-          placeholderTextColor={theme.subtext}
-          multiline
-          maxLength={1000}
-        />
+  const renderInputBar = () => {
+    console.log('Input value:', newMessage); // Debug log
+    return (
+      <View style={[styles.inputContainer, { backgroundColor: theme.background }]}> 
+        <TouchableOpacity style={styles.attachButton}>
+          <Icon name="add" size={24} color={theme.text} />
+        </TouchableOpacity>
+        <View style={[styles.textInputContainer, { backgroundColor: theme.card }]}> 
+          <TextInput
+            style={[styles.textInput, { color: theme.text }]}
+            value={newMessage}
+            onChangeText={setNewMessage}
+            placeholder="Type a message..."
+            placeholderTextColor={theme.subtext}
+            multiline
+            maxLength={1000}
+          />
+        </View>
+        {newMessage.trim().length > 0 ? (
+          <TouchableOpacity 
+            style={[styles.sendButton, { backgroundColor: 'red' }]} // Bright green for visibility
+            onPress={sendMessage}
+          >
+            <Icon name="send" size={20} color="#fff" />
+          </TouchableOpacity>
+        ) : (
+          <TouchableOpacity style={styles.micButton}>
+            <Icon name="mic" size={24} color={theme.text} />
+          </TouchableOpacity>
+        )}
       </View>
-      
-      {newMessage.trim() ? (
-        <TouchableOpacity 
-          style={[styles.sendButton, { backgroundColor: theme.primary }]}
-          onPress={sendMessage}
-        >
-          <Icon name="send" size={20} color="#fff" />
-        </TouchableOpacity>
-      ) : (
-        <TouchableOpacity style={styles.micButton}>
-          <Icon name="mic" size={24} color={theme.text} />
-        </TouchableOpacity>
-      )}
-    </View>
-  );
+    );
+  };
+
+  if (isLoading) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: theme.background }}>
+        <ActivityIndicator size="large" color={theme.accent} />
+      </View>
+    );
+  }
+  if (error) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: theme.background }}>
+        <Text style={{ color: theme.text }}>{error}</Text>
+      </View>
+    );
+  }
 
   return (
-    <KeyboardAvoidingView 
-      style={[styles.container, { backgroundColor: theme.background }]}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
-    >
-      <FlatList
-        ref={flatListRef}
-        data={messages}
-        renderItem={renderMessage}
-        keyExtractor={(item) => item.id}
-        inverted
-        contentContainerStyle={styles.messagesList}
-        showsVerticalScrollIndicator={false}
-        onEndReached={() => {
-          // TODO: Load older messages
-        }}
-        onEndReachedThreshold={0.1}
-      />
-      
-      {renderInputBar()}
-    </KeyboardAvoidingView>
+    <>
+      <KeyboardAvoidingView 
+        style={[styles.container, { backgroundColor: theme.background }]}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
+      >
+        <FlatList
+          ref={flatListRef}
+          data={messages}
+          renderItem={renderMessage}
+          keyExtractor={(item) => item.id}
+          inverted
+          contentContainerStyle={styles.messagesList}
+          showsVerticalScrollIndicator={false}
+          onEndReached={() => {
+            // TODO: Load older messages
+          }}
+          onEndReachedThreshold={0.1}
+        />
+        
+        {renderInputBar()}
+      </KeyboardAvoidingView>
+      <Modal
+        visible={menuVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setMenuVisible(false)}
+      >
+        <TouchableWithoutFeedback onPress={() => setMenuVisible(false)}>
+          <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.3)' }} />
+        </TouchableWithoutFeedback>
+        <View style={{ position: 'absolute', top: 60, right: 20, backgroundColor: '#fff', borderRadius: 8, elevation: 5, minWidth: 200 }}>
+          {[
+            { label: 'View contact', screen: 'ContactProfile' },
+            { label: 'Search', screen: 'SearchScreen' },
+            { label: 'New group', screen: 'New Group' }, // <-- update to real NewGroupScreen
+            { label: 'Media, links, and docs', screen: 'MediaSharedScreen' },
+            { label: 'Chat theme', screen: 'ChatSettingsScreen' },
+          ].map((item, idx) => (
+            <TouchableOpacity
+              key={item.label}
+              style={{ padding: 16, borderBottomWidth: idx < 4 ? 1 : 0, borderBottomColor: '#eee' }}
+              onPress={() => {
+                setMenuVisible(false);
+                navigation.navigate(item.screen);
+              }}
+            >
+              <Text style={{ color: '#222', fontSize: 16 }}>{item.label}</Text>
+            </TouchableOpacity>
+          ))}
+          <TouchableOpacity
+            style={{ padding: 16 }}
+            onPress={() => setMenuVisible(false)}
+          >
+            <Text style={{ color: 'red', fontSize: 16 }}>Cancel</Text>
+          </TouchableOpacity>
+        </View>
+      </Modal>
+    </>
   );
 };
 

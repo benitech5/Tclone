@@ -168,7 +168,7 @@ const ProfileSetupScreen: React.FC<ProfileSetupScreenProps> = ({ navigation, rou
       };
       console.log('Profile data being sent:', profileData);
       // Call backend API to create user profile
-      const response = await axios.post('http://192.168.188.18:8082/api/user', profileData);
+      const response = await axios.post('http://10.132.219.185:8082/api/user', profileData);
       console.log('Profile save response:', response.data);
       // Optionally, you can use response.data if you want to update Redux with backend data
       dispatch(login(response.data));

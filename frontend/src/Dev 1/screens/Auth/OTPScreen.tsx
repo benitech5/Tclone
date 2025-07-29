@@ -6,8 +6,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AuthStackParamList } from '../../types/navigation';
 import { useAppDispatch } from '../../store/store';
 import { login } from '../../store/authSlice';
-import { verifyOtp } from '../../api/AuthService';
-import { checkUserExists } from '../../api/AuthService';
+import { verifyOtp, checkUserExist } from '../../api/AuthService';
 
 type OtpScreenNavigationProp = NativeStackNavigationProp<AuthStackParamList, 'Otp'>;
 type OtpScreenRouteProp = RouteProp<AuthStackParamList, 'Otp'>;
@@ -56,9 +55,10 @@ const OtpScreen = () => {
             await AsyncStorage.setItem('user', JSON.stringify(data.user));
             dispatch(login(data.user));
             // Check if user exists in backend
-            const exists = await checkUserExists(phoneNumber);
+            const res = await checkUserExist(phoneNumber);
+            console.log('checkUserExist response:', res.data); // Debug log
             setLoading(false);
-            if (exists) {
+            if (res.data.exists) {
                 navigation.getParent()?.reset({
                     index: 0,
                     routes: [{ name: 'Main', params: { screen: 'Home' } }],

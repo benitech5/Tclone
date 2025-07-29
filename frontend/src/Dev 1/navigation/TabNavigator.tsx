@@ -15,6 +15,7 @@ import SavedMessagesScreen from '../screens/Chat/SavedMessagesScreen';
 import { useAppDispatch, useAppSelector } from '../store/store';
 import { logout } from '../store/authSlice';
 import { useTheme } from '../ThemeContext';
+import NewGroupScreen from '../screens/Other/NewGroupScreen';
 
 // Placeholder for Orbixa Features
 const OrbixaFeaturesScreen = () => {
@@ -42,16 +43,6 @@ const MyProfileScreen = () => {
   return (
     <View style={[styles.centered, { backgroundColor: theme.background }]}>
       <Text style={[styles.placeholderText, { color: theme.text }]}>My Profile (Placeholder)</Text>
-    </View>
-  );
-};
-
-// Placeholder for New Group
-const NewGroupScreen = () => {
-  const { theme } = useTheme();
-  return (
-    <View style={[styles.centered, { backgroundColor: theme.background }]}>
-      <Text style={[styles.placeholderText, { color: theme.text }]}>New Group (Placeholder)</Text>
     </View>
   );
 };
