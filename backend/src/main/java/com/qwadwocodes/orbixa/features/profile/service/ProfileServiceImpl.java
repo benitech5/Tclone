@@ -131,6 +131,7 @@ public class ProfileServiceImpl implements ProfileService {
     public UserDto createUserProfile(UserDto userDto) {
         User user = User.builder()
             .firstName(userDto.getFirstName())
+            .lastName(userDto.getLastName())
             .otherName(userDto.getOtherName())
             .phoneNumber(userDto.getPhoneNumber())
             .profilePictureUrl(userDto.getProfilePictureUrl())
@@ -147,6 +148,7 @@ public class ProfileServiceImpl implements ProfileService {
         return new UserDto(
             user.getId(),
             user.getFirstName(),
+            user.getLastName(),
             user.getOtherName(),
             user.getPhoneNumber(),
             user.getProfilePictureUrl(),

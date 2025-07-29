@@ -25,8 +25,7 @@ export type MainStackParamList = {
   Notifications: undefined;
   Profile: undefined;
   Account: undefined;
-  ChatRoom: { chatId: string; chatName: string };
-  ChatDetails: { chatId: string };
+  ChatDetails: { chatId: string; chatName: string };
   CallScreen: { callId: string; callerName: string; callType: 'audio' | 'video'; isIncoming: boolean };
   CallHistory: undefined;
   GroupChat: { groupId: string; groupName: string };

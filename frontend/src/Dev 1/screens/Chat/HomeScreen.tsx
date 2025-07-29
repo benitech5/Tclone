@@ -47,7 +47,7 @@ const HomeScreen: React.FC = ({ navigation }: any) => {
         styles.chatItem,
         { backgroundColor: theme.card }
       ]}
-      onPress={() => navigation.navigate('ChatRoom', { chatId: item.id, chatName: item.name })}
+      onPress={() => navigation.navigate('ChatDetails', { chatId: item.id, chatName: item.name })}
     >
       <View style={styles.avatar}>
         <Text style={styles.avatarText}>

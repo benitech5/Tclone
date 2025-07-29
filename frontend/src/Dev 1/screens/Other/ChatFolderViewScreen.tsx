@@ -182,12 +182,12 @@ const ChatFolderViewScreen: React.FC<ChatFolderViewScreenProps> = ({ navigation,
       });
     } else if (chat.type === 'channel') {
       // TODO: Navigate to channel chat
-      navigation.navigate('ChatRoom', {
+      navigation.navigate('ChatDetails', {
         chatId: chat.id,
         chatName: chat.name,
       });
     } else {
-      navigation.navigate('ChatRoom', {
+      navigation.navigate('ChatDetails', {
         chatId: chat.id,
         chatName: chat.name,
       });

@@ -15,6 +15,7 @@ import org.springframework.http.HttpStatus;
 
 import java.time.LocalDateTime;
 import java.util.Random;
+import java.util.Optional;
 
 @Service
 public class AuthServiceImpl implements AuthService {
@@ -61,16 +62,37 @@ public class AuthServiceImpl implements AuthService {
         }
 
         // Get user from database
-        User user = userRepository.findByPhoneNumber(request.getPhoneNumber())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
-
-        // Clear OTP from both Redis and database
-        otpService.deleteOtp(request.getPhoneNumber());
-        user.setOtp(null);
-        user.setOtpExpiry(null);
-        user.setLastSeen(LocalDateTime.now());
-        user.setOnline(true);
-        userRepository.save(user);
+        Optional<User> userOpt = userRepository.findByPhoneNumber(request.getPhoneNumber());
+        
+        User user;
+        if (userOpt.isPresent()) {
+            // Existing user
+            user = userOpt.get();
+            // Clear OTP from both Redis and database
+            otpService.deleteOtp(request.getPhoneNumber());
+            user.setOtp(null);
+            user.setOtpExpiry(null);
+            user.setLastSeen(LocalDateTime.now());
+            user.setOnline(true);
+            userRepository.save(user);
+        } else {
+            // New user - create temporary user for OTP verification
+            user = new User();
+            user.setPhoneNumber(request.getPhoneNumber());
+            user.setFirstName(""); // Will be set during profile setup
+            user.setLastName(""); // Will be set during profile setup
+            user.setUsername(""); // Will be set during profile setup
+            user.setCreatedAt(LocalDateTime.now());
+            user.setUpdatedAt(LocalDateTime.now());
+            user.setOnline(false);
+            user.setLastSeen(LocalDateTime.now());
+            
+            // Save the temporary user
+            user = userRepository.save(user);
+            
+            // Clear OTP from Redis
+            otpService.deleteOtp(request.getPhoneNumber());
+        }
 
         // Generate JWT token
         String token = jwtUtil.generateToken(user.getPhoneNumber());
@@ -79,6 +101,7 @@ public class AuthServiceImpl implements AuthService {
         UserDto userDto = new UserDto(
             user.getId(), 
             user.getFirstName(), 
+            user.getLastName(),
             user.getOtherName(),
             user.getPhoneNumber(), 
             user.getProfilePictureUrl(),

@@ -75,7 +75,7 @@ const ContactProfileScreen: React.FC<ContactProfileScreenProps> = ({ navigation,
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const handleStartChat = () => {
-    navigation.navigate('ChatRoom', {
+    navigation.navigate('ChatDetails', {
       chatId: contactId,
       chatName: contactInfo.name,
     });

@@ -4,7 +4,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { MainStackParamList, AuthStackParamList } from '../types/navigation';
 import HomeScreen from '../screens/Chat/HomeScreen';
 import ChatSettingsScreen from '../screens/Settings/ChatSettingsScreen';
-import ChatRoomScreen from '../screens/Chat/ChatRoomScreen';
+import ChatDetailsScreen from '../screens/Chat/ChatDetailsScreen';
 import SettingsScreen from '../screens/Settings/SettingsScreen';
 import NotificationsAndSoundsScreen from '../screens/Settings/NotificationsAndSoundsScreen';
 import ContactsScreen from '../screens/Contacts/ContactsScreen';
@@ -57,7 +57,7 @@ export const MainNavigator = () => (
     }}
   >
     <Stack.Screen name="Home" component={TabNavigator} />
-    <Stack.Screen name="ChatRoom" component={ChatRoomScreen} />
+    <Stack.Screen name="ChatDetails" component={ChatDetailsScreen} />
     <Stack.Screen name="Settings" component={SettingsScreen} />
     <Stack.Screen
       name="ChatSettings"

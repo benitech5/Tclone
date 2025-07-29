@@ -6,7 +6,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AuthStackParamList } from '../../types/navigation';
 import { useAppDispatch } from '../../store/store';
 import { login } from '../../store/authSlice';
-import { verifyOtp, checkUserExists } from '../../api/AuthService';
+import { verifyOtp } from '../../api/AuthService';
 
 type OtpScreenNavigationProp = NativeStackNavigationProp<AuthStackParamList, 'Otp'>;
 type OtpScreenRouteProp = RouteProp<AuthStackParamList, 'Otp'>;
@@ -50,21 +50,24 @@ const OtpScreen = () => {
         setLoading(true);
         try {
             const data = await verifyOtp(phoneNumber, otpValue);
+            console.log('OTP verification response:', data);
+            
+            // Save the fresh token and user data
+            console.log('Saving token to AsyncStorage:', data.token ? 'Token exists' : 'No token');
             await AsyncStorage.setItem('token', data.token);
             await AsyncStorage.setItem('user', JSON.stringify(data.user));
             dispatch(login(data.user));
-            const exists = await checkUserExists(phoneNumber);
+            
+            // Verify token was saved
+            const savedToken = await AsyncStorage.getItem('token');
+            console.log('Token saved verification:', savedToken ? 'Token saved successfully' : 'Token not saved');
+            
             setLoading(false);
-            if (exists) {
-                navigation.getParent()?.reset({
-                    index: 0,
-                    routes: [{ name: 'Main', params: { screen: 'Home' } }],
-                });
-            } else {
-                navigation.navigate('ProfileSetup', { phoneNumber });
-            }
+            // Navigate to ProfileSetup for new user profile creation
+            navigation.navigate('ProfileSetup', { phoneNumber });
         } catch (err: any) {
             setLoading(false);
+            console.log('OTP verification error:', err);
             if (err.response?.status === 400) {
                 setError('Invalid OTP. Please try again.');
             } else if (err.response?.status === 404) {

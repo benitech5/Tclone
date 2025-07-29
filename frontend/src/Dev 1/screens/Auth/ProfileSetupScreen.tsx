@@ -22,6 +22,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import * as ImagePicker from 'expo-image-picker';
 import axios from 'axios';
 import { API_ENDPOINTS } from '../../api/config';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 type ProfileSetupNavigationProp = CompositeNavigationProp<
   NativeStackNavigationProp<AuthStackParamList, 'ProfileSetup'>,
@@ -160,24 +161,39 @@ const ProfileSetupScreen: React.FC<ProfileSetupScreenProps> = ({ navigation, rou
     setIsLoading(true);
 
     try {
+      // Get the token from AsyncStorage (saved during OTP verification)
+      const token = await AsyncStorage.getItem('token');
+      console.log('Retrieved token from AsyncStorage:', token ? 'Token exists' : 'No token found');
+      
       const profileData = {
         firstName: firstName.trim(),
+        lastName: lastName.trim(),
         otherName: otherName.trim() || null,
         username: username.trim(),
         profilePictureUrl: profileImage || null,
         phoneNumber,
       };
       console.log('Profile data being sent:', profileData);
-      // Call backend API to create user profile
-              const response = await axios.post(`${API_ENDPOINTS.USER}`, profileData);
+      
+      let response;
+      if (token && !token.includes('_')) {
+        // If we have a valid token, use it for authenticated request
+        response = await axios.post(`${API_ENDPOINTS.USER}`, profileData, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+      } else {
+        // For new users without valid token, create profile without authentication
+        response = await axios.post(`${API_ENDPOINTS.USER}`, profileData);
+      }
+      
       console.log('Profile save response:', response.data);
-      // Optionally, you can use response.data if you want to update Redux with backend data
+      // Update Redux with the user data
       dispatch(login(response.data));
 
       // Navigate to main app
-      navigation.reset({
+      navigation.getParent()?.reset({
         index: 0,
-        routes: [{ name: 'Main' }],
+        routes: [{ name: 'Main', params: { screen: 'Home' } }],
       });
     } catch (error) {
       console.log('Profile save error:', error.response || error);

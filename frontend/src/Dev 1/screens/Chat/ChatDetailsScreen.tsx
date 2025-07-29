@@ -42,6 +42,7 @@ const ChatDetailsScreen: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const flatListRef = useRef<FlatList>(null);
 
+  // Load messages from AsyncStorage on mount
   useEffect(() => {
     const loadMessages = async () => {
       try {
@@ -59,6 +60,7 @@ const ChatDetailsScreen: React.FC = () => {
     loadMessages();
   }, [chatId]);
 
+  // Save messages to AsyncStorage whenever they change
   useEffect(() => {
     if (messages.length > 0) {
       AsyncStorage.setItem(`chat_messages_${chatId}`,
@@ -67,14 +69,20 @@ const ChatDetailsScreen: React.FC = () => {
     }
   }, [messages, chatId]);
 
+  // Fetch messages from backend
   useEffect(() => {
     const fetchMessages = async () => {
       try {
         const token = await AsyncStorage.getItem('token');
-        const response = await axios.get(`http://192.168.96.216:8082/api/messages/chat/${chatId}`,
+        const response = await axios.get(`http://192.168.188.31:8082/api/messages/chat/${chatId}`,
           { headers: { Authorization: `Bearer ${token}` } });
-        setMessages(response.data.map((msg: any) => ({ ...msg, timestamp: new Date(msg.timestamp), isMine: msg.senderId === user?.id })));
+        setMessages(response.data.map((msg: any) => ({ 
+          ...msg, 
+          timestamp: new Date(msg.timestamp), 
+          isMine: msg.senderId === user?.id 
+        })));
       } catch (e) {
+        // Fallback to local storage if API fails
         const stored = await AsyncStorage.getItem(`chat_messages_${chatId}`);
         if (stored) {
           const parsed = JSON.parse(stored);
@@ -85,8 +93,9 @@ const ChatDetailsScreen: React.FC = () => {
       }
     };
     fetchMessages();
-  }, [chatId]);
+  }, [chatId, user?.id]);
 
+  // Set up navigation header
   useEffect(() => {
     navigation.setOptions && navigation.setOptions({
       headerShown: true,
@@ -139,7 +148,7 @@ const ChatDetailsScreen: React.FC = () => {
       };
       try {
         const token = await AsyncStorage.getItem('token');
-        await axios.post(`http://192.168.96.216:8082/api/messages/chat/${chatId}`, message, {
+        await axios.post(`http://192.168.188.31:8082/api/messages/chat/${chatId}`, message, {
           headers: { Authorization: `Bearer ${token}` }
         });
         setMessages(prev => [
@@ -161,11 +170,14 @@ const ChatDetailsScreen: React.FC = () => {
   const reactToMessage = async (messageId: string, reaction: string) => {
     try {
       const token = await AsyncStorage.getItem('token');
-      await axios.post(`http://192.168.96.216:8082/api/messages/${messageId}/react`, null, {
+      await axios.post(`http://192.168.188.31:8082/api/messages/${messageId}/react`, null, {
         params: { reaction },
         headers: { Authorization: `Bearer ${token}` }
       });
-    } catch (e) {}
+      // Optionally refresh messages or update local state
+    } catch (e) {
+      console.error('Failed to react to message:', e);
+    }
   };
 
   const editMessage = async (messageId: string, updatedContent: string) => {
@@ -174,7 +186,15 @@ const ChatDetailsScreen: React.FC = () => {
       await axios.put(`http://192.168.96.216:8082/api/messages/${messageId}`, { content: updatedContent }, {
         headers: { Authorization: `Bearer ${token}` }
       });
-    } catch (e) {}
+      // Update local message state
+      setMessages(prev => prev.map(msg => 
+        msg.id === messageId 
+          ? { ...msg, content: updatedContent }
+          : msg
+      ));
+    } catch (e) {
+      console.error('Failed to edit message:', e);
+    }
   };
 
   const deleteMessage = async (messageId: string) => {
@@ -183,7 +203,11 @@ const ChatDetailsScreen: React.FC = () => {
       await axios.delete(`http://192.168.96.216:8082/api/messages/${messageId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-    } catch (e) {}
+      // Remove message from local state
+      setMessages(prev => prev.filter(msg => msg.id !== messageId));
+    } catch (e) {
+      console.error('Failed to delete message:', e);
+    }
   };
 
   const renderMessage = ({ item }: { item: Message }) => (
@@ -242,6 +266,14 @@ const ChatDetailsScreen: React.FC = () => {
       )}
     </View>
   );
+
+  if (isLoading) {
+    return (
+      <View style={[styles.container, { backgroundColor: theme.background, justifyContent: 'center', alignItems: 'center' }]}>
+        <ActivityIndicator size="large" color={theme.primary} />
+      </View>
+    );
+  }
 
   return (
     <KeyboardAvoidingView 

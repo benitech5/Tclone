@@ -395,7 +395,7 @@ const CallInfoScreen: React.FC<CallInfoScreenProps> = ({ navigation, route }) =>
             'chatbubble',
             'Send Message',
             'Send a message to this contact',
-            () => navigation.navigate('ChatRoom', { chatId: callInfo.contactId, chatName: callInfo.contactName }),
+            () => navigation.navigate('ChatDetails', { chatId: callInfo.contactId, chatName: callInfo.contactName }),
             '#2196F3'
           )}
           

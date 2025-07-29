@@ -182,13 +182,13 @@ const SearchScreen: React.FC<SearchScreenProps> = ({ navigation }) => {
     
     switch (result.type) {
       case 'chat':
-        navigation.navigate('ChatRoom', { 
+        navigation.navigate('ChatDetails', { 
           chatId: result.chatId!, 
           chatName: result.title 
         });
         break;
       case 'message':
-        navigation.navigate('ChatRoom', { 
+        navigation.navigate('ChatDetails', { 
           chatId: result.chatId!, 
           chatName: result.subtitle.replace('From: ', '') 
         });
