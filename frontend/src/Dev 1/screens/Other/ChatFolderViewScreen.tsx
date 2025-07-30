@@ -64,7 +64,7 @@ const mockFolderInfo: FolderInfo = {
   name: 'Work',
   description: 'All work-related conversations and project discussions',
   icon: 'briefcase',
-  color: '#2196F3',
+  color: '#DC143C',
   chatCount: 8,
   isDefault: false,
   isCustom: true,

@@ -10,6 +10,7 @@ import {
   ScrollView,
   Image,
   Animated,
+  TextInput,
 } from "react-native";
 import { CompositeNavigationProp } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -35,21 +36,12 @@ interface HomeScreenProps {
 const HomeScreen: React.FC = ({ navigation }: any) => {
   const { theme } = useTheme();
   const [groups, setGroups] = useState<any[]>([]);
+  const [filteredGroups, setFilteredGroups] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [activeTab, setActiveTab] = useState("All");
   const [storyUpdateTrigger, setStoryUpdateTrigger] = useState(0);
-
-  const tabList = [
-    { label: "All", key: "All" },
-    { label: "Important", key: "Important" },
-    { label: "Unread", key: "Unread" },
-  ];
-
-  const tabAnim = useRef(new Animated.Value(0)).current;
-  const [tabMeasurements, setTabMeasurements] = useState<
-    { x: number; width: number }[]
-  >([]);
+  const [isSearchActive, setIsSearchActive] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     const fetchGroups = async () => {
@@ -57,7 +49,15 @@ const HomeScreen: React.FC = ({ navigation }: any) => {
       setError("");
       try {
         const res = await getUserGroups();
-        setGroups(res.data);
+        // Add some mock data for demonstration
+        const groupsWithMockData = res.data.map((group: any) => ({
+          ...group,
+          isImportant: Math.random() > 0.7, // Randomly mark some as important
+          isPinned: Math.random() > 0.8, // Randomly mark some as pinned
+          unreadCount: Math.floor(Math.random() * 5), // Random unread count
+        }));
+        setGroups(groupsWithMockData);
+        setFilteredGroups(groupsWithMockData);
       } catch (err: any) {
         setError("Failed to load chats");
       } finally {
@@ -66,6 +66,19 @@ const HomeScreen: React.FC = ({ navigation }: any) => {
     };
     fetchGroups();
   }, []);
+
+  // Filter groups based on search query
+  useEffect(() => {
+    if (searchQuery.trim() === "") {
+      setFilteredGroups(groups);
+    } else {
+      const filtered = groups.filter(group =>
+        group.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (group.lastMessage && group.lastMessage.toLowerCase().includes(searchQuery.toLowerCase()))
+      );
+      setFilteredGroups(filtered);
+    }
+  }, [searchQuery, groups]);
 
   useFocusEffect(
     React.useCallback(() => {
@@ -77,15 +90,12 @@ const HomeScreen: React.FC = ({ navigation }: any) => {
     return storyName === "My Story" && getUserStories().length === 0;
   };
 
-  useEffect(() => {
-    const idx = tabList.findIndex((tab) => tab.key === activeTab);
-    Animated.spring(tabAnim, {
-      toValue: idx,
-      useNativeDriver: false,
-      friction: 7,
-      tension: 80,
-    }).start();
-  }, [activeTab]);
+  const handleSearchPress = () => {
+    setIsSearchActive(!isSearchActive);
+    if (isSearchActive) {
+      setSearchQuery("");
+    }
+  };
 
   const renderItem = ({ item }: { item: any }) => (
     <TouchableOpacity
@@ -116,21 +126,57 @@ const HomeScreen: React.FC = ({ navigation }: any) => {
             </View>
           )}
         </View>
+        {/* Show important/pinned indicators */}
+        {(item.isImportant || item.isPinned) && (
+          <View style={styles.indicatorContainer}>
+            {item.isPinned && (
+              <Ionicons name="pin" size={12} color="#ffc107" style={styles.indicator} />
+            )}
+            {item.isImportant && (
+              <Ionicons name="star" size={12} color="#ffc107" style={styles.indicator} />
+            )}
+          </View>
+        )}
       </View>
     </TouchableOpacity>
+  );
+
+  const renderEmptyState = () => (
+    <View style={styles.emptyState}>
+      <Ionicons 
+        name={searchQuery ? "search" : "chatbubbles"}
+        size={48} 
+        color="#999" 
+      />
+      <Text style={[styles.emptyStateText, { color: theme.subtext }]}>
+        {searchQuery ? "No chats found" : "No chats available"}
+      </Text>
+    </View>
   );
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
       {/* Header */}
       <View style={styles.headerRow}>
-        <TouchableOpacity style={styles.menuButton}>
-          <Ionicons name="menu" size={28} color="#fff" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Orbixa</Text>
-        <TouchableOpacity style={styles.searchButton}>
-          <Ionicons name="search" size={24} color="#fff" />
-        </TouchableOpacity>
+        {isSearchActive ? (
+          <View style={styles.searchInputContainer}>
+            <TextInput
+              style={styles.searchInput}
+              placeholder="Search chats..."
+              placeholderTextColor="#ccc"
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              autoFocus={true}
+            />
+            <TouchableOpacity onPress={handleSearchPress} style={styles.closeSearchButton}>
+              <Ionicons name="close" size={20} color="#fff" />
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <TouchableOpacity style={styles.searchButton} onPress={handleSearchPress}>
+            <Ionicons name="search" size={24} color="#fff" />
+          </TouchableOpacity>
+        )}
       </View>
 
       {/* Stories */}
@@ -176,62 +222,56 @@ const HomeScreen: React.FC = ({ navigation }: any) => {
             </TouchableOpacity>
           ))}
         </ScrollView>
-
-        {/* Tabs */}
-        <View style={styles.tabsRow}>
-          {tabList.map((tab, index) => (
-            <TouchableOpacity
-              key={tab.key}
-              onPress={() => setActiveTab(tab.key)}
-              style={styles.tabButton}
-              onLayout={(e) => {
-                const { x, width } = e.nativeEvent.layout;
-                setTabMeasurements((prev) => {
-                  const updated = [...prev];
-                  updated[index] = { x, width };
-                  return updated;
-                });
-              }}
-            >
-              <Text
-                style={[
-                  styles.tabText,
-                  activeTab === tab.key && { opacity: 1 },
-                ]}
-              >
-                {tab.label}
-              </Text>
-            </TouchableOpacity>
-          ))}
-
-          {/* Animated tray */}
-          {tabMeasurements.length === tabList.length && (
-            <Animated.View
-              style={[
-                styles.tabTray,
-                {
-                  width: tabAnim.interpolate({
-                    inputRange: tabList.map((_, i) => i),
-                    outputRange: tabMeasurements.map((m) => m.width),
-                  }),
-                  left: tabAnim.interpolate({
-                    inputRange: tabList.map((_, i) => i),
-                    outputRange: tabMeasurements.map((m) => m.x),
-                  }),
-                },
-              ]}
-            />
-          )}
-        </View>
       </View>
 
       {/* Chat list */}
-      <FlatList
-        data={groups}
-        renderItem={renderItem}
-        keyExtractor={(item) => item.id.toString()}
-        contentContainerStyle={styles.listContent}
-      />
+      <View style={styles.chatListContainer}>
+        {loading ? (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color="#dc143c" />
+            <Text style={[styles.loadingText, { color: theme.subtext }]}>Loading chats...</Text>
+          </View>
+        ) : (
+          <FlatList
+            data={filteredGroups}
+            renderItem={renderItem}
+            keyExtractor={(item) => item.id.toString()}
+            contentContainerStyle={styles.listContent}
+            ListEmptyComponent={renderEmptyState}
+          />
+        )}
+      </View>
+
+      {/* Camera Button */}
+      <TouchableOpacity 
+        style={styles.cameraButton}
+        onPress={() => {
+          // Navigate to camera screen or open camera functionality
+          navigation.navigate("Camera", {
+            onImageCaptured: (imageUri: string) => {
+              // Handle captured image
+              console.log("Image captured:", imageUri);
+              // You can navigate to a story creation screen or handle the image
+              navigation.navigate("AddStory", { capturedImage: imageUri });
+            }
+          });
+        }}
+      >
+        <Ionicons name="camera" size={28} color="#fff" />
+      </TouchableOpacity>
+
+      {/* Edit Button for Text Stories */}
+      <TouchableOpacity 
+        style={styles.editButton}
+        onPress={() => {
+          // Navigate to AddStory screen for text-only stories
+          navigation.navigate("AddStory", { 
+            textOnly: true 
+          });
+        }}
+      >
+        <Ionicons name="create" size={24} color="#fff" />
+      </TouchableOpacity>
     </View>
   );
 };
@@ -247,21 +287,28 @@ const styles = StyleSheet.create({
     paddingTop: 40,
     paddingBottom: 12,
     paddingHorizontal: 16,
-    justifyContent: "space-between",
-  },
-  headerTitle: {
-    color: "#fff",
-    fontSize: 28,
-    fontWeight: "bold",
-    textAlign: "left",
-    flex: 1,
-    marginLeft: 20,
-  },
-  menuButton: {
-    marginRight: 8,
+    justifyContent: "flex-start",
   },
   searchButton: {
+    marginLeft: 290,
+  },
+  searchInputContainer: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  searchInput: {
+    flex: 1,
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    borderRadius: 20,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    color: "#fff",
+    fontSize: 16,
+  },
+  closeSearchButton: {
     marginLeft: 8,
+    padding: 4,
   },
   storiesArea: {
     backgroundColor: "#dc143c",
@@ -308,31 +355,8 @@ const styles = StyleSheet.create({
     marginTop: 4,
     width: 60,
   },
-  tabsRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#dc143c",
-    paddingHorizontal: 12,
-    paddingBottom: 12,
-    justifyContent: "space-evenly",
-    position: "relative",
-  },
-  tabButton: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-  },
-  tabText: {
-    color: "#fff",
-    fontSize: 15,
-    fontWeight: "bold",
-    opacity: 0.6,
-  },
-  tabTray: {
-    position: "absolute",
-    height: 4,
-    backgroundColor: "#fff",
-    borderRadius: 2,
-    bottom: 0,
+  chatListContainer: {
+    flex: 1,
   },
   chatItem: {
     flexDirection: "row",
@@ -392,8 +416,61 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     fontSize: 12,
   },
+  indicatorContainer: {
+    flexDirection: "row",
+    marginTop: 2,
+  },
+  indicator: {
+    marginRight: 4,
+  },
   listContent: {
     paddingBottom: 20,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  loadingText: {
+    marginTop: 12,
+    fontSize: 16,
+  },
+  emptyState: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingVertical: 60,
+  },
+  emptyStateText: {
+    marginTop: 16,
+    fontSize: 16,
+    textAlign: "center",
+  },
+  cameraButton: {
+    position: "absolute",
+    bottom: 20,
+    right: 20,
+    backgroundColor: "#dc143c",
+    borderRadius: 24,
+    width: 48,
+    height: 48,
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 2,
+    borderColor: "#fff",
+  },
+  editButton: {
+    position: "absolute",
+    bottom: 70, // Adjust position to be above the camera button
+    right: 20,
+    backgroundColor: "#dc143c",
+    borderRadius: 24,
+    width: 48,
+    height: 48,
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 2,
+    borderColor: "#fff",
   },
 });
 

@@ -100,7 +100,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 30,
     textAlign: 'center',
-    color: '#0088cc', // Telegram blue
+    color: '#DC143C', // Electric Crimson
   },
   input: {
     height: 50,

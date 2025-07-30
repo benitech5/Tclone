@@ -233,6 +233,17 @@ const DrawerNavigator = () => {
         }}
       />
       <Drawer.Screen
+        name="New Channel"
+        component={require('../screens/Other/NewChannelScreen').default}
+        options={{
+          drawerIcon: ({ color, size }) => (
+            <Ionicons name="chatbubbles-outline" size={size} color={color} />
+          ),
+          headerStyle: { backgroundColor: theme.background },
+          headerTintColor: theme.text,
+        }}
+      />
+      <Drawer.Screen
         name="Contacts"
         component={ContactsScreen}
         options={{

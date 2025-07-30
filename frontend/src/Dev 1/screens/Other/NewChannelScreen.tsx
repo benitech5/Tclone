@@ -115,7 +115,7 @@ const NewChannelScreen: React.FC<NewChannelScreenProps> = ({ navigation }) => {
         </View>
         
         <View style={styles.settingContent}>
-          <Text style={[styles.settingTitle, { color: theme.text }]}>
+          <Text style={[styles.settingTitle, { color: theme.text,  }]}>
             {title}
           </Text>
           <Text style={[styles.settingSubtitle, { color: theme.subtext }]}>
@@ -184,7 +184,7 @@ const NewChannelScreen: React.FC<NewChannelScreenProps> = ({ navigation }) => {
         </TouchableOpacity>
         
         <Text style={[styles.headerTitle, { color: theme.text }]}>
-          New Channel
+          New Channel 
         </Text>
         
         <TouchableOpacity 
@@ -276,30 +276,26 @@ const NewChannelScreen: React.FC<NewChannelScreenProps> = ({ navigation }) => {
 
         {/* Privacy Settings */}
         <View style={styles.privacySection}>
-          <Text style={[styles.sectionTitle, { color: theme.text }]}>
-            Privacy
-          </Text>
+          <Text style={[styles.sectionTitle, { color: theme.text ,paddingLeft: 16}]}>Privacy</Text>
           {renderPrivacyOption(
             'Public Channel',
             'Anyone can find and join your channel',
             settings.isPublic,
-            () => handleSettingToggle('isPublic', true)
+            () => setSettings(prev => ({ ...prev, isPublic: true, isPrivate: false }))
           )}
-          
           {renderPrivacyOption(
             'Private Channel',
             'Only invited users can join your channel',
             settings.isPrivate,
-            () => handleSettingToggle('isPrivate', true)
+            () => setSettings(prev => ({ ...prev, isPrivate: true, isPublic: false }))
           )}
         </View>
 
         {/* Channel Settings */}
         <View style={styles.settingsSection}>
-          <Text style={[styles.sectionTitle, { color: theme.text }]}>
+          <Text style={[styles.sectionTitle, { color: theme.text, paddingLeft: 16 }]}>
             Channel Settings
           </Text>
-          
           {renderSettingItem(
             'chatbubble',
             'Allow Comments',

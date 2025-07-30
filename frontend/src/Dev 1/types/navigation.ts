@@ -62,4 +62,7 @@ export type MainStackParamList = {
   AddStory: undefined;
   GroupChat: { groupId: string; groupName: string };
   ChatRoom: { chatId: string; chatName: string };
+  Camera: {
+    onImageCaptured?: (imageUri: string) => void;
+  };
 };
