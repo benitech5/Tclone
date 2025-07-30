@@ -60,7 +60,7 @@ const DevicesScreen = () => {
             by scanning a QR code.
           </Text>
           <TouchableOpacity
-            style={[styles.linkButton, { backgroundColor: "#2196f3" }]}
+            style={[styles.linkButton, { backgroundColor: "#DC143C" }]}
           >
             <Text style={styles.linkButtonText}>🔗 Link Desktop Device</Text>
           </TouchableOpacity>
@@ -129,7 +129,7 @@ const DevicesScreen = () => {
           <Text
             style={[styles.value, { color: theme.accent, fontWeight: "bold" }]}
           >
-            6 months
+           6 months 
           </Text>
         </View>
       </ScrollView>

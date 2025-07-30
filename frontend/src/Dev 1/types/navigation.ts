@@ -41,9 +41,9 @@ export type MainStackParamList = {
   Language: undefined;
   Theme: undefined;
   ChatFolders: undefined;
-  InviteFriends: undefined;
+  InviteFriends: { groupId: string; groupName: string };
   AddContact: undefined;
-  ContactProfile: undefined;
+  ContactProfile: { contactId: string };
   RecentCalls: undefined;
   CallInfo: undefined;
   GlobalSearch: undefined;
@@ -55,10 +55,19 @@ export type MainStackParamList = {
   GroupInfo: undefined;
   InviteToGroup: undefined;
   NewChannel: undefined;
-  ChannelInfo: undefined;
+  ChannelInfo: { channelId: string; channelName: string };
   JoinRequests: undefined;
   PowerSaving: undefined;
   StoryShow: { storyId: string };
+<<<<<<< HEAD
   AddStory: { mediaUri?: string; mediaType?: "image" | "video" } | undefined;
   StatusViewers: undefined;
+=======
+  AddStory: undefined;
+  GroupChat: { groupId: string; groupName: string };
+  ChatRoom: { chatId: string; chatName: string };
+  Camera: {
+    onImageCaptured?: (imageUri: string) => void;
+  };
+>>>>>>> 04aed0ecfd830dc4dc104d46942fc804022e079f
 };

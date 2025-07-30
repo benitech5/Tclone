@@ -104,6 +104,12 @@ const specialEntries = [
     icon: "person-add",
     type: "special",
   },
+  {
+    id: "new-channel",
+    name: "New Channel",
+    icon: "chatbubbles-outline",
+    type: "special",
+  },
 ];
 
 const ContactsScreen = () => {
@@ -123,6 +129,8 @@ const ContactsScreen = () => {
       navigation.navigate("NewGroup" as never);
     } else if (item.id === "new-contacts") {
       console.log("Add new contacts");
+    } else if (item.id === "new-channel") {
+      navigation.navigate("NewChannel" as never);
     }
   };
 

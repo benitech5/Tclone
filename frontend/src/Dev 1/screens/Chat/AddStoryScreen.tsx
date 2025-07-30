@@ -4,11 +4,14 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  TextInput,
   ScrollView,
   SafeAreaView,
   Alert,
   Image,
+<<<<<<< HEAD
+=======
+  TextInput,
+>>>>>>> 04aed0ecfd830dc4dc104d46942fc804022e079f
 } from "react-native";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { useNavigation, useRoute } from "@react-navigation/native";
@@ -20,10 +23,14 @@ const AddStoryScreen = () => {
   const { theme } = useTheme();
   const navigation = useNavigation();
   const route = useRoute();
+<<<<<<< HEAD
   const [storyType, setStoryType] = useState<"text" | "image" | "video">(
     "text"
   );
   const [storyContent, setStoryContent] = useState("");
+=======
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+>>>>>>> 04aed0ecfd830dc4dc104d46942fc804022e079f
   const [storyText, setStoryText] = useState("");
   const [selectedMedia, setSelectedMedia] = useState<{
     uri: string;
@@ -41,12 +48,43 @@ const AddStoryScreen = () => {
     }
   }, [route.params]);
 
+  // Check if we have a captured image from camera
+  useEffect(() => {
+    const { capturedImage, capturedVideo, storyText: cameraText, fromCamera, textOnly, mediaType } = route.params as any;
+    if (capturedImage && fromCamera) {
+      setSelectedImage(capturedImage);
+      if (cameraText) {
+        setStoryText(cameraText);
+      }
+    }
+    if (capturedVideo && fromCamera) {
+      setSelectedImage(capturedVideo); // Use selectedImage state for video too
+      if (cameraText) {
+        setStoryText(cameraText);
+      }
+    }
+    // Handle text-only stories
+    if (textOnly) {
+      setSelectedImage(null); // No image for text-only stories
+    }
+  }, [route.params]);
+
   const handleCreateStory = () => {
-    if (storyType === "text" && !storyText.trim()) {
+    const { textOnly, mediaType } = route.params as any;
+    
+    // For text-only stories, we don't need an image
+    if (!textOnly && !selectedImage) {
+      Alert.alert("Error", "Please select an image or video for your story");
+      return;
+    }
+
+    // For text-only stories, we need some text content
+    if (textOnly && !storyText.trim()) {
       Alert.alert("Error", "Please enter some text for your story");
       return;
     }
 
+<<<<<<< HEAD
     if (storyType === "image" && !selectedMedia) {
       Alert.alert("Error", "Please select an image for your story");
       return;
@@ -66,6 +104,14 @@ const AddStoryScreen = () => {
       type: storyType as "text" | "image" | "video",
       content: storyType === "text" ? storyText : undefined,
       url: selectedMedia?.uri || undefined,
+=======
+    // Create the story object with proper format
+    const newStory = {
+      id: `user-${Date.now()}`,
+      type: textOnly ? "text" : (mediaType === "video" ? "video" : "image") as "text" | "image" | "video",
+      content: storyText || undefined,
+      url: selectedImage ? { uri: selectedImage } as any : undefined, // Works for both images and videos
+>>>>>>> 04aed0ecfd830dc4dc104d46942fc804022e079f
       timestamp: "Just now",
       createdAt: now.toISOString(),
       expiresAt: expiresAt.toISOString(),
@@ -74,6 +120,7 @@ const AddStoryScreen = () => {
     // Add the story to user's stories
     addUserStory(newStory);
 
+<<<<<<< HEAD
     Alert.alert(
       "Success",
       "Story posted successfully! It will expire in 24 hours.",
@@ -121,23 +168,37 @@ const AddStoryScreen = () => {
     }
   };
 
+=======
+    const currentMediaType = (route.params as any)?.mediaType;
+    const successMessage = currentMediaType === "video" 
+      ? "Video story posted successfully!" 
+      : "Story posted successfully!";
+
+    Alert.alert("Success", successMessage, [
+      {
+        text: "OK",
+        onPress: () => {
+          // Navigate back to chat screen after posting story
+          navigation.goBack();
+        },
+      },
+    ]);
+  };
+
+>>>>>>> 04aed0ecfd830dc4dc104d46942fc804022e079f
   return (
     <SafeAreaView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity
-          onPress={() => navigation.goBack()}
-          style={styles.backButton}
-        >
-          <Ionicons name="arrow-back" size={24} color="#fff" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Add Story</Text>
+        <View style={styles.headerLeft} />
+        <Text style={styles.headerTitle}>Story Settings</Text>
         <TouchableOpacity onPress={handleCreateStory} style={styles.postButton}>
           <Text style={styles.postButtonText}>Post</Text>
         </TouchableOpacity>
       </View>
 
       <ScrollView style={styles.content}>
+<<<<<<< HEAD
         {/* Story Type Selection */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Story Type</Text>
@@ -257,10 +318,42 @@ const AddStoryScreen = () => {
                 <Text style={styles.previewPlaceholder}>
                   Your story preview will appear here
                 </Text>
+=======
+        {/* Story Media Display */}
+        {selectedImage && (
+          <View style={styles.imageSection}>
+            <Image source={{ uri: selectedImage }} style={styles.storyImage} />
+            {(route.params as any)?.mediaType === "video" && (
+              <View style={styles.videoOverlay}>
+                <Ionicons name="play-circle" size={60} color="#fff" />
+              </View>
+            )}
+            {storyText && (
+              <View style={styles.textOverlay}>
+                <Text style={styles.storyText}>{storyText}</Text>
+>>>>>>> 04aed0ecfd830dc4dc104d46942fc804022e079f
               </View>
             )}
           </View>
-        </View>
+        )}
+
+        {/* Text Input for Text-Only Stories */}
+        {(route.params as any)?.textOnly && (
+          <View style={styles.textInputSection}>
+            <Text style={styles.textInputLabel}>Your Story Text</Text>
+            <TextInput
+              style={styles.textInput}
+              placeholder="Write your story here..."
+              placeholderTextColor="#999"
+              value={storyText}
+              onChangeText={setStoryText}
+              multiline
+              maxLength={500}
+              textAlignVertical="top"
+            />
+            <Text style={styles.characterCount}>{storyText.length}/500</Text>
+          </View>
+        )}
 
         {/* Story Settings */}
         <View style={styles.section}>
@@ -298,8 +391,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
   },
-  backButton: {
-    padding: 8,
+  headerLeft: {
+    width: 40,
   },
   headerTitle: {
     color: "#fff",
@@ -307,7 +400,10 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   postButton: {
-    padding: 8,
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
   },
   postButtonText: {
     color: "#fff",
@@ -317,55 +413,64 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
   },
-  section: {
-    paddingHorizontal: 16,
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: "#f0f0f0",
-  },
-  sectionTitle: {
-    color: "#b30032",
-    fontSize: 16,
-    fontWeight: "bold",
-    marginBottom: 12,
-  },
-  typeContainer: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-  },
-  typeButton: {
-    flexDirection: "row",
+  imageSection: {
+    padding: 16,
     alignItems: "center",
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    borderRadius: 8,
-    borderWidth: 2,
-    borderColor: "#b30032",
-    backgroundColor: "#fff",
+    position: "relative",
   },
-  typeButtonActive: {
-    backgroundColor: "#b30032",
+  storyImage: {
+    width: "100%",
+    height: 300,
+    borderRadius: 12,
+    resizeMode: "cover",
   },
-  typeButtonText: {
-    marginLeft: 8,
-    fontSize: 16,
-    color: "#b30032",
-    fontWeight: "bold",
+  videoOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    borderRadius: 12,
   },
-  typeButtonTextActive: {
-    color: "#fff",
-  },
-  textInputContainer: {
-    borderWidth: 1,
-    borderColor: "#e0e0e0",
-    borderRadius: 8,
+  textOverlay: {
+    position: "absolute",
+    bottom: 20,
+    left: 20,
+    right: 20,
+    backgroundColor: "rgba(0, 0, 0, 0.7)",
     padding: 12,
+    borderRadius: 8,
+  },
+  storyText: {
+    color: "#fff",
+    fontSize: 16,
+    textAlign: "center",
+    fontWeight: "500",
+  },
+  textInputSection: {
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "#eee",
+  },
+  textInputLabel: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#333",
+    marginBottom: 8,
   },
   textInput: {
+    backgroundColor: "#f5f5f5",
+    borderRadius: 8,
+    padding: 12,
     fontSize: 16,
     color: "#333",
-    minHeight: 120,
+    minHeight: 100,
+    textAlignVertical: "top",
   },
+<<<<<<< HEAD
   imagePickerButton: {
     borderWidth: 2,
     borderColor: "#b30032",
@@ -421,16 +526,29 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   previewPlaceholder: {
+=======
+  characterCount: {
+    fontSize: 12,
+>>>>>>> 04aed0ecfd830dc4dc104d46942fc804022e079f
     color: "#999",
-    fontSize: 14,
+    textAlign: "right",
     marginTop: 8,
+  },
+  section: {
+    padding: 16,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#333",
+    marginBottom: 16,
   },
   settingItem: {
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: 12,
+    paddingVertical: 16,
     borderBottomWidth: 1,
-    borderBottomColor: "#f0f0f0",
+    borderBottomColor: "#eee",
   },
   settingText: {
     flex: 1,

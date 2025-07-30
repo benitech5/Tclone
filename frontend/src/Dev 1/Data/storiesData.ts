@@ -2,8 +2,8 @@ import { ImageSourcePropType } from "react-native";
 
 export interface StoryItem {
   id: string;
-  type: "image" | "text" | "video";
-  url?: ImageSourcePropType | string;
+  type: "image" | "text";
+  url?: ImageSourcePropType;
   content?: string;
   timestamp: string;
   createdAt?: string;

@@ -15,11 +15,11 @@ const CallsScreen = () => {
   const getCallIcon = (type: string) => {
     switch (type) {
       case 'incoming':
-        return <Ionicons name="call" size={20} color="#4CAF50" />;
+        return <Ionicons name="call" size={20} color="#DC143C" />;
       case 'outgoing':
-        return <Ionicons name="call" size={20} color="#2196F3" />;
+        return <Ionicons name="call" size={20} color="#DC143C" />;
       case 'missed':
-        return <Ionicons name="call" size={20} color="#F44336" />;
+        return <Ionicons name="call" size={20} color="#DC143C" />;
       default:
         return <Ionicons name="call" size={20} color={theme.subtext} />;
     }

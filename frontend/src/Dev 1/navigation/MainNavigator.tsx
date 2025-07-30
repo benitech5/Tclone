@@ -45,7 +45,11 @@ import JoinRequestsScreen from "../screens/Other/JoinRequestsScreen";
 import PowerSavingScreen from "../screens/Settings/PowerSavingScreen";
 import StoryShowScreen from "../screens/Chat/StoryShowScreen";
 import AddStoryScreen from "../screens/Chat/AddStoryScreen";
+<<<<<<< HEAD
 import StatusViewersScreen from "../screens/Chat/StatusViewersScreen";
+=======
+import CameraScreen from "../screens/Chat/CameraScreen";
+>>>>>>> 04aed0ecfd830dc4dc104d46942fc804022e079f
 
 const Stack = createNativeStackNavigator<MainStackParamList>();
 
@@ -136,7 +140,15 @@ export const MainNavigator = () => (
     <Stack.Screen name="PowerSaving" component={PowerSavingScreen} />
     <Stack.Screen name="StoryShow" component={StoryShowScreen} />
     <Stack.Screen name="AddStory" component={AddStoryScreen} />
+<<<<<<< HEAD
     <Stack.Screen name="StatusViewers" component={StatusViewersScreen} />
+=======
+    <Stack.Screen 
+      name="Camera" 
+      component={CameraScreen}
+      options={{ headerShown: false }}
+    />
+>>>>>>> 04aed0ecfd830dc4dc104d46942fc804022e079f
   </Stack.Navigator>
 );
 

@@ -11,6 +11,8 @@ const lightTheme = {
   subtext: '#888',
   buttonBg: '#ffeaea',
   buttonText: '#e53935',
+  primary: '#DC143C', // Electric Crimson
+  error: '#e74c3c',   // Added error
 };
 
 const darkTheme = {
@@ -23,6 +25,8 @@ const darkTheme = {
   subtext: '#bbb',
   buttonBg: '#31344b',
   buttonText: '#fff',
+  primary: '#DC143C', // Electric Crimson
+  error: '#e74c3c',   // Added error
 };
 
 const ThemeContext = createContext({
