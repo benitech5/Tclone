@@ -36,77 +36,24 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      {/* Header Section */}
-      <View style={styles.header}>
+    <View style={styles.container}>
+      {/* Main Header */}
+      <View style={styles.mainHeader}>
         <TouchableOpacity
-          onPress={() => navigation.goBack()}
-          style={styles.backButton}
+          onPress={() => navigation.navigate("Home")}
+          style={styles.menuButton}
         >
-          <Ionicons name="arrow-back" size={24} color="#fff" />
+          <Ionicons name="menu" size={24} color="#fff" />
         </TouchableOpacity>
-
-        <View style={styles.headerContent}>
-          <Image
-            source={require("../../../../assets/avatars/everything/Madara Uchiha.jpeg")}
-            style={styles.profileImage}
-          />
-          <Text style={styles.userName}>Yung Zeus</Text>
-          <Text style={styles.userStatus}>Online</Text>
-        </View>
-
-        <View style={styles.headerActions}>
-          <TouchableOpacity style={styles.headerAction}>
-            <Ionicons name="search" size={24} color="#fff" />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.headerAction}>
-            <Ionicons name="ellipsis-vertical" size={24} color="#fff" />
-          </TouchableOpacity>
-        </View>
+        <Text style={styles.headerTitle}>Settings</Text>
+        <View style={styles.headerRight} />
       </View>
 
-      <ScrollView style={styles.scrollView}>
-        {/* Profile Photo Action */}
-        <View style={styles.profilePhotoSection}>
-          <TouchableOpacity style={styles.profilePhotoAction}>
-            <Ionicons name="camera" size={20} color="#b30032" />
-            <Text style={styles.profilePhotoText}>Set Profile Photo</Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* Account Section */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Account</Text>
-
-          <TouchableOpacity style={styles.accountItem}>
-            <View style={styles.accountItemContent}>
-              <Text style={styles.accountItemLabel}>Phone Number</Text>
-              <Text style={styles.accountItemValue}>+233 725098765</Text>
-            </View>
-            <Text style={styles.accountItemHint}>
-              Tap to change phone number.
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.accountItem}>
-            <View style={styles.accountItemContent}>
-              <Text style={styles.accountItemLabel}>Username</Text>
-              <Text style={styles.accountItemValue}>None</Text>
-            </View>
-            <Text style={styles.accountItemHint}>Username</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.accountItem}>
-            <View style={styles.accountItemContent}>
-              <Text style={styles.accountItemLabel}>Bio</Text>
-              <Text style={styles.accountItemValue}>Bio</Text>
-            </View>
-            <Text style={styles.accountItemHint}>
-              Add a few words about yourself.
-            </Text>
-          </TouchableOpacity>
-        </View>
-
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
         {/* Settings Section */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Settings</Text>
@@ -213,7 +160,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
           </TouchableOpacity>
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 };
 
@@ -222,63 +169,40 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#fff",
   },
-  header: {
-    backgroundColor: "#b30032",
-    paddingTop: 20,
-    paddingBottom: 20,
-    paddingHorizontal: 16,
+  mainHeader: {
+    backgroundColor: "#dc143c",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
+    paddingHorizontal: 16,
+    paddingTop: 4,
+    paddingBottom: 8,
+    elevation: 4,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    zIndex: 1000,
+    height: 50,
   },
-  backButton: {
-    padding: 8,
+  menuButton: {
+    padding: 4,
   },
-  headerContent: {
-    flex: 1,
-    alignItems: "center",
-  },
-  profileImage: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    marginBottom: 8,
-  },
-  userName: {
+  headerTitle: {
     color: "#fff",
-    fontSize: 20,
+    fontSize: 16,
     fontWeight: "bold",
-    marginBottom: 4,
+    flex: 1,
+    textAlign: "center",
   },
-  userStatus: {
-    color: "#fff",
-    fontSize: 14,
-    opacity: 0.8,
-  },
-  headerActions: {
-    flexDirection: "row",
-  },
-  headerAction: {
-    padding: 8,
-    marginLeft: 8,
+  headerRight: {
+    width: 40,
   },
   scrollView: {
     flex: 1,
   },
-  profilePhotoSection: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderBottomWidth: 15,
-    borderBottomColor: "#f0f0f0",
-  },
-  profilePhotoAction: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  profilePhotoText: {
-    color: "#b30032",
-    fontSize: 16,
-    marginLeft: 8,
+  scrollContent: {
+    paddingBottom: 20,
   },
   section: {
     paddingHorizontal: 16,
@@ -292,27 +216,6 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginBottom: 12,
     marginTop: 8,
-  },
-  accountItem: {
-    marginBottom: 16,
-  },
-  accountItemContent: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 4,
-  },
-  accountItemLabel: {
-    fontSize: 14,
-    color: "#333",
-  },
-  accountItemValue: {
-    fontSize: 16,
-    color: "#333",
-  },
-  accountItemHint: {
-    fontSize: 12,
-    color: "#666",
   },
   settingsItem: {
     flexDirection: "row",

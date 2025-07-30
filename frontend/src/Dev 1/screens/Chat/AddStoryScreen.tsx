@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -8,18 +8,38 @@ import {
   ScrollView,
   SafeAreaView,
   Alert,
+  Image,
 } from "react-native";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
 import { useTheme } from "../../ThemeContext";
 import { addUserStory } from "../../Data/storiesData";
+import * as ImagePicker from "expo-image-picker";
 
 const AddStoryScreen = () => {
   const { theme } = useTheme();
   const navigation = useNavigation();
-  const [storyType, setStoryType] = useState<"text" | "image">("text");
+  const route = useRoute();
+  const [storyType, setStoryType] = useState<"text" | "image" | "video">(
+    "text"
+  );
   const [storyContent, setStoryContent] = useState("");
   const [storyText, setStoryText] = useState("");
+  const [selectedMedia, setSelectedMedia] = useState<{
+    uri: string;
+    type: "image" | "video";
+  } | null>(null);
+
+  // Check if media was passed from HomeScreen
+  useEffect(() => {
+    const params = route.params as
+      | { mediaUri?: string; mediaType?: "image" | "video" }
+      | undefined;
+    if (params?.mediaUri && params?.mediaType) {
+      setSelectedMedia({ uri: params.mediaUri, type: params.mediaType });
+      setStoryType(params.mediaType);
+    }
+  }, [route.params]);
 
   const handleCreateStory = () => {
     if (storyType === "text" && !storyText.trim()) {
@@ -27,40 +47,78 @@ const AddStoryScreen = () => {
       return;
     }
 
-    if (storyType === "image" && !storyContent.trim()) {
+    if (storyType === "image" && !selectedMedia) {
       Alert.alert("Error", "Please select an image for your story");
       return;
     }
 
-    // Create the story object
+    if (storyType === "video" && !selectedMedia) {
+      Alert.alert("Error", "Please select a video for your story");
+      return;
+    }
+
+    // Create the story object with 24-hour expiration
+    const now = new Date();
+    const expiresAt = new Date(now.getTime() + 24 * 60 * 60 * 1000); // 24 hours from now
+
     const newStory = {
       id: `user-${Date.now()}`,
-      type: storyType as "text" | "image",
+      type: storyType as "text" | "image" | "video",
       content: storyType === "text" ? storyText : undefined,
-      url:
-        storyType === "image"
-          ? require("../../../../assets/avatars/everything/bballGyal.jpeg")
-          : undefined, // Placeholder image
+      url: selectedMedia?.uri || undefined,
       timestamp: "Just now",
+      createdAt: now.toISOString(),
+      expiresAt: expiresAt.toISOString(),
     };
 
     // Add the story to user's stories
     addUserStory(newStory);
 
-    Alert.alert("Success", "Story posted successfully!", [
-      {
-        text: "OK",
-        onPress: () => navigation.goBack(),
-      },
-    ]);
+    Alert.alert(
+      "Success",
+      "Story posted successfully! It will expire in 24 hours.",
+      [
+        {
+          text: "OK",
+          onPress: () => navigation.goBack(),
+        },
+      ]
+    );
   };
 
-  const handleSelectImage = () => {
-    // Here you would implement image picker functionality
-    Alert.alert(
-      "Image Picker",
-      "Image picker functionality would be implemented here"
-    );
+  const handleSelectMedia = async (mediaType: "image" | "video") => {
+    try {
+      // Request permissions
+      const { status } =
+        await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== "granted") {
+        Alert.alert(
+          "Permission needed",
+          "Please grant permission to access your media library"
+        );
+        return;
+      }
+
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes:
+          mediaType === "image"
+            ? ImagePicker.MediaTypeOptions.Images
+            : ImagePicker.MediaTypeOptions.Videos,
+        allowsEditing: true,
+        aspect: [9, 16], // Story aspect ratio
+        quality: 0.8,
+        videoMaxDuration: mediaType === "video" ? 15 : undefined, // 15 seconds max for videos
+      });
+
+      if (!result.canceled && result.assets[0]) {
+        const asset = result.assets[0];
+        setSelectedMedia({ uri: asset.uri, type: mediaType });
+        setStoryType(mediaType);
+      }
+    } catch (error) {
+      console.error("Error picking media:", error);
+      Alert.alert("Error", `Failed to pick ${mediaType}`);
+    }
   };
 
   return (
@@ -149,17 +207,26 @@ const AddStoryScreen = () => {
               />
             </View>
           ) : (
-            <TouchableOpacity
-              style={styles.imagePickerButton}
-              onPress={handleSelectImage}
-            >
-              <MaterialIcons
-                name="add-photo-alternate"
-                size={48}
-                color="#b30032"
-              />
-              <Text style={styles.imagePickerText}>Select Image</Text>
-            </TouchableOpacity>
+            <View>
+              <TouchableOpacity
+                style={styles.imagePickerButton}
+                onPress={() => handleSelectMedia("image")}
+              >
+                <MaterialIcons
+                  name="add-photo-alternate"
+                  size={48}
+                  color="#b30032"
+                />
+                <Text style={styles.imagePickerText}>Select Image</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.imagePickerButton, { marginTop: 12 }]}
+                onPress={() => handleSelectMedia("video")}
+              >
+                <MaterialIcons name="video-library" size={48} color="#b30032" />
+                <Text style={styles.imagePickerText}>Select Video</Text>
+              </TouchableOpacity>
+            </View>
           )}
         </View>
 
@@ -171,11 +238,18 @@ const AddStoryScreen = () => {
               <View style={styles.textPreview}>
                 <Text style={styles.previewText}>{storyText}</Text>
               </View>
-            ) : storyType === "image" ? (
+            ) : storyType === "image" && selectedMedia ? (
               <View style={styles.imagePreview}>
-                <MaterialIcons name="image" size={48} color="#ccc" />
+                <Image
+                  source={{ uri: selectedMedia.uri }}
+                  style={styles.previewImage}
+                />
+              </View>
+            ) : storyType === "video" && selectedMedia ? (
+              <View style={styles.videoPreview}>
+                <MaterialIcons name="video-library" size={48} color="#ccc" />
                 <Text style={styles.previewPlaceholder}>
-                  Image will appear here
+                  Video selected: {selectedMedia.uri.split("/").pop()}
                 </Text>
               </View>
             ) : (
@@ -329,6 +403,19 @@ const styles = StyleSheet.create({
   },
   imagePreview: {
     alignItems: "center",
+    justifyContent: "center",
+    minHeight: 200,
+  },
+  previewImage: {
+    width: 200,
+    height: 200,
+    borderRadius: 8,
+    resizeMode: "cover",
+  },
+  videoPreview: {
+    alignItems: "center",
+    justifyContent: "center",
+    minHeight: 200,
   },
   emptyPreview: {
     alignItems: "center",

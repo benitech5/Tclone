@@ -59,5 +59,6 @@ export type MainStackParamList = {
   JoinRequests: undefined;
   PowerSaving: undefined;
   StoryShow: { storyId: string };
-  AddStory: undefined;
+  AddStory: { mediaUri?: string; mediaType?: "image" | "video" } | undefined;
+  StatusViewers: undefined;
 };
