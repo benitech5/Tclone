@@ -59,10 +59,15 @@ export type MainStackParamList = {
   JoinRequests: undefined;
   PowerSaving: undefined;
   StoryShow: { storyId: string };
+<<<<<<< HEAD
+  AddStory: { mediaUri?: string; mediaType?: "image" | "video" } | undefined;
+  StatusViewers: undefined;
+=======
   AddStory: undefined;
   GroupChat: { groupId: string; groupName: string };
   ChatRoom: { chatId: string; chatName: string };
   Camera: {
     onImageCaptured?: (imageUri: string) => void;
   };
+>>>>>>> 04aed0ecfd830dc4dc104d46942fc804022e079f
 };

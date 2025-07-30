@@ -146,7 +146,6 @@ export const MainNavigator = () => (
     <Stack.Screen name="JoinRequests" component={JoinRequestsScreen} />
     <Stack.Screen name="PowerSaving" component={PowerSavingScreen} />
     <Stack.Screen name="StoryShow" component={StoryShowScreen} />
-    <Stack.Screen name="AddStory" component={AddStoryScreen} />
     <Stack.Screen 
       name="Camera" 
       component={CameraScreen}

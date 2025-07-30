@@ -12,6 +12,7 @@ import {
   Animated,
   TextInput,
 } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
 import { CompositeNavigationProp } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { MainStackParamList, RootStackParamList } from "../../types/navigation";
@@ -21,7 +22,10 @@ import { logout } from "../../store/authSlice";
 import { useTheme } from "../../ThemeContext";
 import { getUserGroups } from "../../api/ChatService";
 import { Ionicons } from "@expo/vector-icons";
-import { storiesData, getUserStories } from "../../Data/storiesData";
+import { storiesData, getNonExpiredUserStories } from "../../Data/storiesData";
+import * as ImagePicker from "expo-image-picker";
+import { Alert } from "react-native";
+
 import { useFocusEffect } from "@react-navigation/native";
 
 type HomeScreenNavigationProp = CompositeNavigationProp<
@@ -87,7 +91,88 @@ const HomeScreen: React.FC = ({ navigation }: any) => {
   );
 
   const shouldShowPlusIcon = (storyName: string) => {
-    return storyName === "My Story" && getUserStories().length === 0;
+    return storyName === "My Story";
+  };
+
+  const handleUploadStory = async () => {
+    try {
+      // Request permissions
+      const { status } =
+        await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== "granted") {
+        Alert.alert(
+          "Permission needed",
+          "Please grant permission to access your media library"
+        );
+        return;
+      }
+
+      // Show picker options
+      Alert.alert("Upload Story", "Choose media type", [
+        {
+          text: "Photo",
+          onPress: () => pickImage(),
+        },
+        {
+          text: "Video",
+          onPress: () => pickVideo(),
+        },
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+      ]);
+    } catch (error) {
+      console.error("Error requesting permissions:", error);
+      Alert.alert("Error", "Failed to access media library");
+    }
+  };
+
+  const pickImage = async () => {
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [9, 16], // Story aspect ratio
+        quality: 0.8,
+      });
+
+      if (!result.canceled && result.assets[0]) {
+        const asset = result.assets[0];
+        // Navigate to AddStory with the selected image
+        navigation.navigate("AddStory", {
+          mediaUri: asset.uri,
+          mediaType: "image",
+        });
+      }
+    } catch (error) {
+      console.error("Error picking image:", error);
+      Alert.alert("Error", "Failed to pick image");
+    }
+  };
+
+  const pickVideo = async () => {
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Videos,
+        allowsEditing: true,
+        aspect: [9, 16], // Story aspect ratio
+        quality: 0.8,
+        videoMaxDuration: 15, // 15 seconds max for stories
+      });
+
+      if (!result.canceled && result.assets[0]) {
+        const asset = result.assets[0];
+        // Navigate to AddStory with the selected video
+        navigation.navigate("AddStory", {
+          mediaUri: asset.uri,
+          mediaType: "video",
+        });
+      }
+    } catch (error) {
+      console.error("Error picking video:", error);
+      Alert.alert("Error", "Failed to pick video");
+    }
   };
 
   const handleSearchPress = () => {
@@ -192,12 +277,11 @@ const HomeScreen: React.FC = ({ navigation }: any) => {
               activeOpacity={0.8}
               onPress={() => {
                 if (story.name === "My Story") {
-                  const userStories =
-                    require("../../Data/storiesData").getUserStories();
+                  const userStories = getNonExpiredUserStories();
                   if (userStories.length > 0) {
                     navigation.navigate("StoryShow", { storyId: story.id });
                   } else {
-                    navigation.navigate("AddStory");
+                    handleUploadStory();
                   }
                 } else {
                   navigation.navigate("StoryShow", { storyId: story.id });
@@ -206,14 +290,20 @@ const HomeScreen: React.FC = ({ navigation }: any) => {
               style={styles.storyCircleContainer}
             >
               <View style={styles.storyAvatarContainer}>
-                <Image source={story.avatar} style={styles.storyAvatar} />
+                <LinearGradient
+                  colors={["#00FFFF", "#00FF00"]}
+                  style={styles.storyGradientBorder}
+                >
+                  <Image source={story.avatar} style={styles.storyAvatar} />
+                </LinearGradient>
                 {shouldShowPlusIcon(story.name) && (
-                  <View
+                  <TouchableOpacity
                     style={styles.plusIconContainer}
                     key={storyUpdateTrigger}
+                    onPress={handleUploadStory}
                   >
-                    <Ionicons name="add" size={16} color="#fff" />
-                  </View>
+                    <Ionicons name="add" size={18} color="#fff" />
+                  </TouchableOpacity>
                 )}
               </View>
               <Text style={styles.storyName} numberOfLines={1}>
@@ -324,12 +414,18 @@ const styles = StyleSheet.create({
   storyCircleContainer: {
     marginRight: 16,
   },
+  storyGradientBorder: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    padding: 2,
+    justifyContent: "center",
+    alignItems: "center",
+  },
   storyAvatar: {
     width: 60,
     height: 60,
     borderRadius: 30,
-    borderWidth: 2,
-    borderColor: "#fff",
   },
   storyAvatarContainer: {
     position: "relative",
@@ -339,14 +435,22 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: -2,
     right: -2,
-    backgroundColor: "#b30032",
+    backgroundColor: "#dc143c",
     borderRadius: 12,
-    width: 24,
-    height: 24,
+    width: 26,
+    height: 26,
     justifyContent: "center",
     alignItems: "center",
     borderWidth: 2,
     borderColor: "#fff",
+    shadowColor: "#000",  
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
   storyName: {
     color: "#fff",
@@ -357,6 +461,32 @@ const styles = StyleSheet.create({
   },
   chatListContainer: {
     flex: 1,
+  },
+  tabsRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#dc143c",
+    paddingHorizontal: 12,
+    paddingBottom: 12,
+    justifyContent: "space-evenly",
+    position: "relative",
+  },
+  tabButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+  },
+  tabText: {
+    color: "#fff",
+    fontSize: 15,
+    fontWeight: "bold",
+    opacity: 0.6,
+  },
+  tabTray: {
+    position: "absolute",
+    height: 4,
+    backgroundColor: "#fff",
+    borderRadius: 2,
+    bottom: 0,
   },
   chatItem: {
     flexDirection: "row",

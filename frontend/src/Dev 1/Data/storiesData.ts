@@ -2,10 +2,12 @@ import { ImageSourcePropType } from "react-native";
 
 export interface StoryItem {
   id: string;
-  type: "image" | "text" | "video";
+  type: "image" | "text";
   url?: ImageSourcePropType;
   content?: string;
   timestamp: string;
+  createdAt?: string;
+  expiresAt?: string;
 }
 
 export interface Story {
@@ -62,6 +64,32 @@ export const getUserStories = (): StoryItem[] => {
 // Function to delete all user stories
 export const deleteAllUserStories = () => {
   userStories.length = 0;
+};
+
+// Function to delete a specific user story
+export const deleteUserStory = (storyId: string) => {
+  const index = userStories.findIndex((story) => story.id === storyId);
+  if (index !== -1) {
+    userStories.splice(index, 1);
+  }
+};
+
+// Function to clean up expired stories (older than 24 hours)
+export const cleanupExpiredStories = () => {
+  const now = new Date();
+  userStories = userStories.filter((story) => {
+    if (story.expiresAt) {
+      const expiresAt = new Date(story.expiresAt);
+      return now < expiresAt;
+    }
+    return true; // Keep stories without expiration
+  });
+};
+
+// Function to get non-expired user stories
+export const getNonExpiredUserStories = (): StoryItem[] => {
+  cleanupExpiredStories();
+  return userStories;
 };
 
 // Detailed story content for StoryShowScreen

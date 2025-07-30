@@ -1,5 +1,5 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { useRoute } from '@react-navigation/native';
+import React, { useState, useRef, useEffect } from "react";
+import { useRoute } from "@react-navigation/native";
 import {
     View,
     Text,
@@ -30,7 +30,7 @@ interface Message {
     senderId: string;
     senderName: string;
     timestamp: Date;
-    type: 'text' | 'image' | 'file' | 'voice';
+    type: 'text' | 'image' | 'file' | 'voice' | 'video';
     isMine: boolean;
 }
 
@@ -54,6 +54,7 @@ export default function ChatDetailsScreen() {
     const [reactions, setReactions] = useState<{[key: string]: string}>({});
     const [menuVisible, setMenuVisible] = useState(false);
     const [showMediaPicker, setShowMediaPicker] = useState(false);
+    const [seenMessages, setSeenMessages] = useState<Record<string, boolean>>({});
 
     // Load messages from AsyncStorage on mount
     useEffect(() => {
@@ -195,7 +196,30 @@ export default function ChatDetailsScreen() {
                 flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
             }, 100);
         }
+
+        const savedPinnedMessage = await AsyncStorage.getItem(
+          `pinned_${chatId}`
+        );
+        if (savedPinnedMessage) {
+          setPinnedMessage(JSON.parse(savedPinnedMessage));
+        }
+
+        // Mark messages as seen after loading
+        const newSeenMessages: Record<string, boolean> = {};
+        res.data.forEach((msg: any) => {
+          if (msg.senderId !== "currentUser") {
+            newSeenMessages[msg.id] = true;
+          }
+        });
+        setSeenMessages(newSeenMessages);
+      } catch (err: any) {
+        setError("Failed to load messages");
+      } finally {
+        setLoading(false);
+      }
     };
+    if (chatId) fetchMessages();
+  }, [chatId]);
 
     const reactToMessage = async (messageId: string, reaction: string) => {
         try {
@@ -427,12 +451,48 @@ export default function ChatDetailsScreen() {
         </View>
     );
 
-    if (loading) {
-        return <View style={[styles.safeArea, { backgroundColor: theme.background, justifyContent: 'center', alignItems: 'center' }]}><ActivityIndicator size="large" color={theme.accent} /></View>;
+  // Save pinned message when it changes
+  useEffect(() => {
+    if (chatId) {
+      if (pinnedMessage) {
+        AsyncStorage.setItem(`pinned_${chatId}`, JSON.stringify(pinnedMessage));
+      } else {
+        AsyncStorage.removeItem(`pinned_${chatId}`);
+      }
     }
-    if (error) {
-        return <View style={[styles.safeArea, { backgroundColor: theme.background, justifyContent: 'center', alignItems: 'center' }]}><Text style={{ color: theme.text }}>{error}</Text></View>;
+  }, [pinnedMessage, chatId]);
+
+  const handleSend = async () => {
+    if (message.trim() === "") return;
+    try {
+      await sendMessage(chatId, message);
+      // Re-fetch messages after sending
+      const res = await getMessages(chatId);
+      setMessages(res.data);
+      setMessage("");
+      setTimeout(() => {
+        flatListRef.current?.scrollToEnd({ animated: true });
+      }, 100);
+    } catch (err) {
+      setError("Failed to send message");
     }
+  };
+
+  const handleEmojiSelect = (emoji: string) => {
+    if (selectedMessageId) {
+      setMessageReactions((prev) => ({
+        ...prev,
+        [selectedMessageId]: emoji,
+      }));
+    }
+    setShowEmojiPicker(false);
+    setSelectedMessageId(null);
+  };
+
+  const renderMessage = ({ item }: { item: any }) => {
+    const isSentByMe = item.senderId === "currentUser";
+    const hasReaction = messageReactions[item.id];
+    const isSeen = seenMessages[item.id];
 
     return (
         <>
@@ -485,7 +545,7 @@ export default function ChatDetailsScreen() {
                                         setMessages(prev => [newMessage, ...prev]);
                                     }}
                                 >
-                                    <Ionicons name="call" size={20} color={theme.text} />
+                                    //<Ionicons name="call" size={20} color={theme.text} />
                                 </TouchableOpacity>
                                 <TouchableOpacity 
                                     style={styles.headerActionButton}
@@ -746,6 +806,150 @@ export default function ChatDetailsScreen() {
             </Modal>
         </>
     );
+  };
+
+  if (loading) {
+    return (
+      <View
+        style={[
+          styles.safeArea,
+          {
+            backgroundColor: theme.background,
+            justifyContent: "center",
+            alignItems: "center",
+          },
+        ]}
+      >
+        <ActivityIndicator size="large" color={theme.accent} />
+      </View>
+    );
+  }
+  if (error) {
+    return (
+      <View
+        style={[
+          styles.safeArea,
+          {
+            backgroundColor: theme.background,
+            justifyContent: "center",
+            alignItems: "center",
+          },
+        ]}
+      >
+        <Text style={{ color: theme.text }}>{error}</Text>
+      </View>
+    );
+  }
+
+  return (
+    <SafeAreaView
+      style={[styles.safeArea, { backgroundColor: theme.background }]}
+    >
+      <View style={[styles.container, { backgroundColor: theme.background }]}>
+        <Text
+          style={{ textAlign: "center", color: theme.subtext, marginTop: 10 }}
+        >
+          Chat ID: {chatId}
+        </Text>
+
+        {/* Pinned Message Display */}
+        {pinnedMessage && (
+          <View
+            style={[
+              styles.pinnedMessageContainer,
+              { backgroundColor: theme.accent },
+            ]}
+          >
+            <View style={styles.pinnedMessageHeader}>
+              <Ionicons name="pin" size={16} color="#fff" />
+              <Text style={styles.pinnedMessageLabel}>Pinned Message</Text>
+              <TouchableOpacity
+                onPress={() => setPinnedMessage(null)}
+                style={styles.unpinButton}
+              >
+                <Ionicons name="close" size={16} color="#fff" />
+              </TouchableOpacity>
+            </View>
+            <Text style={styles.pinnedMessageText} numberOfLines={2}>
+              {pinnedMessage.content}
+            </Text>
+          </View>
+        )}
+
+        <FlatList
+          ref={flatListRef}
+          data={messages}
+          renderItem={renderMessage}
+          keyExtractor={(item) => item.id.toString()}
+          contentContainerStyle={styles.messagesContainer}
+          onContentSizeChange={() =>
+            flatListRef.current?.scrollToEnd({ animated: true })
+          }
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        />
+        <View
+          style={[
+            styles.inputContainer,
+            { backgroundColor: theme.card, borderTopColor: theme.border },
+          ]}
+        >
+          <TextInput
+            style={[
+              styles.input,
+              {
+                borderColor: theme.border,
+                backgroundColor: theme.background,
+                color: theme.text,
+              },
+            ]}
+            placeholder="Type a message..."
+            placeholderTextColor={theme.subtext}
+            value={message}
+            onChangeText={setMessage}
+            onSubmitEditing={handleSend}
+            returnKeyType="send"
+            multiline={false}
+            onFocus={() => {
+              setTimeout(() => {
+                flatListRef.current?.scrollToEnd({ animated: true });
+              }, 300);
+            }}
+          />
+          <TouchableOpacity style={styles.sendButton} onPress={handleSend}>
+            <Ionicons name="send" size={24} color={theme.accent} />
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      {/* Emoji Picker Modal */}
+      <Modal
+        transparent={true}
+        animationType="slide"
+        visible={showEmojiPicker}
+        onRequestClose={() => setShowEmojiPicker(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.emojiPickerContainer}>
+            <View style={styles.emojiPickerHeader}>
+              <Text style={styles.emojiPickerTitle}>Add Reaction</Text>
+              <TouchableOpacity
+                onPress={() => setShowEmojiPicker(false)}
+                style={styles.closeEmojiPicker}
+              >
+                <Ionicons name="close" size={24} color={theme.text} />
+              </TouchableOpacity>
+            </View>
+            <EmojiSelector
+              onEmojiSelected={handleEmojiSelect}
+              showSearchBar={false}
+              showTabs={false}
+            />
+          </View>
+        </View>
+      </Modal>
+    </SafeAreaView>
+  );
 }
 
 const styles = StyleSheet.create({
