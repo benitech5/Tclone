@@ -79,8 +79,8 @@ const AddStoryScreen = () => {
       {
         text: "OK",
         onPress: () => {
-          // Navigate back to chat screen after posting story
-          navigation.goBack();
+          // Navigate to home screen after posting story
+          navigation.navigate("Home" as never);
         },
       },
     ]);

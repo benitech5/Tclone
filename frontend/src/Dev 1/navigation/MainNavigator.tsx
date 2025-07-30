@@ -6,7 +6,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { MainStackParamList, AuthStackParamList } from "../types/navigation";
 import HomeScreen from "../screens/Chat/HomeScreen";
 import ChatSettingsScreen from "../screens/Settings/ChatSettingsScreen";
-import ChatDetailsScreen from "../screens/Chat/ChatDetailsScreen";
+import ChatRoomScreen from "../screens/Chat/ChatRoomScreen";
 import SettingsScreen from "../screens/Settings/SettingsScreen";
 import NotificationsAndSoundsScreen from "../screens/Settings/NotificationsAndSoundsScreen";
 import ContactsScreen from "../screens/Contacts/ContactsScreen";
@@ -71,7 +71,18 @@ export const MainNavigator = () => (
       component={TabNavigator}
       options={{ headerShown: false }}
     />
-    <Stack.Screen name="ChatDetails" component={ChatDetailsScreen} />
+    <Stack.Screen 
+      name="ChatRoom" 
+      component={ChatRoomScreen}
+      options={({ route, navigation }) => ({
+        title: route.params?.chatName || 'Chat',
+        headerLeft: () => (
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <Ionicons name="arrow-back" size={24} color="#fff" />
+          </TouchableOpacity>
+        ),
+      })}
+    />
     <Stack.Screen
       name="Settings"
       component={SettingsScreen}

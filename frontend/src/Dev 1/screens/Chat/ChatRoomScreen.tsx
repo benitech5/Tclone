@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useRoute } from '@react-navigation/native';
+import { useRoute, useNavigation } from '@react-navigation/native';
 import {
     View,
     Text,
@@ -34,14 +34,17 @@ interface Message {
     isMine: boolean;
 }
 
-export default function ChatDetailsScreen() {
+export default function ChatRoomScreen() {
     const [message, setMessage] = useState('');
     const route = useRoute();
+    const navigation = useNavigation();
     const { chatSettings } = useSettings();
     const { theme } = useTheme();
     const user = useAppSelector((state) => state.auth.user);
     // @ts-ignore
     const chatId = route.params?.chatId;
+    // @ts-ignore
+    const chatName = route.params?.chatName;
     const [messages, setMessages] = useState<Message[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -204,10 +207,17 @@ export default function ChatDetailsScreen() {
                 params: { reaction },
                 headers: { Authorization: `Bearer ${token}` }
             });
-            // Reaction already added to local state, no need to update again
+            // Update local reactions
+            setReactions(prev => ({
+                ...prev,
+                [messageId]: reaction
+            }));
         } catch (e) {
-            // Reaction already added to local state, backend sync failed
-            console.log('Failed to sync reaction with backend');
+            // Fallback to local only
+            setReactions(prev => ({
+                ...prev,
+                [messageId]: reaction
+            }));
         }
     };
 
@@ -305,13 +315,9 @@ export default function ChatDetailsScreen() {
 
     const addReaction = (emoji: string) => {
         if (selectedMessageId) {
-            setReactions(prev => ({
-                ...prev,
-                [selectedMessageId]: emoji
-            }));
+            reactToMessage(selectedMessageId, emoji);
             setShowReactionPicker(false);
             setSelectedMessageId(null);
-            reactToMessage(selectedMessageId, emoji);
         }
     };
 
@@ -442,49 +448,19 @@ export default function ChatDetailsScreen() {
                 keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
             >
                 <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.background }]}>  
-                    {/* Chat Header */}
-                    <View style={[styles.chatHeader, { backgroundColor: theme.card, borderBottomColor: theme.border }]}>
-                        <View style={styles.chatHeaderInfo}>
-                                                            <Text style={[styles.chatName, { color: theme.text }]}>
-                                    {(route.params as any)?.chatName || `Chat ${chatId}`}
+                    <View style={[styles.container, { backgroundColor: theme.background }]}>  
+                        {/* Chat Header */}
+                        <View style={[styles.chatHeader, { backgroundColor: theme.card, borderBottomColor: theme.border }]}>
+                            <View style={styles.chatHeaderInfo}>
+                                <Text style={[styles.chatName, { color: theme.text }]}>
+                                    {chatName || `Chat ${chatId}`}
                                 </Text>
-                            <Text style={[styles.chatStatus, { color: theme.subtext }]}>
-                                {messages.length} messages • Online
-                            </Text>
-                        </View>
-                                                    <View style={styles.chatHeaderActions}>
-                                <TouchableOpacity 
-                                    style={styles.headerActionButton}
-                                    onPress={() => {
-                                        const newMessage: Message = {
-                                            id: Date.now().toString(),
-                                            content: '👥 Demo Group 1: Group info accessed',
-                                            senderId: user?.email || 'unknown',
-                                            senderName: user?.name || 'Me',
-                                            timestamp: new Date(),
-                                            type: 'text',
-                                            isMine: true,
-                                        };
-                                        setMessages(prev => [newMessage, ...prev]);
-                                    }}
-                                >
-                                    <Ionicons name="people" size={20} color={theme.text} />
-                                </TouchableOpacity>
-                                <TouchableOpacity 
-                                    style={styles.headerActionButton}
-                                    onPress={() => {
-                                        const newMessage: Message = {
-                                            id: Date.now().toString(),
-                                            content: '📞 Demo Group 1: Voice call initiated',
-                                            senderId: user?.email || 'unknown',
-                                            senderName: user?.name || 'Me',
-                                            timestamp: new Date(),
-                                            type: 'voice',
-                                            isMine: true,
-                                        };
-                                        setMessages(prev => [newMessage, ...prev]);
-                                    }}
-                                >
+                                <Text style={[styles.chatStatus, { color: theme.subtext }]}>
+                                    {messages.length} messages • Online
+                                </Text>
+                            </View>
+                            <View style={styles.chatHeaderActions}>
+                                <TouchableOpacity style={styles.headerActionButton}>
                                     <Ionicons name="call" size={20} color={theme.text} />
                                 </TouchableOpacity>
                                 <TouchableOpacity 
@@ -494,213 +470,61 @@ export default function ChatDetailsScreen() {
                                     <Ionicons name="ellipsis-vertical" size={20} color={theme.text} />
                                 </TouchableOpacity>
                             </View>
-                    </View>
-                    
-                    {/* Pinned Message Display */}
-                    {pinnedMessage && (
-                        <View style={[styles.pinnedMessageContainer, { backgroundColor: theme.accent + '20' }]}>
-                            <View style={styles.pinnedHeader}>
-                                <Ionicons name="pin" size={16} color={theme.accent} />
-                                <Text style={[styles.pinnedTitle, { color: theme.accent }]}>Pinned Message</Text>
-                                <TouchableOpacity onPress={() => setPinnedMessage(null)}>
-                                    <Ionicons name="close" size={16} color={theme.accent} />
-                                </TouchableOpacity>
-                            </View>
-                            <Text style={[styles.pinnedText, { color: theme.text }]} numberOfLines={2}>
-                                {pinnedMessage.content}
-                            </Text>
                         </View>
-                    )}
+                        
+                        {/* Pinned Message Display */}
+                        {pinnedMessage && (
+                            <View style={[styles.pinnedMessageContainer, { backgroundColor: theme.accent + '20' }]}>
+                                <View style={styles.pinnedHeader}>
+                                    <Ionicons name="pin" size={16} color={theme.accent} />
+                                    <Text style={[styles.pinnedTitle, { color: theme.accent }]}>Pinned Message</Text>
+                                    <TouchableOpacity onPress={() => setPinnedMessage(null)}>
+                                        <Ionicons name="close" size={16} color={theme.accent} />
+                                    </TouchableOpacity>
+                                </View>
+                                <Text style={[styles.pinnedText, { color: theme.text }]} numberOfLines={2}>
+                                    {pinnedMessage.content}
+                                </Text>
+                            </View>
+                        )}
 
-                    <FlatList
-                        ref={flatListRef}
-                        data={messages}
-                        renderItem={renderMessage}
-                        keyExtractor={(item) => item.id}
-                        inverted
-                        contentContainerStyle={styles.messagesContainer}
-                        showsVerticalScrollIndicator={false}
-                        keyboardShouldPersistTaps="handled"
-                        onEndReached={() => {
-                            // TODO: Load older messages
-                        }}
-                        onEndReachedThreshold={0.1}
-                    />
-                    
-                                            {showMediaPicker && (
+                        <FlatList
+                            ref={flatListRef}
+                            data={messages}
+                            renderItem={renderMessage}
+                            keyExtractor={(item) => item.id}
+                            inverted
+                            contentContainerStyle={styles.messagesContainer}
+                            showsVerticalScrollIndicator={false}
+                            keyboardShouldPersistTaps="handled"
+                            onEndReached={() => {
+                                // TODO: Load older messages
+                            }}
+                            onEndReachedThreshold={0.1}
+                        />
+                        
+                        {showMediaPicker && (
                             <View style={styles.mediaPickerContainer}>
                                 <Text style={[styles.mediaPickerTitle, { color: theme.text }]}>Media Options</Text>
                                 <View style={styles.mediaOptions}>
-                                    <TouchableOpacity 
-                                        style={styles.mediaOption}
-                                        onPress={() => {
-                                            setShowMediaPicker(false);
-                                            // Camera functionality with multiple options
-                                            Alert.alert(
-                                                'Camera Options',
-                                                'Choose camera action:',
-                                                [
-                                                    {
-                                                        text: 'Take Photo',
-                                                        onPress: () => {
-                                                            const newMessage: Message = {
-                                                                id: Date.now().toString(),
-                                                                content: '📷 Photo captured with camera',
-                                                                senderId: user?.email || 'unknown',
-                                                                senderName: user?.name || 'Me',
-                                                                timestamp: new Date(),
-                                                                type: 'image',
-                                                                isMine: true,
-                                                            };
-                                                            setMessages(prev => [newMessage, ...prev]);
-                                                        }
-                                                    },
-                                                    {
-                                                        text: 'Record Video',
-                                                        onPress: () => {
-                                                            const newMessage: Message = {
-                                                                id: Date.now().toString(),
-                                                                content: '🎥 Video recorded with camera',
-                                                                senderId: user?.email || 'unknown',
-                                                                senderName: user?.name || 'Me',
-                                                                timestamp: new Date(),
-                                                                type: 'video',
-                                                                isMine: true,
-                                                            };
-                                                            setMessages(prev => [newMessage, ...prev]);
-                                                        }
-                                                    },
-                                                    {
-                                                        text: 'Cancel',
-                                                        style: 'cancel'
-                                                    }
-                                                ]
-                                            );
-                                        }}
-                                    >
+                                    <TouchableOpacity style={styles.mediaOption}>
                                         <Ionicons name="camera" size={24} color={theme.text} />
                                         <Text style={[styles.mediaOptionText, { color: theme.text }]}>Camera</Text>
                                     </TouchableOpacity>
-                                    <TouchableOpacity 
-                                        style={styles.mediaOption}
-                                        onPress={() => {
-                                            setShowMediaPicker(false);
-                                            // Gallery functionality with file types
-                                            Alert.alert(
-                                                'Gallery Options',
-                                                'Choose file type:',
-                                                [
-                                                    {
-                                                        text: 'Photos',
-                                                        onPress: () => {
-                                                            const newMessage: Message = {
-                                                                id: Date.now().toString(),
-                                                                content: '🖼️ Photos selected from gallery',
-                                                                senderId: user?.email || 'unknown',
-                                                                senderName: user?.name || 'Me',
-                                                                timestamp: new Date(),
-                                                                type: 'image',
-                                                                isMine: true,
-                                                            };
-                                                            setMessages(prev => [newMessage, ...prev]);
-                                                        }
-                                                    },
-                                                    {
-                                                        text: 'Videos',
-                                                        onPress: () => {
-                                                            const newMessage: Message = {
-                                                                id: Date.now().toString(),
-                                                                content: '🎬 Videos selected from gallery',
-                                                                senderId: user?.email || 'unknown',
-                                                                senderName: user?.name || 'Me',
-                                                                timestamp: new Date(),
-                                                                type: 'video',
-                                                                isMine: true,
-                                                            };
-                                                            setMessages(prev => [newMessage, ...prev]);
-                                                        }
-                                                    },
-                                                    {
-                                                        text: 'Cancel',
-                                                        style: 'cancel'
-                                                    }
-                                                ]
-                                            );
-                                        }}
-                                    >
+                                    <TouchableOpacity style={styles.mediaOption}>
                                         <Ionicons name="images" size={24} color={theme.text} />
                                         <Text style={[styles.mediaOptionText, { color: theme.text }]}>Gallery</Text>
                                     </TouchableOpacity>
-                                    <TouchableOpacity 
-                                        style={styles.mediaOption}
-                                        onPress={() => {
-                                            setShowMediaPicker(false);
-                                            // Document functionality with file types
-                                            Alert.alert(
-                                                'Document Options',
-                                                'Choose document type:',
-                                                [
-                                                    {
-                                                        text: 'PDF',
-                                                        onPress: () => {
-                                                            const newMessage: Message = {
-                                                                id: Date.now().toString(),
-                                                                content: '📄 PDF document shared',
-                                                                senderId: user?.email || 'unknown',
-                                                                senderName: user?.name || 'Me',
-                                                                timestamp: new Date(),
-                                                                type: 'file',
-                                                                isMine: true,
-                                                            };
-                                                            setMessages(prev => [newMessage, ...prev]);
-                                                        }
-                                                    },
-                                                    {
-                                                        text: 'Word Document',
-                                                        onPress: () => {
-                                                            const newMessage: Message = {
-                                                                id: Date.now().toString(),
-                                                                content: '📝 Word document shared',
-                                                                senderId: user?.email || 'unknown',
-                                                                senderName: user?.name || 'Me',
-                                                                timestamp: new Date(),
-                                                                type: 'file',
-                                                                isMine: true,
-                                                            };
-                                                            setMessages(prev => [newMessage, ...prev]);
-                                                        }
-                                                    },
-                                                    {
-                                                        text: 'Excel Sheet',
-                                                        onPress: () => {
-                                                            const newMessage: Message = {
-                                                                id: Date.now().toString(),
-                                                                content: '📊 Excel sheet shared',
-                                                                senderId: user?.email || 'unknown',
-                                                                senderName: user?.name || 'Me',
-                                                                timestamp: new Date(),
-                                                                type: 'file',
-                                                                isMine: true,
-                                                            };
-                                                            setMessages(prev => [newMessage, ...prev]);
-                                                        }
-                                                    },
-                                                    {
-                                                        text: 'Cancel',
-                                                        style: 'cancel'
-                                                    }
-                                                ]
-                                            );
-                                        }}
-                                    >
+                                    <TouchableOpacity style={styles.mediaOption}>
                                         <Ionicons name="document" size={24} color={theme.text} />
                                         <Text style={[styles.mediaOptionText, { color: theme.text }]}>Document</Text>
                                     </TouchableOpacity>
                                 </View>
                             </View>
                         )}
-                    
-                    {renderInputBar()}
+                        
+                        {renderInputBar()}
+                    </View>
                 </SafeAreaView>
             </KeyboardAvoidingView>
             
@@ -933,4 +757,4 @@ const styles = StyleSheet.create({
         alignSelf: 'center',
         padding: 8,
     },
-});
+}); 

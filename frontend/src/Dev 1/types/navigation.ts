@@ -24,7 +24,7 @@ export type MainStackParamList = {
   Notifications: undefined;
   Profile: undefined;
   Account: undefined;
-  ChatDetails: { chatId: string };
+  ChatRoom: { chatId: string; chatName: string };
   ForwardMessage: undefined;
   SavedMessages: undefined;
   PinnedMessages: undefined;

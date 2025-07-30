@@ -100,7 +100,7 @@ const HomeScreen: React.FC = ({ navigation }: any) => {
   const renderItem = ({ item }: { item: any }) => (
     <TouchableOpacity
       style={[styles.chatItem, { backgroundColor: theme.background }]}
-      onPress={() => navigation.navigate("ChatDetails", { chatId: item.id })}
+      onPress={() => navigation.navigate("ChatRoom", { chatId: item.id, chatName: item.name })}
     >
       <Image
         source={{ uri: item.avatar || "https://via.placeholder.com/50" }}
