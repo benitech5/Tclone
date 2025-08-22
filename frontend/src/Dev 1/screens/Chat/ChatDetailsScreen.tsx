@@ -546,7 +546,7 @@ export default function ChatDetailsScreen() {
                                     }}
                                 >
                                     //<Ionicons name="call" size={20} color={theme.text} />
-                                </TouchableOpacity>
+                                </TouchableOpacity>040000000000000000000000000000  
                                 <TouchableOpacity 
                                     style={styles.headerActionButton}
                                     onPress={() => setMenuVisible(true)}
